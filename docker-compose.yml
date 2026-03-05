@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: ilhafit_db
+    restart: always
+    environment:
+      POSTGRES_DB: ilhafit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"
+    volumes:
+      - ilhafit_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ilhafit-network
+
+  backend:
+    build: ./backend
+    container_name: ilhafit_backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ilhafit
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ilhafit-network
+
+  frontend:
+    build: ./frontend
+    container_name: ilhafit_frontend
+    ports:
+      - "5173:80"
+    networks:
+      - ilhafit-network
+
+volumes:
+  ilhafit_data:
+
+networks:
+  ilhafit-network:
+    driver: bridge
