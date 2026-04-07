@@ -5,7 +5,7 @@ import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.Profissional;
 import com.example.ilhafit.entity.Usuario;
-import com.example.ilhafit.repository.AdministradorRepository;
+
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
@@ -25,7 +25,7 @@ public class AvaliacaoService {
     private final UsuarioRepository usuarioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final ProfissionalRepository profissionalRepository;
-    private final AdministradorRepository administradorRepository;
+
 
     @Transactional
     public AvaliacaoDTO.Resposta avaliar(AvaliacaoDTO.Requisicao requisicao, String emailUsuario) {
@@ -40,9 +40,6 @@ public class AvaliacaoService {
             }
             if (estabelecimentoRepository.findByEmail(emailUsuario).isPresent()) {
                 throw new IllegalStateException("Estabelecimentos não podem enviar avaliações.");
-            }
-            if (administradorRepository.findByEmail(emailUsuario).isPresent()) {
-                throw new IllegalStateException("Administradores não podem enviar avaliações.");
             }
             throw new IllegalArgumentException("Usuário não encontrado.");
         }
@@ -95,7 +92,9 @@ public class AvaliacaoService {
         Avaliacao avaliacao = avaliacaoRepository.findById(avaliacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
 
-        boolean isAdmin = administradorRepository.findByEmail(emailUsuario).isPresent();
+        boolean isAdmin = usuarioRepository.findByEmail(emailUsuario)
+                .map(u -> u.getRole() == com.example.ilhafit.entity.Role.ADMIN)
+                .orElse(false);
         boolean isAutor = avaliacao.getAutor().getEmail().equals(emailUsuario);
 
         if (!isAdmin && !isAutor) {

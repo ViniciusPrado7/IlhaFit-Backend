@@ -17,12 +17,11 @@ import java.util.Map;
 public class ProfissionalController {
 
     private final ProfissionalService profissionalService;
-    private final com.example.ilhafit.service.AuthService authService;
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@Valid @RequestBody ProfissionalDTO.Registro dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerProfissional(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(profissionalService.cadastrar(dto));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
