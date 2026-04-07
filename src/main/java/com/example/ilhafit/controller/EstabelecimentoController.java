@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +18,11 @@ import java.util.Map;
 public class EstabelecimentoController {
 
     private final EstabelecimentoService estabelecimentoService;
-    private final com.example.ilhafit.service.AuthService authService;
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@Valid @RequestBody EstabelecimentoDTO.Registro dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerEstabelecimento(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(estabelecimentoService.cadastrar(dto));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

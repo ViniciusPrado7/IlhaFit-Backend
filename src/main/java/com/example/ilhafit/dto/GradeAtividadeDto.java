@@ -8,5 +8,5 @@ public class GradeAtividadeDTO {
     private String atividade;
     private Boolean exclusivoMulheres;
     private List<String> diasSemana;
-    private List<String> períodos;
+    private List<String> periodos;
 }

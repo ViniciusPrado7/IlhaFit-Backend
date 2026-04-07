@@ -31,5 +31,5 @@ public class GradeAtividade {
     @ElementCollection
     @CollectionTable(name = "grade_atividade_periodos", joinColumns = @JoinColumn(name = "grade_id"))
     @Column(name = "periodo")
-    private List<String> períodos;
+    private List<String> periodos;
 }
