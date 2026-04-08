@@ -1,8 +1,11 @@
 package com.example.ilhafit.service;
 
-import com.example.ilhafit.dto.UsuarioDTO;
+import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
+import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
+import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
 import com.example.ilhafit.entity.Role;
 import com.example.ilhafit.entity.Usuario;
+import com.example.ilhafit.mapper.UsuarioMapper;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
@@ -11,8 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
@@ -20,85 +21,90 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final ProfissionalRepository profissionalRepository;
+    private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UsuarioDTO.Resposta cadastrar(UsuarioDTO.Registro dto) {
-        if (emailEmUso(dto.getEmail())) {
-            throw new IllegalArgumentException("Email já está em uso.");
+    public UsuarioResponseDTO cadastrar(UsuarioRegistroDTO dto) {
+
+        validarEmail(dto.getEmail());
+
+        Usuario usuario = mapper.toEntity(dto);
+
+        
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+
+       
+        if (usuario.getRole() == null) {
+            usuario.setRole(Role.USUARIO);
         }
 
-        String senhaCodificada = passwordEncoder.encode(dto.getSenha());
-        Role role = (dto.getRole() != null) ? dto.getRole() : Role.USUARIO;
+        usuario = usuarioRepository.save(usuario);
 
-        Usuario u = new Usuario();
-        u.setNome(dto.getNome());
-        u.setEmail(dto.getEmail());
-        u.setSenha(senhaCodificada);
-        u.setRole(role);
+        return mapper.toResponse(usuario);
+    }
+
+    
+    public UsuarioResponseDTO login(com.example.ilhafit.dto.usuario.UsuarioLoginDTO dto) {
+
+        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
+
+        if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
+            throw new IllegalArgumentException("Credenciais inválidas");
+        }
+
+        return mapper.toResponse(usuario);
+    }
+
+
+    @Transactional
+    public UsuarioResponseDTO atualizar(Long id, UsuarioAtualizacaoDTO dto) {
+
+        Usuario usuario = buscarUsuarioOuErro(id);
+
         
-        u = usuarioRepository.save(u);
+        if (dto.getEmail() != null && !dto.getEmail().equals(usuario.getEmail())) {
+            validarEmail(dto.getEmail());
+        }
 
-        UsuarioDTO.Resposta resposta = new UsuarioDTO.Resposta();
-        resposta.setId(u.getId());
-        resposta.setNome(u.getNome());
-        resposta.setEmail(u.getEmail());
-        resposta.setRole(u.getRole());
+       
+        mapper.updateEntityFromDTO(usuario, dto);
 
-        return resposta;
+       
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        usuario = usuarioRepository.save(usuario);
+
+        return mapper.toResponse(usuario);
+    }
+
+    
+    @Transactional
+    public void deletar(Long id) {
+
+        Usuario usuario = buscarUsuarioOuErro(id);
+
+        usuarioRepository.delete(usuario);
+    }
+
+
+    private Usuario buscarUsuarioOuErro(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    }
+
+    private void validarEmail(String email) {
+        if (emailEmUso(email)) {
+            throw new IllegalArgumentException("Email já está em uso.");
+        }
     }
 
     private boolean emailEmUso(String email) {
         return usuarioRepository.existsByEmail(email) ||
                estabelecimentoRepository.findByEmail(email).isPresent() ||
                profissionalRepository.findByEmail(email).isPresent();
-    }
-
-    public Object login(UsuarioDTO.Login dto) {
-        Optional<Usuario> u = usuarioRepository.findByEmail(dto.getEmail());
-        if (u.isPresent()) {
-            if (passwordEncoder.matches(dto.getSenha(), u.get().getSenha())) {
-                UsuarioDTO.Resposta resposta = new UsuarioDTO.Resposta();
-                resposta.setId(u.get().getId());
-                resposta.setNome(u.get().getNome());
-                resposta.setEmail(u.get().getEmail());
-                resposta.setRole(u.get().getRole());
-                return resposta;
-            }
-            throw new IllegalArgumentException("Credenciais inválidas");
-        }
-
-        throw new IllegalArgumentException("Credenciais inválidas");
-    }
-
-    @Transactional
-    public void atualizar(Long id, UsuarioDTO.Atualizacao dto) {
-        Usuario u = usuarioRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        if (dto.getNome() != null && !dto.getNome().isBlank()) {
-            u.setNome(dto.getNome());
-        }
-        
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            if (!u.getEmail().equals(dto.getEmail()) && emailEmUso(dto.getEmail())) {
-                throw new IllegalArgumentException("Email já está em uso por outra conta.");
-            }
-            u.setEmail(dto.getEmail());
-        }
-
-        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-            u.setSenha(passwordEncoder.encode(dto.getSenha()));
-        }
-
-        usuarioRepository.save(u);
-    }
-
-    @Transactional
-    public void deletar(Long id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new IllegalArgumentException("Usuário não encontrado");
-        }
-        usuarioRepository.deleteById(id);
     }
 }
