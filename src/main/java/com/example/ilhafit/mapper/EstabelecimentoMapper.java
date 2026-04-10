@@ -52,7 +52,8 @@ public class EstabelecimentoMapper {
         dto.setExclusivoMulheres(est.getExclusivoMulheres());
         if (est.getGradeAtividades() != null) {
             dto.setGradeAtividades(est.getGradeAtividades().stream().map(g -> {
-                GradeAtividadeDTO d = new GradeAtividadeDTO();
+                GradeAtividadeDTO.Resposta d = new GradeAtividadeDTO.Resposta();
+                d.setId(g.getId());
                 d.setAtividade(g.getAtividade());
                 d.setExclusivoMulheres(g.getExclusivoMulheres());
                 d.setDiasSemana(g.getDiasSemana());

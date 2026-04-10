@@ -54,7 +54,8 @@ public class ProfissionalMapper {
         dto.setExclusivoMulheres(pro.getExclusivoMulheres());
         if (pro.getGradeAtividades() != null) {
             dto.setGradeAtividades(pro.getGradeAtividades().stream().map(g -> {
-                GradeAtividadeDTO d = new GradeAtividadeDTO();
+                GradeAtividadeDTO.Resposta d = new GradeAtividadeDTO.Resposta();
+                d.setId(g.getId());
                 d.setAtividade(g.getAtividade());
                 d.setExclusivoMulheres(g.getExclusivoMulheres());
                 d.setDiasSemana(g.getDiasSemana());

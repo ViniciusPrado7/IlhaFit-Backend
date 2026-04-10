@@ -31,7 +31,7 @@ public class EstabelecimentoDTO {
 
         private EnderecoDTO endereco;
         private Boolean exclusivoMulheres;
-        private List<GradeAtividadeDTO> gradeAtividades;
+        private List<GradeAtividadeDTO.Registro> gradeAtividades;
         private List<String> fotosUrl;
         private String outrosAtividade;
     }
@@ -47,7 +47,7 @@ public class EstabelecimentoDTO {
         private String cnpj;
         private EnderecoDTO endereco;
         private Boolean exclusivoMulheres;
-        private List<GradeAtividadeDTO> gradeAtividades;
+        private List<GradeAtividadeDTO.Resposta> gradeAtividades;
         private List<String> fotosUrl;
         private String outrosAtividade;
         private Role role;

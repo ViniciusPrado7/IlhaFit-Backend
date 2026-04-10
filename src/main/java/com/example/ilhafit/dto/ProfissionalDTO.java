@@ -32,7 +32,7 @@ public class ProfissionalDTO {
         private String registroCref;
         private EnderecoDTO endereco;
         private Boolean exclusivoMulheres;
-        private List<GradeAtividadeDTO> gradeAtividades;
+        private List<GradeAtividadeDTO.Registro> gradeAtividades;
         private String fotoUrl;
         private String outrosAtividade;
     }
@@ -49,7 +49,7 @@ public class ProfissionalDTO {
         private String registroCref;
         private EnderecoDTO endereco;
         private Boolean exclusivoMulheres;
-        private List<GradeAtividadeDTO> gradeAtividades;
+        private List<GradeAtividadeDTO.Resposta> gradeAtividades;
         private String fotoUrl;
         private String outrosAtividade;
         private Role role;
