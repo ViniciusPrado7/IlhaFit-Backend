@@ -2,6 +2,7 @@ package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AdministradorDTO;
 import com.example.ilhafit.service.AdministradorService;
+import com.example.ilhafit.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class AdministradorController {
 
     private final AdministradorService administradorService;
-    private final com.example.ilhafit.service.AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@Valid @RequestBody AdministradorDTO.Registro dto) {

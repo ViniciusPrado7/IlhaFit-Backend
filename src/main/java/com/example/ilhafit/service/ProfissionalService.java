@@ -34,6 +34,9 @@ public class ProfissionalService {
             throw new IllegalArgumentException("CPF já cadastrado");
         }
         Profissional profissional = profissionalMapper.toEntity(dto);
+        if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
+            profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         profissional.setRole(Role.PROFISSIONAL);
         return mappedWithRating(profissionalRepository.save(profissional));
     }

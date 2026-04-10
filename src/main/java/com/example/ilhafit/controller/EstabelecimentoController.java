@@ -1,6 +1,7 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.EstabelecimentoDTO;
+import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.EstabelecimentoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,12 @@ import java.util.Map;
 public class EstabelecimentoController {
 
     private final EstabelecimentoService estabelecimentoService;
+    private final AuthService authService;
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@Valid @RequestBody EstabelecimentoDTO.Registro dto) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(estabelecimentoService.cadastrar(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerEstabelecimento(dto));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

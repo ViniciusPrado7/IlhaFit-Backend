@@ -4,6 +4,7 @@ import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
 import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
+import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final AuthService authService;
 
     @PostMapping("/cadastrar")
     public ResponseEntity<UsuarioResponseDTO> criar(
             @RequestBody @Valid UsuarioRegistroDTO dto) {
 
-        UsuarioResponseDTO response = usuarioService.cadastrar(dto);
+        UsuarioResponseDTO response = authService.registerUsuario(dto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

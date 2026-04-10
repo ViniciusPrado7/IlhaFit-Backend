@@ -34,6 +34,9 @@ public class EstabelecimentoService {
             throw new IllegalArgumentException("CNPJ já cadastrado");
         }
         Estabelecimento estabelecimento = estabelecimentoMapper.toEntity(dto);
+        if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
+            estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         estabelecimento.setRole(Role.ESTABELECIMENTO);
         return mappedWithRating(estabelecimentoRepository.save(estabelecimento));
     }

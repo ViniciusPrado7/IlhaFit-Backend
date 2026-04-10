@@ -21,6 +21,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").permitAll()
                         .requestMatchers("/api/estabelecimentos/**").permitAll()
                         .requestMatchers("/api/profissionais/**").permitAll()
+                        .requestMatchers("/api/administradores/**").permitAll()
                         .anyRequest().authenticated());
 
         return http.build();
