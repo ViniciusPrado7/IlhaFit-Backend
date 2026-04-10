@@ -6,6 +6,7 @@ import com.example.ilhafit.entity.Role;
 import com.example.ilhafit.mapper.AdministradorMapper;
 import com.example.ilhafit.repository.AdministradorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class AdministradorService {
 
     private final AdministradorRepository administradorRepository;
     private final AdministradorMapper administradorMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public AdministradorDTO.Resposta cadastrar(AdministradorDTO.Registro dto) {
@@ -26,6 +28,9 @@ public class AdministradorService {
             throw new IllegalArgumentException("Email já cadastrado");
         }
         Administrador admin = administradorMapper.toEntity(dto);
+        if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
+            admin.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         admin.setRole(Role.ADMIN);
         return administradorMapper.toDTO(administradorRepository.save(admin));
     }
