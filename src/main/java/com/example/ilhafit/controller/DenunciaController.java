@@ -1,7 +1,7 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.DenunciaDTO;
-import com.example.ilhafit.entity.StatusDenuncia;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.service.DenunciaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

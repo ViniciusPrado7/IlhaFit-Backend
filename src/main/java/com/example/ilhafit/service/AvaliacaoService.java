@@ -5,6 +5,7 @@ import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.Profissional;
 import com.example.ilhafit.entity.Usuario;
+import com.example.ilhafit.enums.Role;
 
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
@@ -93,7 +94,7 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
 
         boolean isAdmin = usuarioRepository.findByEmail(emailUsuario)
-                .map(u -> u.getRole() == com.example.ilhafit.entity.Role.ADMIN)
+                .map(u -> u.getRole() == Role.ADMIN)
                 .orElse(false);
         boolean isAutor = avaliacao.getAutor().getEmail().equals(emailUsuario);
 

@@ -35,7 +35,6 @@ public class EstabelecimentoMapper {
             }).toList());
         }
         est.setFotosUrl(dto.getFotosUrl());
-        est.setOutrosAtividade(dto.getOutrosAtividade());
         return est;
     }
 
@@ -62,8 +61,6 @@ public class EstabelecimentoMapper {
             }).toList());
         }
         dto.setFotosUrl(est.getFotosUrl());
-        dto.setOutrosAtividade(est.getOutrosAtividade());
-        dto.setRole(est.getRole());
         return dto;
     }
 }

@@ -16,10 +16,11 @@ import java.util.stream.Collectors;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+    private final CategoriaVinculoService categoriaVinculoService;
 
     @Transactional
     public CategoriaDTO.Resposta criar(CategoriaDTO.Registro dto) {
-        if (categoriaRepository.existsByNome(dto.getNome())) {
+        if (categoriaRepository.existsByNomeIgnoreCase(dto.getNome())) {
             throw new IllegalArgumentException("Categoria com este nome já existe");
         }
         Categoria categoria = toEntity(dto);
@@ -41,8 +42,7 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
-        // Verifica se o novo nome já existe em outra categoria
-        categoriaRepository.findByNome(dto.getNome()).ifPresent(existing -> {
+        categoriaRepository.findByNomeIgnoreCase(dto.getNome()).ifPresent(existing -> {
             if (!existing.getId().equals(id)) {
                 throw new IllegalArgumentException("Categoria com este nome já existe");
             }
@@ -50,26 +50,23 @@ public class CategoriaService {
 
         categoria.setNome(dto.getNome());
         categoria.setDescricao(dto.getDescricao());
-        categoria.setIconeUrl(dto.getIconeUrl());
 
         return toDTO(categoriaRepository.save(categoria));
     }
 
     @Transactional
     public void deletar(Long id) {
-        if (!categoriaRepository.existsById(id)) {
-            throw new IllegalArgumentException("Categoria não encontrada");
-        }
-        categoriaRepository.deleteById(id);
-    }
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
-    // ---- Helpers ----
+        categoriaVinculoService.removerCategoriaDeTodos(categoria.getNome());
+        categoriaRepository.delete(categoria);
+    }
 
     private Categoria toEntity(CategoriaDTO.Registro dto) {
         Categoria categoria = new Categoria();
         categoria.setNome(dto.getNome());
         categoria.setDescricao(dto.getDescricao());
-        categoria.setIconeUrl(dto.getIconeUrl());
         return categoria;
     }
 
@@ -78,7 +75,6 @@ public class CategoriaService {
         dto.setId(categoria.getId());
         dto.setNome(categoria.getNome());
         dto.setDescricao(categoria.getDescricao());
-        dto.setIconeUrl(categoria.getIconeUrl());
         return dto;
     }
 }

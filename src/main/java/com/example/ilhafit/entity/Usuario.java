@@ -1,5 +1,6 @@
 package com.example.ilhafit.entity;
 
+import com.example.ilhafit.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,6 +1,16 @@
 package com.example.ilhafit.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -21,28 +31,24 @@ public class Profissional {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome Ã© obrigatÃ³rio")
     @Column(nullable = false)
     private String nome;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email deve ser válido")
+    @NotBlank(message = "Email Ã© obrigatÃ³rio")
+    @Email(message = "Email deve ser vÃ¡lido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
+    @NotBlank(message = "Senha Ã© obrigatÃ³ria")
     @Column(nullable = false)
     private String senha;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
-    private Role role = Role.PROFISSIONAL;
-
-    @NotBlank(message = "Telefone é obrigatório")
+    @NotBlank(message = "Telefone Ã© obrigatÃ³rio")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CPF é obrigatório")
+    @NotBlank(message = "CPF Ã© obrigatÃ³rio")
     @Column(name = "cpf", nullable = false, unique = true)
     private String cpf;
 
@@ -60,9 +66,6 @@ public class Profissional {
 
     @Column(name = "exclusivo_mulheres")
     private Boolean exclusivoMulheres = false;
-
-    @Column(name = "outros_atividade")
-    private String outrosAtividade;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profissional_id")

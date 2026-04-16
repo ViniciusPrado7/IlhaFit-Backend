@@ -21,7 +21,7 @@ public class UsuarioController {
     private final AuthService authService;
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<UsuarioResponseDTO> criar(
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(
             @RequestBody @Valid UsuarioRegistroDTO dto) {
 
         UsuarioResponseDTO response = authService.registerUsuario(dto);
@@ -40,7 +40,7 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable Long id,
             @RequestBody @Valid UsuarioAtualizacaoDTO dto) {
@@ -50,7 +50,7 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
 
         usuarioService.deletar(id);

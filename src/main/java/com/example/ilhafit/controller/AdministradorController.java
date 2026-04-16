@@ -20,8 +20,8 @@ public class AdministradorController {
     private final AdministradorService administradorService;
     private final AuthService authService;
 
-    @PostMapping("/registrar")
-    public ResponseEntity<?> registrar(@Valid @RequestBody AdministradorDTO.Registro dto) {
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrar(@Valid @RequestBody AdministradorDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerAdministrador(dto));
         } catch (Exception e) {
@@ -29,24 +29,19 @@ public class AdministradorController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> cadastrar(@Valid @RequestBody AdministradorDTO.Registro dto) {
-        return registrar(dto);
-    }
-
-    @GetMapping
+    @GetMapping("/administradores")
     public ResponseEntity<List<AdministradorDTO.Resposta>> listarTodos() {
         return ResponseEntity.ok(administradorService.listarTodos());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/administradores/{id}")
     public ResponseEntity<AdministradorDTO.Resposta> buscarPorId(@PathVariable Long id) {
         return administradorService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody AdministradorDTO.Registro dto) {
         try {
             return ResponseEntity.ok(administradorService.atualizar(id, dto));
@@ -55,7 +50,7 @@ public class AdministradorController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
             administradorService.deletar(id);

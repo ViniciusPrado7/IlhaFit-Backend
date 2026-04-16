@@ -3,7 +3,7 @@ package com.example.ilhafit.service;
 import com.example.ilhafit.dto.DenunciaDTO;
 import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Denuncia;
-import com.example.ilhafit.entity.StatusDenuncia;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.DenunciaRepository;
 import lombok.RequiredArgsConstructor;

@@ -21,8 +21,8 @@ public class EstabelecimentoController {
     private final EstabelecimentoService estabelecimentoService;
     private final AuthService authService;
 
-    @PostMapping("/registrar")
-    public ResponseEntity<?> registrar(@Valid @RequestBody EstabelecimentoDTO.Registro dto) {
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrar(@Valid @RequestBody EstabelecimentoDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerEstabelecimento(dto));
         } catch (Exception e) {
@@ -30,24 +30,19 @@ public class EstabelecimentoController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> cadastrar(@Valid @RequestBody EstabelecimentoDTO.Registro dto) {
-        return registrar(dto);
-    }
-
-    @GetMapping
+    @GetMapping("/estabelecimentos")
     public ResponseEntity<List<EstabelecimentoDTO.Resposta>> listarTodos() {
         return ResponseEntity.ok(estabelecimentoService.listarTodos());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/estabelecimentos/{id}")
     public ResponseEntity<EstabelecimentoDTO.Resposta> buscarPorId(@PathVariable Long id) {
         return estabelecimentoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody EstabelecimentoDTO.Registro dto) {
         try {
             return ResponseEntity.ok(estabelecimentoService.atualizar(id, dto));
@@ -56,7 +51,7 @@ public class EstabelecimentoController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
             estabelecimentoService.deletar(id);

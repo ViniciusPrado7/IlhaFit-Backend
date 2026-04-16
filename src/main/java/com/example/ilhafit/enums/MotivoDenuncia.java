@@ -1,4 +1,4 @@
-package com.example.ilhafit.entity;
+package com.example.ilhafit.enums;
 
 public enum MotivoDenuncia {
     PRECONCEITO,

@@ -20,7 +20,7 @@ public class GradeAtividadeController {
 
     // ---- Profissional ----
 
-    @PostMapping("/profissional/{profissionalId}")
+    @PostMapping("/cadastrar/profissional/{profissionalId}")
     public ResponseEntity<?> adicionarAoProfissional(
             @PathVariable Long profissionalId,
             @Valid @RequestBody GradeAtividadeDTO.Registro dto) {
@@ -32,14 +32,14 @@ public class GradeAtividadeController {
         }
     }
 
-    @GetMapping("/profissional/{profissionalId}")
+    @GetMapping("/grade-atividades/profissional/{profissionalId}")
     public ResponseEntity<List<GradeAtividadeDTO.Resposta>> listarPorProfissional(@PathVariable Long profissionalId) {
         return ResponseEntity.ok(gradeAtividadeService.listarPorProfissional(profissionalId));
     }
 
     // ---- Estabelecimento ----
 
-    @PostMapping("/estabelecimento/{estabelecimentoId}")
+    @PostMapping("/cadastrar/estabelecimento/{estabelecimentoId}")
     public ResponseEntity<?> adicionarAoEstabelecimento(
             @PathVariable Long estabelecimentoId,
             @Valid @RequestBody GradeAtividadeDTO.Registro dto) {
@@ -51,14 +51,14 @@ public class GradeAtividadeController {
         }
     }
 
-    @GetMapping("/estabelecimento/{estabelecimentoId}")
+    @GetMapping("/grade-atividades/estabelecimento/{estabelecimentoId}")
     public ResponseEntity<List<GradeAtividadeDTO.Resposta>> listarPorEstabelecimento(@PathVariable Long estabelecimentoId) {
         return ResponseEntity.ok(gradeAtividadeService.listarPorEstabelecimento(estabelecimentoId));
     }
 
     // ---- Operações gerais ----
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody GradeAtividadeDTO.Registro dto) {
         try {
             GradeAtividadeDTO.Resposta atualizado = gradeAtividadeService.atualizar(id, dto);
@@ -68,7 +68,7 @@ public class GradeAtividadeController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
             gradeAtividadeService.deletar(id);

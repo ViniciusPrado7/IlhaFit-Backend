@@ -1,7 +1,7 @@
 package com.example.ilhafit.dto;
 
-import com.example.ilhafit.entity.MotivoDenuncia;
-import com.example.ilhafit.entity.StatusDenuncia;
+import com.example.ilhafit.enums.MotivoDenuncia;
+import com.example.ilhafit.enums.StatusDenuncia;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

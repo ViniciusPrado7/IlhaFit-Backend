@@ -36,7 +36,6 @@ public class ProfissionalMapper {
             }).toList());
         }
         pro.setFotoUrl(dto.getFotoUrl());
-        pro.setOutrosAtividade(dto.getOutrosAtividade());
         return pro;
     }
 
@@ -64,8 +63,6 @@ public class ProfissionalMapper {
             }).toList());
         }
         dto.setFotoUrl(pro.getFotoUrl());
-        dto.setOutrosAtividade(pro.getOutrosAtividade());
-        dto.setRole(pro.getRole());
         return dto;
     }
 }
