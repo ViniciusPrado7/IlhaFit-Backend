@@ -1,6 +1,18 @@
 package com.example.ilhafit.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -21,7 +33,7 @@ public class Estabelecimento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome Ã© obrigatÃ³rio")
     @Column(nullable = false)
     private String nome;
 
@@ -31,20 +43,20 @@ public class Estabelecimento {
     @Column(name = "razao_social")
     private String razaoSocial;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email deve ser válido")
+    @NotBlank(message = "Email Ã© obrigatÃ³rio")
+    @Email(message = "Email deve ser vÃ¡lido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
+    @NotBlank(message = "Senha Ã© obrigatÃ³ria")
     @Column(nullable = false)
     private String senha;
 
-    @NotBlank(message = "Telefone é obrigatório")
+    @NotBlank(message = "Telefone Ã© obrigatÃ³rio")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CNPJ é obrigatório")
+    @NotBlank(message = "CNPJ Ã© obrigatÃ³rio")
     @Column(nullable = false, unique = true)
     private String cnpj;
 
@@ -54,9 +66,6 @@ public class Estabelecimento {
     @Column(name = "exclusivo_mulheres")
     private Boolean exclusivoMulheres = false;
 
-    @Column(name = "outros_atividade")
-    private String outrosAtividade;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "estabelecimento_id")
     private List<GradeAtividade> gradeAtividades;
@@ -65,10 +74,6 @@ public class Estabelecimento {
     @CollectionTable(name = "estabelecimento_fotos", joinColumns = @JoinColumn(name = "estabelecimento_id"))
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private List<String> fotosUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
-    private Role role = Role.ESTABELECIMENTO;
 
     @Column(name = "data_cadastro", nullable = false, updatable = false)
     private LocalDateTime dataCadastro;

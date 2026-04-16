@@ -1,37 +1,34 @@
 package com.example.ilhafit.dto.usuario;
 
-
-import com.example.ilhafit.entity.Role;
-
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Getter
 @Setter
 public class UsuarioRegistroDTO {
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome Ã© obrigatÃ³rio")
     private String nome;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email inválido")
+    @NotBlank(message = "Email Ã© obrigatÃ³rio")
+    @Email(message = "Email invÃ¡lido")
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
+    @NotBlank(message = "Senha Ã© obrigatÃ³ria")
     @Pattern(
         regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!.*_\\-]).{8,}$",
-        message = "Senha deve conter 8+ caracteres, maiúscula, minúscula, número e especial"
+        message = "Senha deve conter 8+ caracteres, maiÃºscula, minÃºscula, nÃºmero e especial"
     )
     private String senha;
 
-    @NotBlank(message = "Confirmação de senha é obrigatória")
+    @NotBlank(message = "ConfirmaÃ§Ã£o de senha Ã© obrigatÃ³ria")
     private String confirmacaoSenha;
 
-    private Role role;
-
-    @AssertTrue(message = "As senhas não coincidem")
+    @AssertTrue(message = "As senhas nÃ£o coincidem")
     public boolean isSenhaValida() {
         if (senha == null || confirmacaoSenha == null) return true;
         return senha.equals(confirmacaoSenha);

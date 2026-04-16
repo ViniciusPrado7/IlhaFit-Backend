@@ -15,10 +15,6 @@ public class UsuarioMapper {
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
 
-        if (dto.getRole() != null) {
-            usuario.setRole(dto.getRole());
-        }
-
         return usuario;
     }
 
