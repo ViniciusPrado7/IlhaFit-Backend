@@ -1,5 +1,7 @@
 package com.example.ilhafit.entity;
 
+import com.example.ilhafit.enums.MotivoDenuncia;
+import com.example.ilhafit.enums.StatusDenuncia;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

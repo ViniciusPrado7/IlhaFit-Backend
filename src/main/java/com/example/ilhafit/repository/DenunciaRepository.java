@@ -1,7 +1,7 @@
 package com.example.ilhafit.repository;
 
 import com.example.ilhafit.entity.Denuncia;
-import com.example.ilhafit.entity.StatusDenuncia;
+import com.example.ilhafit.enums.StatusDenuncia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

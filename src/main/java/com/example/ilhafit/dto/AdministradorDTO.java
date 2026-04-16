@@ -1,6 +1,6 @@
 package com.example.ilhafit.dto;
 
-import com.example.ilhafit.entity.Role;
+import com.example.ilhafit.enums.Role;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
