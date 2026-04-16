@@ -1,12 +1,13 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.EstabelecimentoDTO;
-import com.example.ilhafit.entity.Estabelecimento;
-import com.example.ilhafit.entity.Role;
-import com.example.ilhafit.mapper.EstabelecimentoMapper;
-import com.example.ilhafit.repository.EstabelecimentoRepository;
-import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.entity.Avaliacao;
+import com.example.ilhafit.entity.Estabelecimento;
+import com.example.ilhafit.entity.GradeAtividade;
+import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.mapper.EstabelecimentoMapper;
+import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.EstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,24 +22,24 @@ import java.util.stream.Collectors;
 public class EstabelecimentoService {
 
     private final EstabelecimentoRepository estabelecimentoRepository;
+    private final CadastroIdentityValidator cadastroIdentityValidator;
+    private final CategoriaPendenteService categoriaPendenteService;
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public EstabelecimentoDTO.Resposta cadastrar(EstabelecimentoDTO.Registro dto) {
-        if (estabelecimentoRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email já cadastrado");
-        }
-        if (estabelecimentoRepository.existsByCnpj(dto.getCnpj())) {
-            throw new IllegalArgumentException("CNPJ já cadastrado");
-        }
+        cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.ESTABELECIMENTO, null);
+        cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
+
         Estabelecimento estabelecimento = estabelecimentoMapper.toEntity(dto);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        estabelecimento.setRole(Role.ESTABELECIMENTO);
-        return mappedWithRating(estabelecimentoRepository.save(estabelecimento));
+        Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
+        registrarCategoriasPendentes(salvo);
+        return mappedWithRating(salvo);
     }
 
     public List<EstabelecimentoDTO.Resposta> listarTodos() {
@@ -62,7 +63,7 @@ public class EstabelecimentoService {
                     .mapToInt(Avaliacao::getNota)
                     .average()
                     .orElse(0.0);
-            dto.setAvaliacao(Math.round(media * 10.0) / 10.0); 
+            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
         }
         return dto;
     }
@@ -75,7 +76,14 @@ public class EstabelecimentoService {
     @Transactional
     public EstabelecimentoDTO.Resposta atualizar(Long id, EstabelecimentoDTO.Registro dto) {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento nÃ£o encontrado"));
+
+        if (!estabelecimento.getEmail().equals(dto.getEmail())) {
+            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.ESTABELECIMENTO, id);
+        }
+        if (!estabelecimento.getCnpj().equals(dto.getCnpj())) {
+            cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), id);
+        }
 
         estabelecimento.setNome(dto.getNome());
         estabelecimento.setEmail(dto.getEmail());
@@ -85,8 +93,6 @@ public class EstabelecimentoService {
         estabelecimento.setRazaoSocial(dto.getRazaoSocial());
         estabelecimento.setExclusivoMulheres(dto.getExclusivoMulheres());
         estabelecimento.setFotosUrl(dto.getFotosUrl());
-        estabelecimento.setOutrosAtividade(dto.getOutrosAtividade());
-
 
         if (dto.getEndereco() != null) {
             estabelecimento.setEndereco(estabelecimentoMapper.toEntity(dto).getEndereco());
@@ -101,15 +107,31 @@ public class EstabelecimentoService {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return mappedWithRating(estabelecimentoRepository.save(estabelecimento));
+        Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
+        registrarCategoriasPendentes(salvo);
+        return mappedWithRating(salvo);
     }
 
     @Transactional
     public void deletar(Long id) {
         if (!estabelecimentoRepository.existsById(id)) {
-            throw new IllegalArgumentException("Estabelecimento não encontrado");
+            throw new IllegalArgumentException("Estabelecimento nÃ£o encontrado");
         }
         avaliacaoRepository.deleteByEstabelecimentoId(id);
         estabelecimentoRepository.deleteById(id);
+    }
+
+    private void registrarCategoriasPendentes(Estabelecimento estabelecimento) {
+        if (estabelecimento.getGradeAtividades() == null) {
+            return;
+        }
+
+        for (GradeAtividade atividade : estabelecimento.getGradeAtividades()) {
+            categoriaPendenteService.registrarPendenciaSeNecessario(
+                    atividade.getAtividade(),
+                    TipoCadastro.ESTABELECIMENTO,
+                    estabelecimento.getId()
+            );
+        }
     }
 }

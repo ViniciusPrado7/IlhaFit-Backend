@@ -20,8 +20,8 @@ public class ProfissionalController {
     private final ProfissionalService profissionalService;
     private final AuthService authService;
 
-    @PostMapping("/registrar")
-    public ResponseEntity<?> registrar(@Valid @RequestBody ProfissionalDTO.Registro dto) {
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrar(@Valid @RequestBody ProfissionalDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerProfissional(dto));
         } catch (Exception e) {
@@ -29,39 +29,34 @@ public class ProfissionalController {
         }
     }
 
-    @PostMapping("/cadastro")
-    public ResponseEntity<?> cadastrar(@Valid @RequestBody ProfissionalDTO.Registro dto) {
-        return registrar(dto);
-    }
-
-    @GetMapping
+    @GetMapping("/profissionais")
     public ResponseEntity<List<ProfissionalDTO.Resposta>> listarTodos() {
         List<ProfissionalDTO.Resposta> profissionais = profissionalService.listarTodos();
         return ResponseEntity.ok(profissionais);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/profissionais/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         return profissionalService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/email/{email}")
+    @GetMapping("/profissionais/email/{email}")
     public ResponseEntity<?> buscarPorEmail(@PathVariable String email) {
         return profissionalService.buscarPorEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/cpf/{cpf}")
+    @GetMapping("/profissionais/cpf/{cpf}")
     public ResponseEntity<?> buscarPorCpf(@PathVariable String cpf) {
         return profissionalService.buscarPorCpf(cpf)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody ProfissionalDTO.Registro dto) {
         try {
             ProfissionalDTO.Resposta profissionalAtualizado = profissionalService.atualizar(id, dto);
@@ -73,7 +68,7 @@ public class ProfissionalController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
             profissionalService.deletar(id);

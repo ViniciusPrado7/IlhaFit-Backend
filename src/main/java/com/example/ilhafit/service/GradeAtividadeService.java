@@ -4,6 +4,7 @@ import com.example.ilhafit.dto.GradeAtividadeDTO;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.GradeAtividade;
 import com.example.ilhafit.entity.Profissional;
+import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.GradeAtividadeRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
@@ -21,8 +22,7 @@ public class GradeAtividadeService {
     private final GradeAtividadeRepository gradeAtividadeRepository;
     private final ProfissionalRepository profissionalRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
-
-    // ---- Profissional ----
+    private final CategoriaPendenteService categoriaPendenteService;
 
     @Transactional
     public GradeAtividadeDTO.Resposta adicionarAoProfissional(Long profissionalId, GradeAtividadeDTO.Registro dto) {
@@ -33,6 +33,12 @@ public class GradeAtividadeService {
         gradeAtividadeRepository.save(atividade);
         profissional.getGradeAtividades().add(atividade);
         profissionalRepository.save(profissional);
+
+        categoriaPendenteService.registrarPendenciaSeNecessario(
+                atividade.getAtividade(),
+                TipoCadastro.PROFISSIONAL,
+                profissionalId
+        );
 
         return toDTO(atividade);
     }
@@ -45,8 +51,6 @@ public class GradeAtividadeService {
                 .collect(Collectors.toList());
     }
 
-    // ---- Estabelecimento ----
-
     @Transactional
     public GradeAtividadeDTO.Resposta adicionarAoEstabelecimento(Long estabelecimentoId, GradeAtividadeDTO.Registro dto) {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
@@ -56,6 +60,12 @@ public class GradeAtividadeService {
         gradeAtividadeRepository.save(atividade);
         estabelecimento.getGradeAtividades().add(atividade);
         estabelecimentoRepository.save(estabelecimento);
+
+        categoriaPendenteService.registrarPendenciaSeNecessario(
+                atividade.getAtividade(),
+                TipoCadastro.ESTABELECIMENTO,
+                estabelecimentoId
+        );
 
         return toDTO(atividade);
     }
@@ -68,8 +78,6 @@ public class GradeAtividadeService {
                 .collect(Collectors.toList());
     }
 
-    // ---- Operações gerais ----
-
     @Transactional
     public GradeAtividadeDTO.Resposta atualizar(Long id, GradeAtividadeDTO.Registro dto) {
         GradeAtividade atividade = gradeAtividadeRepository.findById(id)
@@ -80,7 +88,10 @@ public class GradeAtividadeService {
         atividade.setDiasSemana(dto.getDiasSemana());
         atividade.setPeriodos(dto.getPeriodos());
 
-        return toDTO(gradeAtividadeRepository.save(atividade));
+        GradeAtividade atividadeSalva = gradeAtividadeRepository.save(atividade);
+        registrarPendenciaPorDono(atividadeSalva);
+
+        return toDTO(atividadeSalva);
     }
 
     @Transactional
@@ -91,7 +102,23 @@ public class GradeAtividadeService {
         gradeAtividadeRepository.deleteById(id);
     }
 
-    // ---- Helpers ----
+    private void registrarPendenciaPorDono(GradeAtividade atividade) {
+        profissionalRepository.findByGradeAtividadesId(atividade.getId()).ifPresent(profissional ->
+                categoriaPendenteService.registrarPendenciaSeNecessario(
+                        atividade.getAtividade(),
+                        TipoCadastro.PROFISSIONAL,
+                        profissional.getId()
+                )
+        );
+
+        estabelecimentoRepository.findByGradeAtividadesId(atividade.getId()).ifPresent(estabelecimento ->
+                categoriaPendenteService.registrarPendenciaSeNecessario(
+                        atividade.getAtividade(),
+                        TipoCadastro.ESTABELECIMENTO,
+                        estabelecimento.getId()
+                )
+        );
+    }
 
     private GradeAtividade toEntity(GradeAtividadeDTO.Registro dto) {
         GradeAtividade entity = new GradeAtividade();

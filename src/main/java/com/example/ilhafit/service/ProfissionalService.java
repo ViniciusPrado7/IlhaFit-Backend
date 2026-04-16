@@ -1,12 +1,13 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.ProfissionalDTO;
-import com.example.ilhafit.entity.Profissional;
-import com.example.ilhafit.entity.Role;
-import com.example.ilhafit.mapper.ProfissionalMapper;
-import com.example.ilhafit.repository.ProfissionalRepository;
-import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.entity.Avaliacao;
+import com.example.ilhafit.entity.GradeAtividade;
+import com.example.ilhafit.entity.Profissional;
+import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.mapper.ProfissionalMapper;
+import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.ProfissionalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,24 +22,24 @@ import java.util.stream.Collectors;
 public class ProfissionalService {
 
     private final ProfissionalRepository profissionalRepository;
+    private final CadastroIdentityValidator cadastroIdentityValidator;
+    private final CategoriaPendenteService categoriaPendenteService;
     private final ProfissionalMapper profissionalMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public ProfissionalDTO.Resposta cadastrar(ProfissionalDTO.Registro dto) {
-        if (profissionalRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email já cadastrado");
-        }
-        if (profissionalRepository.existsByCpf(dto.getCpf())) {
-            throw new IllegalArgumentException("CPF já cadastrado");
-        }
+        cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.PROFISSIONAL, null);
+        cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
+
         Profissional profissional = profissionalMapper.toEntity(dto);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
-        profissional.setRole(Role.PROFISSIONAL);
-        return mappedWithRating(profissionalRepository.save(profissional));
+        Profissional salvo = profissionalRepository.save(profissional);
+        registrarCategoriasPendentes(salvo);
+        return mappedWithRating(salvo);
     }
 
     public List<ProfissionalDTO.Resposta> listarTodos() {
@@ -62,7 +63,7 @@ public class ProfissionalService {
                     .mapToInt(Avaliacao::getNota)
                     .average()
                     .orElse(0.0);
-            dto.setAvaliacao(Math.round(media * 10.0) / 10.0); 
+            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
         }
         return dto;
     }
@@ -80,7 +81,14 @@ public class ProfissionalService {
     @Transactional
     public ProfissionalDTO.Resposta atualizar(Long id, ProfissionalDTO.Registro dto) {
         Profissional profissional = profissionalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Profissional nÃ£o encontrado"));
+
+        if (!profissional.getEmail().equals(dto.getEmail())) {
+            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.PROFISSIONAL, id);
+        }
+        if (!profissional.getCpf().equals(dto.getCpf())) {
+            cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), id);
+        }
 
         profissional.setNome(dto.getNome());
         profissional.setEmail(dto.getEmail());
@@ -91,7 +99,6 @@ public class ProfissionalService {
         profissional.setRegistroCref(dto.getRegistroCref());
         profissional.setExclusivoMulheres(dto.getExclusivoMulheres());
         profissional.setFotoUrl(dto.getFotoUrl());
-        profissional.setOutrosAtividade(dto.getOutrosAtividade());
 
         if (dto.getEndereco() != null) {
             profissional.setEndereco(profissionalMapper.toEntity(dto).getEndereco());
@@ -106,15 +113,31 @@ public class ProfissionalService {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return mappedWithRating(profissionalRepository.save(profissional));
+        Profissional salvo = profissionalRepository.save(profissional);
+        registrarCategoriasPendentes(salvo);
+        return mappedWithRating(salvo);
     }
 
     @Transactional
     public void deletar(Long id) {
         if (!profissionalRepository.existsById(id)) {
-            throw new IllegalArgumentException("Profissional não encontrado");
+            throw new IllegalArgumentException("Profissional nÃ£o encontrado");
         }
         avaliacaoRepository.deleteByProfissionalId(id);
         profissionalRepository.deleteById(id);
+    }
+
+    private void registrarCategoriasPendentes(Profissional profissional) {
+        if (profissional.getGradeAtividades() == null) {
+            return;
+        }
+
+        for (GradeAtividade atividade : profissional.getGradeAtividades()) {
+            categoriaPendenteService.registrarPendenciaSeNecessario(
+                    atividade.getAtividade(),
+                    TipoCadastro.PROFISSIONAL,
+                    profissional.getId()
+            );
+        }
     }
 }

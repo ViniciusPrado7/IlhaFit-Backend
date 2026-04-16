@@ -18,8 +18,8 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    @PostMapping
-    public ResponseEntity<?> criar(@Valid @RequestBody CategoriaDTO.Registro dto) {
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrar(@Valid @RequestBody CategoriaDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.criar(dto));
         } catch (IllegalArgumentException e) {
@@ -27,19 +27,19 @@ public class CategoriaController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/categorias")
     public ResponseEntity<List<CategoriaDTO.Resposta>> listarTodas() {
         return ResponseEntity.ok(categoriaService.listarTodas());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/categorias/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         return categoriaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody CategoriaDTO.Registro dto) {
         try {
             CategoriaDTO.Resposta atualizado = categoriaService.atualizar(id, dto);
@@ -49,7 +49,7 @@ public class CategoriaController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
             categoriaService.deletar(id);
