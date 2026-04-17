@@ -90,8 +90,6 @@ public class EstabelecimentoService {
         estabelecimento.setTelefone(dto.getTelefone());
         estabelecimento.setCnpj(dto.getCnpj());
         estabelecimento.setNomeFantasia(dto.getNomeFantasia());
-        estabelecimento.setRazaoSocial(dto.getRazaoSocial());
-        estabelecimento.setExclusivoMulheres(dto.getExclusivoMulheres());
         estabelecimento.setFotosUrl(dto.getFotosUrl());
 
         if (dto.getEndereco() != null) {

@@ -1,6 +1,7 @@
 package com.example.ilhafit.dto;
 
 import com.example.ilhafit.enums.Role;
+import com.example.ilhafit.validation.SenhaForte;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -17,8 +18,7 @@ public class AdministradorDTO {
         private String email;
 
         @NotBlank(message = "Senha é obrigatória")
-        @Size(min = 8, message = "Senha deve ter no mínimo 8 caracteres")
-        @Pattern(regexp = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$", message = "Senha deve conter pelo menos 1 número, 1 letra maiúscula e 1 caractere especial")
+        @SenhaForte
         private String senha;
     }
 

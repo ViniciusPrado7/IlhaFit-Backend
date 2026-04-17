@@ -21,9 +21,7 @@ public class EstabelecimentoMapper {
         est.setTelefone(dto.getTelefone());
         est.setCnpj(dto.getCnpj());
         est.setNomeFantasia(dto.getNomeFantasia());
-        est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
-        est.setExclusivoMulheres(dto.getExclusivoMulheres());
         if (dto.getGradeAtividades() != null) {
             est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
                 GradeAtividade entity = new GradeAtividade();
@@ -46,9 +44,7 @@ public class EstabelecimentoMapper {
         dto.setTelefone(est.getTelefone());
         dto.setCnpj(est.getCnpj());
         dto.setNomeFantasia(est.getNomeFantasia());
-        dto.setRazaoSocial(est.getRazaoSocial());
         dto.setEndereco(enderecoMapper.toDTO(est.getEndereco()));
-        dto.setExclusivoMulheres(est.getExclusivoMulheres());
         if (est.getGradeAtividades() != null) {
             dto.setGradeAtividades(est.getGradeAtividades().stream().map(g -> {
                 GradeAtividadeDTO.Resposta d = new GradeAtividadeDTO.Resposta();

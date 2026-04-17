@@ -40,9 +40,6 @@ public class Estabelecimento {
     @Column(name = "nome_fantasia")
     private String nomeFantasia;
 
-    @Column(name = "razao_social")
-    private String razaoSocial;
-
     @NotBlank(message = "Email Ã© obrigatÃ³rio")
     @Email(message = "Email deve ser vÃ¡lido")
     @Column(nullable = false, unique = true)
@@ -62,9 +59,6 @@ public class Estabelecimento {
 
     @Embedded
     private Endereco endereco;
-
-    @Column(name = "exclusivo_mulheres")
-    private Boolean exclusivoMulheres = false;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "estabelecimento_id")

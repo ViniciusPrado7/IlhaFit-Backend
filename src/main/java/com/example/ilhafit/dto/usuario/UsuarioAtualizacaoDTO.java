@@ -1,7 +1,7 @@
 package com.example.ilhafit.dto.usuario;
 
+import com.example.ilhafit.validation.SenhaForte;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,9 +14,6 @@ public class UsuarioAtualizacaoDTO {
     @Email(message = "Email inválido")
     private String email;
 
-    @Pattern(
-        regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!.*_\\-]).{8,}$",
-        message = "Senha fraca"
-    )
+    @SenhaForte
     private String senha;
 }

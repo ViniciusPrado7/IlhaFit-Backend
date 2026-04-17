@@ -1,9 +1,9 @@
 package com.example.ilhafit.dto.usuario;
 
+import com.example.ilhafit.validation.SenhaForte;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,10 +19,7 @@ public class UsuarioRegistroDTO {
     private String email;
 
     @NotBlank(message = "Senha Ã© obrigatÃ³ria")
-    @Pattern(
-        regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!.*_\\-]).{8,}$",
-        message = "Senha deve conter 8+ caracteres, maiÃºscula, minÃºscula, nÃºmero e especial"
-    )
+    @SenhaForte
     private String senha;
 
     @NotBlank(message = "ConfirmaÃ§Ã£o de senha Ã© obrigatÃ³ria")
