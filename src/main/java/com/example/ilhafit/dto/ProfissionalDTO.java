@@ -1,5 +1,6 @@
 package com.example.ilhafit.dto;
 
+import com.example.ilhafit.validation.SenhaForte;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +19,7 @@ public class ProfissionalDTO {
         @Email(message = "Email deve ser vÃ¡lido")
         private String email;
 
+        @SenhaForte
         private String senha;
 
         @NotBlank(message = "Telefone Ã© obrigatÃ³rio")
