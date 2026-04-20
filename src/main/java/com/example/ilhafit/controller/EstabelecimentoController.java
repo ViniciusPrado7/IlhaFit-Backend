@@ -43,7 +43,7 @@ public class EstabelecimentoController {
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody EstabelecimentoDTO.Registro dto) {
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody EstabelecimentoDTO.Atualizacao dto) {
         try {
             return ResponseEntity.ok(estabelecimentoService.atualizar(id, dto));
         } catch (IllegalArgumentException e) {

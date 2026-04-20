@@ -36,6 +36,29 @@ public class EstabelecimentoMapper {
         return est;
     }
 
+    public Estabelecimento toEntity(EstabelecimentoDTO.Atualizacao dto) {
+        Estabelecimento est = new Estabelecimento();
+        est.setNome(dto.getNome());
+        est.setEmail(dto.getEmail());
+        est.setSenha(dto.getSenha());
+        est.setTelefone(dto.getTelefone());
+        est.setCnpj(dto.getCnpj());
+        est.setNomeFantasia(dto.getNomeFantasia());
+        est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
+        if (dto.getGradeAtividades() != null) {
+            est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
+                GradeAtividade entity = new GradeAtividade();
+                entity.setAtividade(g.getAtividade());
+                entity.setExclusivoMulheres(g.getExclusivoMulheres());
+                entity.setDiasSemana(g.getDiasSemana());
+                entity.setPeriodos(g.getPeriodos());
+                return entity;
+            }).toList());
+        }
+        est.setFotosUrl(dto.getFotosUrl());
+        return est;
+    }
+
     public EstabelecimentoDTO.Resposta toDTO(Estabelecimento est) {
         EstabelecimentoDTO.Resposta dto = new EstabelecimentoDTO.Resposta();
         dto.setId(est.getId());

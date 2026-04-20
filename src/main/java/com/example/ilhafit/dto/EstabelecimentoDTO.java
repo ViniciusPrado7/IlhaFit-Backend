@@ -48,6 +48,40 @@ public class EstabelecimentoDTO {
     }
 
     @Data
+    public static class Atualizacao {
+        @NotBlank(message = "Nome e obrigatorio")
+        private String nome;
+
+        @NotBlank(message = "Nome fantasia e obrigatorio")
+        private String nomeFantasia;
+
+        @NotBlank(message = "Email e obrigatorio")
+        @Email(message = "Email deve ser valido")
+        private String email;
+
+        @SenhaForte
+        private String senha;
+
+        @NotBlank(message = "Telefone e obrigatorio")
+        @Pattern(regexp = "\\d*", message = "Telefone deve conter apenas numeros")
+        private String telefone;
+
+        @NotBlank(message = "CNPJ e obrigatorio")
+        private String cnpj;
+
+        @Valid
+        @NotNull(message = "Endereco e obrigatorio")
+        private EnderecoDTO endereco;
+
+        @Valid
+        @NotNull(message = "Grade de atividades e obrigatoria")
+        private List<GradeAtividadeDTO.Registro> gradeAtividades;
+
+        @NotNull(message = "Fotos URL e obrigatorio")
+        private List<String> fotosUrl;
+    }
+
+    @Data
     public static class Resposta {
         private Long id;
         private String nome;
