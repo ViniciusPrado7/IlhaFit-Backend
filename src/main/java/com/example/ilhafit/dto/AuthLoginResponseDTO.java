@@ -12,4 +12,6 @@ public class AuthLoginResponseDTO {
     private String email;
     private String tipo;
     private String role;
+    private String token;
+    private String tokenType;
 }

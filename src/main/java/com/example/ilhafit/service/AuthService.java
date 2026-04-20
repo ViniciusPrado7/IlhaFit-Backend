@@ -4,6 +4,7 @@ import com.example.ilhafit.dto.AdministradorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.dto.EstabelecimentoDTO;
 import com.example.ilhafit.dto.ProfissionalDTO;
+import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
 import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
@@ -16,6 +17,7 @@ import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class AuthService {
     private final ProfissionalRepository profissionalRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AdministradorDTO.Resposta registerAdministrador(AdministradorDTO.Registro dto) {
         return administradorService.cadastrar(dto);
@@ -48,6 +51,14 @@ public class AuthService {
 
     public UsuarioResponseDTO registerUsuario(UsuarioRegistroDTO dto) {
         return usuarioService.cadastrar(dto);
+    }
+
+    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioAtualizacaoDTO dto) {
+        return usuarioService.atualizar(id, dto);
+    }
+
+    public void deletarUsuario(Long id) {
+        usuarioService.deletar(id);
     }
 
     public AuthLoginResponseDTO login(UsuarioLoginDTO dto) {
@@ -87,6 +98,8 @@ public class AuthService {
                 .email(estabelecimento.getEmail())
                 .tipo(TipoCadastro.ESTABELECIMENTO.name())
                 .role(TipoCadastro.ESTABELECIMENTO.name())
+                .token(jwtService.gerarTokenEstabelecimento(estabelecimento))
+                .tokenType("Bearer")
                 .build();
     }
 
