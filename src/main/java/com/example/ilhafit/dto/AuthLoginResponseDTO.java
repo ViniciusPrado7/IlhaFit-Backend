@@ -3,7 +3,10 @@ package com.example.ilhafit.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import lombok.Setter;
+
 @Getter
+@Setter
 @Builder
 public class AuthLoginResponseDTO {
 
@@ -12,4 +15,5 @@ public class AuthLoginResponseDTO {
     private String email;
     private String tipo;
     private String role;
+    private String token;
 }

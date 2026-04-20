@@ -16,6 +16,7 @@ import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class AuthService {
     private final ProfissionalRepository profissionalRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AdministradorDTO.Resposta registerAdministrador(AdministradorDTO.Registro dto) {
         return administradorService.cadastrar(dto);
@@ -51,7 +53,7 @@ public class AuthService {
     }
 
     public AuthLoginResponseDTO login(UsuarioLoginDTO dto) {
-        return usuarioRepository.findByEmail(dto.getEmail())
+        AuthLoginResponseDTO response = usuarioRepository.findByEmail(dto.getEmail())
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
                 .map(this::toUsuarioLoginResponse)
                 .or(() -> estabelecimentoRepository.findByEmail(dto.getEmail())
@@ -64,6 +66,11 @@ public class AuthService {
                         .filter(administrador -> senhaCorreta(dto.getSenha(), administrador.getSenha()))
                         .map(this::toAdministradorLoginResponse))
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
+
+        String token = jwtService.generateToken(response.getEmail(), response.getRole(), response.getTipo(), response.getId());
+        response.setToken(token);
+        
+        return response;
     }
 
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
