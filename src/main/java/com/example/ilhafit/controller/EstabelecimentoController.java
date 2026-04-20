@@ -1,12 +1,14 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.EstabelecimentoDTO;
+import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.EstabelecimentoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -43,21 +45,38 @@ public class EstabelecimentoController {
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody EstabelecimentoDTO.Atualizacao dto) {
+    public ResponseEntity<?> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody EstabelecimentoDTO.Atualizacao dto,
+            @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
+            validarEstabelecimentoAutenticado(id, userDetails);
             return ResponseEntity.ok(estabelecimentoService.atualizar(id, dto));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Long id) {
+    public ResponseEntity<?> deletar(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
+            validarEstabelecimentoAutenticado(id, userDetails);
             estabelecimentoService.deletar(id);
             return ResponseEntity.ok(Map.of("mensagem", "Estabelecimento deletado com sucesso!"));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    private void validarEstabelecimentoAutenticado(Long estabelecimentoId, JwtAuthenticatedUser userDetails) {
+        if (userDetails == null || !estabelecimentoId.equals(userDetails.getId())) {
+            throw new SecurityException("Sem permissao para alterar este estabelecimento");
         }
     }
 }

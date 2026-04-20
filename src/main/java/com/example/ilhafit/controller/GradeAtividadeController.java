@@ -1,11 +1,13 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.GradeAtividadeDTO;
+import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.GradeAtividadeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,10 +44,14 @@ public class GradeAtividadeController {
     @PostMapping("/cadastrar/estabelecimento/{estabelecimentoId}")
     public ResponseEntity<?> adicionarAoEstabelecimento(
             @PathVariable Long estabelecimentoId,
-            @Valid @RequestBody GradeAtividadeDTO.Registro dto) {
+            @Valid @RequestBody GradeAtividadeDTO.Registro dto,
+            @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
+            validarEstabelecimentoAutenticado(estabelecimentoId, userDetails);
             GradeAtividadeDTO.Resposta resposta = gradeAtividadeService.adicionarAoEstabelecimento(estabelecimentoId, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
@@ -75,6 +81,12 @@ public class GradeAtividadeController {
             return ResponseEntity.ok(Map.of("mensagem", "Atividade removida com sucesso!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    private void validarEstabelecimentoAutenticado(Long estabelecimentoId, JwtAuthenticatedUser userDetails) {
+        if (userDetails == null || !estabelecimentoId.equals(userDetails.getId())) {
+            throw new SecurityException("Sem permissao para alterar este estabelecimento");
         }
     }
 }
