@@ -1,11 +1,9 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
-import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
 import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
 import com.example.ilhafit.service.AuthService;
-import com.example.ilhafit.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
     private final AuthService authService;
 
     @PostMapping("/cadastrar")
@@ -31,21 +28,12 @@ public class UsuarioController {
                 .body(response);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UsuarioResponseDTO> login(
-            @RequestBody @Valid UsuarioLoginDTO dto) {
-
-        UsuarioResponseDTO response = usuarioService.login(dto);
-
-        return ResponseEntity.ok(response);
-    }
-
     @PutMapping("/atualizar/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable Long id,
             @RequestBody @Valid UsuarioAtualizacaoDTO dto) {
 
-        UsuarioResponseDTO response = usuarioService.atualizar(id, dto);
+        UsuarioResponseDTO response = authService.atualizarUsuario(id, dto);
 
         return ResponseEntity.ok(response);
     }
@@ -53,7 +41,7 @@ public class UsuarioController {
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
 
-        usuarioService.deletar(id);
+        authService.deletarUsuario(id);
 
         return ResponseEntity.noContent().build();
     }
