@@ -74,9 +74,9 @@ public class EstabelecimentoService {
     }
 
     @Transactional
-    public EstabelecimentoDTO.Resposta atualizar(Long id, EstabelecimentoDTO.Registro dto) {
+    public EstabelecimentoDTO.Resposta atualizar(Long id, EstabelecimentoDTO.Atualizacao dto) {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento nÃ£o encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado"));
 
         if (!estabelecimento.getEmail().equals(dto.getEmail())) {
             cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.ESTABELECIMENTO, id);
@@ -113,7 +113,7 @@ public class EstabelecimentoService {
     @Transactional
     public void deletar(Long id) {
         if (!estabelecimentoRepository.existsById(id)) {
-            throw new IllegalArgumentException("Estabelecimento nÃ£o encontrado");
+            throw new IllegalArgumentException("Estabelecimento não encontrado");
         }
         avaliacaoRepository.deleteByEstabelecimentoId(id);
         estabelecimentoRepository.deleteById(id);
