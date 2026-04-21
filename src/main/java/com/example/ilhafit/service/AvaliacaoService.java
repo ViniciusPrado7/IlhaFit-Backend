@@ -29,11 +29,13 @@ public class AvaliacaoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final ProfissionalRepository profissionalRepository;
     private final AdministradorRepository administradorRepository;
+    private final ModeracaoService moderacaoService;
 
     @Transactional
     public AvaliacaoDTO.Resposta avaliar(AvaliacaoDTO.Requisicao requisicao, JwtAuthenticatedUser autor) {
         validarAutorAutenticado(autor);
         validarDestinoUnico(requisicao);
+        moderacaoService.validarTextoPermitido(requisicao.getComentario());
 
         Avaliacao avaliacao = new Avaliacao();
         avaliacao.setNota(requisicao.getNota());

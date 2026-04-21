@@ -1,6 +1,8 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AvaliacaoDTO;
+import com.example.ilhafit.exception.ConteudoInadequadoException;
+import com.example.ilhafit.exception.ModeracaoIndisponivelException;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AvaliacaoService;
 import jakarta.validation.Valid;
@@ -31,6 +33,10 @@ public class AvaliacaoController {
             @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
             return ResponseEntity.ok(avaliacaoService.avaliar(dto, userDetails));
+        } catch (ConteudoInadequadoException e) {
+            return ResponseEntity.status(422).body(Map.of("erro", e.getMessage()));
+        } catch (ModeracaoIndisponivelException e) {
+            return ResponseEntity.status(503).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(Map.of("erro", e.getMessage()));
         } catch (SecurityException e) {

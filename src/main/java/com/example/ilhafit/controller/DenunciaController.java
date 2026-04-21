@@ -2,6 +2,8 @@ package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.DenunciaDTO;
 import com.example.ilhafit.enums.StatusDenuncia;
+import com.example.ilhafit.exception.ConteudoInadequadoException;
+import com.example.ilhafit.exception.ModeracaoIndisponivelException;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.DenunciaService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,10 @@ public class DenunciaController {
             @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
             return ResponseEntity.ok(denunciaService.criar(dto, userDetails));
+        } catch (ConteudoInadequadoException e) {
+            return ResponseEntity.status(422).body(Map.of("erro", e.getMessage()));
+        } catch (ModeracaoIndisponivelException e) {
+            return ResponseEntity.status(503).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(Map.of("erro", e.getMessage()));
         } catch (SecurityException e) {
