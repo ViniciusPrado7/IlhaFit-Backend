@@ -12,13 +12,13 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
     List<Avaliacao> findByProfissionalIdOrderByDataAvaliacaoDesc(Long profissionalId);
 
-    boolean existsByAutorIdAndEstabelecimentoId(Long autorId, Long estabelecimentoId);
+    boolean existsByAutorTipoAndAutorIdAndEstabelecimentoId(String autorTipo, Long autorId, Long estabelecimentoId);
 
-    boolean existsByAutorIdAndProfissionalId(Long autorId, Long profissionalId);
+    boolean existsByAutorTipoAndAutorIdAndProfissionalId(String autorTipo, Long autorId, Long profissionalId);
 
     void deleteByEstabelecimentoId(Long estabelecimentoId);
 
     void deleteByProfissionalId(Long profissionalId);
 
-    void deleteByAutorId(Long autorId);
+    void deleteByAutorTipoAndAutorId(String autorTipo, Long autorId);
 }

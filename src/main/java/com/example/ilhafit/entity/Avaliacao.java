@@ -31,8 +31,20 @@ public class Avaliacao {
     private String comentario;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "usuario_id")
     private Usuario autor;
+
+    @Column(name = "autor_id", nullable = false)
+    private Long autorId;
+
+    @Column(name = "autor_email", nullable = false)
+    private String autorEmail;
+
+    @Column(name = "autor_nome", nullable = false)
+    private String autorNome;
+
+    @Column(name = "autor_tipo", nullable = false)
+    private String autorTipo;
 
     @ManyToOne
     @JoinColumn(name = "estabelecimento_id")

@@ -33,27 +33,28 @@ public class Estabelecimento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome Ã© obrigatÃ³rio")
-    @Column(nullable = false)
-    private String nome;
-
+    @NotBlank(message = "Nome fantasia e obrigatorio")
     @Column(name = "nome_fantasia")
     private String nomeFantasia;
 
-    @NotBlank(message = "Email Ã© obrigatÃ³rio")
-    @Email(message = "Email deve ser vÃ¡lido")
+    @NotBlank(message = "Razao social e obrigatoria")
+    @Column(name = "razao_social")
+    private String razaoSocial;
+
+    @NotBlank(message = "Email e obrigatorio")
+    @Email(message = "Email deve ser valido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha Ã© obrigatÃ³ria")
+    @NotBlank(message = "Senha e obrigatoria")
     @Column(nullable = false)
     private String senha;
 
-    @NotBlank(message = "Telefone Ã© obrigatÃ³rio")
+    @NotBlank(message = "Telefone e obrigatorio")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CNPJ Ã© obrigatÃ³rio")
+    @NotBlank(message = "CNPJ e obrigatorio")
     @Column(nullable = false, unique = true)
     private String cnpj;
 

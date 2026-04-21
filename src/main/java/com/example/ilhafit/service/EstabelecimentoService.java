@@ -85,11 +85,11 @@ public class EstabelecimentoService {
             cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), id);
         }
 
-        estabelecimento.setNome(dto.getNome());
         estabelecimento.setEmail(dto.getEmail());
         estabelecimento.setTelefone(dto.getTelefone());
         estabelecimento.setCnpj(dto.getCnpj());
         estabelecimento.setNomeFantasia(dto.getNomeFantasia());
+        estabelecimento.setRazaoSocial(dto.getRazaoSocial());
         estabelecimento.setFotosUrl(dto.getFotosUrl());
 
         if (dto.getEndereco() != null) {

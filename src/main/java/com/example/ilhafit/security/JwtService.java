@@ -29,12 +29,19 @@ public class JwtService {
     }
 
     public String gerarTokenEstabelecimento(Estabelecimento estabelecimento) {
+        return gerarToken(
+                estabelecimento.getId(),
+                estabelecimento.getEmail(),
+                TipoCadastro.ESTABELECIMENTO.name());
+    }
+
+    private String gerarToken(Long id, String email, String tipo) {
         Instant agora = Instant.now();
 
         return Jwts.builder()
-                .setSubject(estabelecimento.getEmail())
-                .claim("id", estabelecimento.getId())
-                .claim("tipo", TipoCadastro.ESTABELECIMENTO.name())
+                .setSubject(email)
+                .claim("id", id)
+                .claim("tipo", tipo)
                 .setIssuedAt(Date.from(agora))
                 .setExpiration(Date.from(agora.plusMillis(expirationMillis)))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
