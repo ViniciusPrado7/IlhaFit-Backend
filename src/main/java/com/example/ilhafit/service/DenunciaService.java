@@ -6,6 +6,7 @@ import com.example.ilhafit.entity.Denuncia;
 import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.DenunciaRepository;
+import com.example.ilhafit.security.JwtAuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,23 +22,30 @@ public class DenunciaService {
     private final AvaliacaoRepository avaliacaoRepository;
 
     @Transactional
-    public DenunciaDTO.Resposta criar(DenunciaDTO.Requisicao requisicao, String emailDenunciante) {
-        if (denunciaRepository.existsByAvaliacaoIdAndDenuncianteEmail(requisicao.getAvaliacaoId(), emailDenunciante)) {
-            throw new IllegalStateException("Você já denunciou esta avaliação.");
+    public DenunciaDTO.Resposta criar(DenunciaDTO.Requisicao requisicao, JwtAuthenticatedUser denunciante) {
+        if (denunciante == null) {
+            throw new SecurityException("E necessario estar logado para realizar esta operacao.");
         }
 
         Avaliacao avaliacao = avaliacaoRepository.findById(requisicao.getAvaliacaoId())
-                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Avaliacao nao encontrada."));
+
+        if (avaliacao.getAutorTipo().equals(denunciante.getTipo()) && avaliacao.getAutorId().equals(denunciante.getId())) {
+            throw new IllegalStateException("Voce nao pode denunciar sua propria avaliacao.");
+        }
+
+        if (denunciaRepository.existsByAvaliacaoIdAndDenuncianteEmail(requisicao.getAvaliacaoId(), denunciante.getUsername())) {
+            throw new IllegalStateException("Voce ja denunciou esta avaliacao.");
+        }
 
         Denuncia denuncia = new Denuncia();
         denuncia.setAvaliacao(avaliacao);
-        denuncia.setDenuncianteEmail(emailDenunciante);
+        denuncia.setDenuncianteEmail(denunciante.getUsername());
         denuncia.setMotivo(requisicao.getMotivo());
         denuncia.setDescricaoAdicional(requisicao.getDescricaoAdicional());
         denuncia.setStatus(StatusDenuncia.PENDENTE);
 
-        Denuncia salva = denunciaRepository.save(denuncia);
-        return toResposta(salva);
+        return toResposta(denunciaRepository.save(denuncia));
     }
 
     public List<DenunciaDTO.Resposta> listarTodas() {
@@ -57,24 +65,19 @@ public class DenunciaService {
     @Transactional
     public DenunciaDTO.Resposta atualizarStatus(Long denunciaId, StatusDenuncia novoStatus) {
         Denuncia denuncia = denunciaRepository.findById(denunciaId)
-                .orElseThrow(() -> new IllegalArgumentException("Denúncia não encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Denuncia nao encontrada."));
 
         denuncia.setStatus(novoStatus);
-        Denuncia atualizada = denunciaRepository.save(denuncia);
-        return toResposta(atualizada);
+        return toResposta(denunciaRepository.save(denuncia));
     }
 
     @Transactional
     public void excluirAvaliacaoDenunciada(Long denunciaId) {
         Denuncia denuncia = denunciaRepository.findById(denunciaId)
-                .orElseThrow(() -> new IllegalArgumentException("Denúncia não encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Denuncia nao encontrada."));
 
         Long avaliacaoId = denuncia.getAvaliacao().getId();
-
-        // Remove todas as denúncias associadas a esta avaliação
         denunciaRepository.deleteByAvaliacaoId(avaliacaoId);
-
-        // Remove a avaliação
         avaliacaoRepository.deleteById(avaliacaoId);
     }
 
@@ -84,7 +87,7 @@ public class DenunciaService {
                 denuncia.getId(),
                 avaliacao.getId(),
                 avaliacao.getComentario(),
-                avaliacao.getAutor().getNome(),
+                avaliacao.getAutorNome(),
                 avaliacao.getNota(),
                 denuncia.getDenuncianteEmail(),
                 denuncia.getMotivo(),
@@ -92,7 +95,7 @@ public class DenunciaService {
                 denuncia.getStatus(),
                 denuncia.getDataDenuncia(),
                 avaliacao.getEstabelecimento() != null ? avaliacao.getEstabelecimento().getId() : null,
-                avaliacao.getEstabelecimento() != null ? (avaliacao.getEstabelecimento().getNomeFantasia() != null ? avaliacao.getEstabelecimento().getNomeFantasia() : avaliacao.getEstabelecimento().getNome()) : null,
+                avaliacao.getEstabelecimento() != null ? avaliacao.getEstabelecimento().getNomeFantasia() : null,
                 avaliacao.getProfissional() != null ? avaliacao.getProfissional().getId() : null,
                 avaliacao.getProfissional() != null ? avaliacao.getProfissional().getNome() : null
         );

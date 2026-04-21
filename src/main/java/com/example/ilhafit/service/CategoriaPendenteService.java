@@ -156,7 +156,7 @@ public class CategoriaPendenteService {
         }
         if (tipoSolicitante == TipoCadastro.ESTABELECIMENTO) {
             Estabelecimento estabelecimento = estabelecimentoRepository.findById(solicitanteId).orElse(null);
-            return estabelecimento != null ? estabelecimento.getNome() : null;
+            return estabelecimento != null ? estabelecimento.getNomeFantasia() : null;
         }
         return null;
     }

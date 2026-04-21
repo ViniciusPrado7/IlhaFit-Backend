@@ -26,6 +26,7 @@ public class AvaliacaoDTO {
         private Integer nota;
         private String comentario;
         private String nomeAutor;
+        private String tipoAutor;
         private LocalDateTime dataAvaliacao;
     }
 }

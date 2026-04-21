@@ -94,7 +94,7 @@ public class AuthService {
     private AuthLoginResponseDTO toEstabelecimentoLoginResponse(Estabelecimento estabelecimento) {
         return AuthLoginResponseDTO.builder()
                 .id(estabelecimento.getId())
-                .nome(estabelecimento.getNome())
+                .nome(estabelecimento.getNomeFantasia())
                 .email(estabelecimento.getEmail())
                 .tipo(TipoCadastro.ESTABELECIMENTO.name())
                 .role(TipoCadastro.ESTABELECIMENTO.name())

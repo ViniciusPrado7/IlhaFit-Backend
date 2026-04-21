@@ -14,11 +14,11 @@ public class EstabelecimentoDTO {
 
     @Data
     public static class Registro {
-        @NotBlank(message = "Nome e obrigatorio")
-        private String nome;
-
         @NotBlank(message = "Nome fantasia e obrigatorio")
         private String nomeFantasia;
+
+        @NotBlank(message = "Razao social e obrigatoria")
+        private String razaoSocial;
 
         @NotBlank(message = "Email e obrigatorio")
         @Email(message = "Email deve ser valido")
@@ -49,11 +49,11 @@ public class EstabelecimentoDTO {
 
     @Data
     public static class Atualizacao {
-        @NotBlank(message = "Nome e obrigatorio")
-        private String nome;
-
         @NotBlank(message = "Nome fantasia e obrigatorio")
         private String nomeFantasia;
+
+        @NotBlank(message = "Razao social e obrigatoria")
+        private String razaoSocial;
 
         @NotBlank(message = "Email e obrigatorio")
         @Email(message = "Email deve ser valido")
@@ -84,8 +84,8 @@ public class EstabelecimentoDTO {
     @Data
     public static class Resposta {
         private Long id;
-        private String nome;
         private String nomeFantasia;
+        private String razaoSocial;
         private String email;
         private String telefone;
         private String cnpj;

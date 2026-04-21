@@ -47,20 +47,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = claims.getSubject();
             String tipo = claims.get("tipo", String.class);
             Long id = claims.get("id", Number.class).longValue();
-            boolean estabelecimentoValido = email != null && estabelecimentoRepository.findByEmail(email)
+            boolean estabelecimentoValido = email != null
+                    && ESTABELECIMENTO_AUTHORITY.equals(tipo)
+                    && estabelecimentoRepository.findByEmail(email)
                     .filter(estabelecimento -> estabelecimento.getId().equals(id))
                     .isPresent();
 
-            if (ESTABELECIMENTO_AUTHORITY.equals(tipo)
-                    && email != null
+            if (estabelecimentoValido
                     && SecurityContextHolder.getContext().getAuthentication() == null
-                    && estabelecimentoValido) {
+                    && email != null) {
 
                 JwtAuthenticatedUser principal = new JwtAuthenticatedUser(
                         id,
                         email,
                         tipo,
-                        List.of(new SimpleGrantedAuthority(ESTABELECIMENTO_AUTHORITY)));
+                        List.of(new SimpleGrantedAuthority(tipo)));
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,

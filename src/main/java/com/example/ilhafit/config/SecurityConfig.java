@@ -38,6 +38,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/categorias/**").permitAll()
                         .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers("/api/grade-atividades/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/avaliacoes/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avaliacoes").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/avaliacoes/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/denuncias").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

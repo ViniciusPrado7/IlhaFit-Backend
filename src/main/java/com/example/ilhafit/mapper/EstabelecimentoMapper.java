@@ -15,12 +15,12 @@ public class EstabelecimentoMapper {
 
     public Estabelecimento toEntity(EstabelecimentoDTO.Registro dto) {
         Estabelecimento est = new Estabelecimento();
-        est.setNome(dto.getNome());
         est.setEmail(dto.getEmail());
         est.setSenha(dto.getSenha());
         est.setTelefone(dto.getTelefone());
         est.setCnpj(dto.getCnpj());
         est.setNomeFantasia(dto.getNomeFantasia());
+        est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
         if (dto.getGradeAtividades() != null) {
             est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
@@ -38,12 +38,12 @@ public class EstabelecimentoMapper {
 
     public Estabelecimento toEntity(EstabelecimentoDTO.Atualizacao dto) {
         Estabelecimento est = new Estabelecimento();
-        est.setNome(dto.getNome());
         est.setEmail(dto.getEmail());
         est.setSenha(dto.getSenha());
         est.setTelefone(dto.getTelefone());
         est.setCnpj(dto.getCnpj());
         est.setNomeFantasia(dto.getNomeFantasia());
+        est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
         if (dto.getGradeAtividades() != null) {
             est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
@@ -62,11 +62,11 @@ public class EstabelecimentoMapper {
     public EstabelecimentoDTO.Resposta toDTO(Estabelecimento est) {
         EstabelecimentoDTO.Resposta dto = new EstabelecimentoDTO.Resposta();
         dto.setId(est.getId());
-        dto.setNome(est.getNome());
         dto.setEmail(est.getEmail());
         dto.setTelefone(est.getTelefone());
         dto.setCnpj(est.getCnpj());
         dto.setNomeFantasia(est.getNomeFantasia());
+        dto.setRazaoSocial(est.getRazaoSocial());
         dto.setEndereco(enderecoMapper.toDTO(est.getEndereco()));
         if (est.getGradeAtividades() != null) {
             dto.setGradeAtividades(est.getGradeAtividades().stream().map(g -> {
