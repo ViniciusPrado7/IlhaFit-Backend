@@ -88,6 +88,8 @@ public class AuthService {
                 .email(usuario.getEmail())
                 .tipo(TipoCadastro.USUARIO.name())
                 .role(usuario.getRole().name())
+                .token(jwtService.gerarTokenUsuario(usuario))
+                .tokenType("Bearer")
                 .build();
     }
 
@@ -120,6 +122,8 @@ public class AuthService {
                 .email(administrador.getEmail())
                 .tipo(TipoCadastro.ADMINISTRADOR.name())
                 .role(administrador.getRole().name())
+                .token(jwtService.gerarTokenAdministrador(administrador))
+                .tokenType("Bearer")
                 .build();
     }
 }
