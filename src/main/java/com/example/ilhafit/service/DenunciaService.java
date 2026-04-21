@@ -20,12 +20,14 @@ public class DenunciaService {
 
     private final DenunciaRepository denunciaRepository;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final ModeracaoService moderacaoService;
 
     @Transactional
     public DenunciaDTO.Resposta criar(DenunciaDTO.Requisicao requisicao, JwtAuthenticatedUser denunciante) {
         if (denunciante == null) {
             throw new SecurityException("E necessario estar logado para realizar esta operacao.");
         }
+        moderacaoService.validarTextoPermitido(requisicao.getDescricaoAdicional());
 
         Avaliacao avaliacao = avaliacaoRepository.findById(requisicao.getAvaliacaoId())
                 .orElseThrow(() -> new IllegalArgumentException("Avaliacao nao encontrada."));
