@@ -2,7 +2,6 @@ package com.example.ilhafit.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -55,14 +54,11 @@ public class Profissional {
     @Column(name = "sexo")
     private String sexo;
 
-    @Column(length = 500)
-    private String especializacao;
-
     @Column(name = "registro_cref")
     private String registroCref;
 
-    @Embedded
-    private Endereco endereco;
+    @Column(name = "regiao")
+    private String regiao;
 
     @Column(name = "exclusivo_mulheres")
     private Boolean exclusivoMulheres = false;
