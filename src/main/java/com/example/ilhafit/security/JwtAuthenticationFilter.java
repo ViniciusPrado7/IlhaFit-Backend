@@ -1,7 +1,9 @@
 package com.example.ilhafit.security;
 
 import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
+import com.example.ilhafit.repository.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -24,10 +26,11 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final String ESTABELECIMENTO_AUTHORITY = TipoCadastro.ESTABELECIMENTO.name();
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
+    private final AdministradorRepository administradorRepository;
 
     @Override
     protected void doFilterInternal(
@@ -46,14 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extrairClaims(token);
             String email = claims.getSubject();
             String tipo = claims.get("tipo", String.class);
+            String role = claims.get("role", String.class);
             Long id = claims.get("id", Number.class).longValue();
-            boolean estabelecimentoValido = email != null
-                    && ESTABELECIMENTO_AUTHORITY.equals(tipo)
-                    && estabelecimentoRepository.findByEmail(email)
-                    .filter(estabelecimento -> estabelecimento.getId().equals(id))
-                    .isPresent();
+            boolean tokenValido = email != null && cadastroExiste(id, email, tipo);
 
-            if (estabelecimentoValido
+            if (tokenValido
                     && SecurityContextHolder.getContext().getAuthentication() == null
                     && email != null) {
 
@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         id,
                         email,
                         tipo,
-                        List.of(new SimpleGrantedAuthority(tipo)));
+                        authorities(tipo, role));
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,
@@ -75,5 +75,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean cadastroExiste(Long id, String email, String tipo) {
+        if (TipoCadastro.USUARIO.name().equals(tipo)) {
+            return usuarioRepository.findByEmail(email)
+                    .filter(usuario -> usuario.getId().equals(id))
+                    .isPresent();
+        }
+
+        if (TipoCadastro.ESTABELECIMENTO.name().equals(tipo)) {
+            return estabelecimentoRepository.findByEmail(email)
+                    .filter(estabelecimento -> estabelecimento.getId().equals(id))
+                    .isPresent();
+        }
+
+        if (TipoCadastro.ADMINISTRADOR.name().equals(tipo)) {
+            return administradorRepository.findByEmail(email)
+                    .filter(administrador -> administrador.getId().equals(id))
+                    .isPresent();
+        }
+
+        return false;
+    }
+
+    private List<SimpleGrantedAuthority> authorities(String tipo, String role) {
+        if (role == null || role.equals(tipo)) {
+            return List.of(new SimpleGrantedAuthority(tipo));
+        }
+
+        return List.of(
+                new SimpleGrantedAuthority(tipo),
+                new SimpleGrantedAuthority(role));
     }
 }
