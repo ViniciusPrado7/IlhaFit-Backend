@@ -30,9 +30,8 @@ public class ProfissionalDTO {
         private String cpf;
 
         private String sexo;
-        private String especializacao;
         private String registroCref;
-        private EnderecoDTO endereco;
+        private String regiao;
         private Boolean exclusivoMulheres;
         private List<GradeAtividadeDTO.Registro> gradeAtividades;
         private String fotoUrl;
@@ -46,9 +45,8 @@ public class ProfissionalDTO {
         private String telefone;
         private String cpf;
         private String sexo;
-        private String especializacao;
         private String registroCref;
-        private EnderecoDTO endereco;
+        private String regiao;
         private Boolean exclusivoMulheres;
         private List<GradeAtividadeDTO.Resposta> gradeAtividades;
         private String fotoUrl;

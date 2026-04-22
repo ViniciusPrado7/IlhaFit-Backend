@@ -95,14 +95,10 @@ public class ProfissionalService {
         profissional.setTelefone(dto.getTelefone());
         profissional.setCpf(dto.getCpf());
         profissional.setSexo(dto.getSexo());
-        profissional.setEspecializacao(dto.getEspecializacao());
         profissional.setRegistroCref(dto.getRegistroCref());
+        profissional.setRegiao(dto.getRegiao());
         profissional.setExclusivoMulheres(dto.getExclusivoMulheres());
         profissional.setFotoUrl(dto.getFotoUrl());
-
-        if (dto.getEndereco() != null) {
-            profissional.setEndereco(profissionalMapper.toEntity(dto).getEndereco());
-        }
 
         if (dto.getGradeAtividades() != null) {
             profissional.getGradeAtividades().clear();

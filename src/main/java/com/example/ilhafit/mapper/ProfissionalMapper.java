@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProfissionalMapper {
 
-    private final EnderecoMapper enderecoMapper;
-
     public Profissional toEntity(ProfissionalDTO.Registro dto) {
         Profissional pro = new Profissional();
         pro.setNome(dto.getNome());
@@ -21,9 +19,8 @@ public class ProfissionalMapper {
         pro.setTelefone(dto.getTelefone());
         pro.setCpf(dto.getCpf());
         pro.setSexo(dto.getSexo());
-        pro.setEspecializacao(dto.getEspecializacao());
         pro.setRegistroCref(dto.getRegistroCref());
-        pro.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
+        pro.setRegiao(dto.getRegiao());
         pro.setExclusivoMulheres(dto.getExclusivoMulheres());
         if (dto.getGradeAtividades() != null) {
             pro.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
@@ -47,9 +44,8 @@ public class ProfissionalMapper {
         dto.setTelefone(pro.getTelefone());
         dto.setCpf(pro.getCpf());
         dto.setSexo(pro.getSexo());
-        dto.setEspecializacao(pro.getEspecializacao());
         dto.setRegistroCref(pro.getRegistroCref());
-        dto.setEndereco(enderecoMapper.toDTO(pro.getEndereco()));
+        dto.setRegiao(pro.getRegiao());
         dto.setExclusivoMulheres(pro.getExclusivoMulheres());
         if (pro.getGradeAtividades() != null) {
             dto.setGradeAtividades(pro.getGradeAtividades().stream().map(g -> {
