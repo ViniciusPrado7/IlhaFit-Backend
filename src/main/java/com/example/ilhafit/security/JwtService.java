@@ -2,6 +2,7 @@ package com.example.ilhafit.security;
 
 import com.example.ilhafit.entity.Administrador;
 import com.example.ilhafit.entity.Estabelecimento;
+import com.example.ilhafit.entity.Profissional;
 import com.example.ilhafit.entity.Usuario;
 import com.example.ilhafit.enums.TipoCadastro;
 import io.jsonwebtoken.Claims;
@@ -36,6 +37,14 @@ public class JwtService {
                 estabelecimento.getEmail(),
                 TipoCadastro.ESTABELECIMENTO.name(),
                 TipoCadastro.ESTABELECIMENTO.name());
+    }
+
+    public String gerarTokenProfissional(Profissional profissional) {
+        return gerarToken(
+                profissional.getId(),
+                profissional.getEmail(),
+                TipoCadastro.PROFISSIONAL.name(),
+                TipoCadastro.PROFISSIONAL.name());
     }
 
     public String gerarTokenUsuario(Usuario usuario) {
