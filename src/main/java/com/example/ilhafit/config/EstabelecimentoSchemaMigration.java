@@ -54,5 +54,7 @@ public class EstabelecimentoSchemaMigration implements ApplicationRunner {
 
         jdbcTemplate.execute("ALTER TABLE estabelecimentos ALTER COLUMN nome_fantasia SET NOT NULL");
         jdbcTemplate.execute("ALTER TABLE estabelecimentos ALTER COLUMN razao_social SET NOT NULL");
+
+      
     }
 }

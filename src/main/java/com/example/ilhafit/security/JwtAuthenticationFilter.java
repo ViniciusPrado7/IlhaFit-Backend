@@ -3,6 +3,7 @@ package com.example.ilhafit.security;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
+import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UsuarioRepository usuarioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
+    private final ProfissionalRepository profissionalRepository;
     private final AdministradorRepository administradorRepository;
 
     @Override
@@ -87,6 +89,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (TipoCadastro.ESTABELECIMENTO.name().equals(tipo)) {
             return estabelecimentoRepository.findByEmail(email)
                     .filter(estabelecimento -> estabelecimento.getId().equals(id))
+                    .isPresent();
+        }
+
+        if (TipoCadastro.PROFISSIONAL.name().equals(tipo)) {
+            return profissionalRepository.findByEmail(email)
+                    .filter(profissional -> profissional.getId().equals(id))
                     .isPresent();
         }
 
