@@ -47,15 +47,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers("/api/grade-atividades/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/avaliacoes/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avaliacoes").hasAnyAuthority(
-                                TipoCadastro.USUARIO.name(),
-                                TipoCadastro.ESTABELECIMENTO.name(),
-                                TipoCadastro.PROFISSIONAL.name())
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avaliacoes").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/denuncias").hasAnyAuthority(
-                                TipoCadastro.USUARIO.name(),
-                                TipoCadastro.ESTABELECIMENTO.name(),
-                                TipoCadastro.PROFISSIONAL.name())
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/denuncias").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
