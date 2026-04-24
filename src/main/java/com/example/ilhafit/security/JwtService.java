@@ -39,6 +39,14 @@ public class JwtService {
                 TipoCadastro.ESTABELECIMENTO.name());
     }
 
+    public String gerarTokenProfissional(Profissional profissional) {
+        return gerarToken(
+                profissional.getId(),
+                profissional.getEmail(),
+                TipoCadastro.PROFISSIONAL.name(),
+                TipoCadastro.PROFISSIONAL.name());
+    }
+
     public String gerarTokenUsuario(Usuario usuario) {
         return gerarToken(
                 usuario.getId(),
