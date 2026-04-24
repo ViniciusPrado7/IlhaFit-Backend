@@ -112,6 +112,8 @@ public class AuthService {
                 .email(profissional.getEmail())
                 .tipo(TipoCadastro.PROFISSIONAL.name())
                 .role(TipoCadastro.PROFISSIONAL.name())
+                .token(jwtService.gerarTokenProfissional(profissional))
+                .tokenType("Bearer")
                 .build();
     }
 

@@ -117,6 +117,7 @@ public class AvaliacaoService {
                 avaliacao.getId(),
                 avaliacao.getNota(),
                 avaliacao.getComentario(),
+                avaliacao.getAutorId(),
                 avaliacao.getAutorNome(),
                 avaliacao.getAutorTipo(),
                 avaliacao.getDataAvaliacao());
