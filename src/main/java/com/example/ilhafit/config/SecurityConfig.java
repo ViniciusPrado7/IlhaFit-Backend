@@ -36,7 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/usuarios/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
+                        .requestMatchers("/api/usuarios/**").authenticated()
                         .requestMatchers("/api/estabelecimentos/cadastrar").permitAll()
                         .requestMatchers("/api/estabelecimentos/estabelecimentos/**").permitAll()
                         .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())

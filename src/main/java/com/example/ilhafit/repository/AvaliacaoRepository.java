@@ -12,6 +12,8 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
     List<Avaliacao> findByProfissionalIdOrderByDataAvaliacaoDesc(Long profissionalId);
 
+    List<Avaliacao> findByAutorTipoAndAutorId(String autorTipo, Long autorId);
+
     boolean existsByAutorTipoAndAutorIdAndEstabelecimentoId(String autorTipo, Long autorId, Long estabelecimentoId);
 
     boolean existsByAutorTipoAndAutorIdAndProfissionalId(String autorTipo, Long autorId, Long profissionalId);
