@@ -63,10 +63,14 @@ public class CategoriaPendenteService {
     }
 
     public List<CategoriaPendenteDTO.Resposta> listarPendentes() {
-        return categoriaPendenteRepository.findByStatusOrderByDataSolicitacaoAsc(StatusCategoriaPendente.PENDENTE)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        return listar(StatusCategoriaPendente.PENDENTE);
+    }
+
+    public List<CategoriaPendenteDTO.Resposta> listar(StatusCategoriaPendente status) {
+        List<CategoriaPendente> lista = status != null
+                ? categoriaPendenteRepository.findByStatusOrderByDataSolicitacaoAsc(status)
+                : categoriaPendenteRepository.findAll(org.springframework.data.domain.Sort.by("dataSolicitacao").ascending());
+        return lista.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Transactional
@@ -88,6 +92,14 @@ public class CategoriaPendenteService {
             pendencia.setStatus(StatusCategoriaPendente.APROVADA);
             pendencia.setDataAnalise(agora);
             pendencia.setObservacaoAdmin(observacaoAdmin);
+
+            if (pendencia.getTipoSolicitante() == TipoCadastro.PROFISSIONAL) {
+                categoriaVinculoService.adicionarCategoriaNoProfissional(
+                        pendencia.getSolicitanteId(), pendencia.getNome());
+            } else if (pendencia.getTipoSolicitante() == TipoCadastro.ESTABELECIMENTO) {
+                categoriaVinculoService.adicionarCategoriaNaEstabelecimento(
+                        pendencia.getSolicitanteId(), pendencia.getNome());
+            }
         });
 
         categoriaPendenteRepository.saveAll(pendenciasMesmoNome);
@@ -142,6 +154,7 @@ public class CategoriaPendenteService {
         dto.setTipoSolicitante(entity.getTipoSolicitante());
         dto.setSolicitanteId(entity.getSolicitanteId());
         dto.setNomeSolicitante(buscarNomeSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
+        dto.setSolicitanteEmail(buscarEmailSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
         dto.setStatus(entity.getStatus());
         dto.setDataSolicitacao(entity.getDataSolicitacao());
         dto.setDataAnalise(entity.getDataAnalise());
@@ -151,12 +164,20 @@ public class CategoriaPendenteService {
 
     private String buscarNomeSolicitante(TipoCadastro tipoSolicitante, Long solicitanteId) {
         if (tipoSolicitante == TipoCadastro.PROFISSIONAL) {
-            Profissional profissional = profissionalRepository.findById(solicitanteId).orElse(null);
-            return profissional != null ? profissional.getNome() : null;
+            return profissionalRepository.findById(solicitanteId).map(Profissional::getNome).orElse(null);
         }
         if (tipoSolicitante == TipoCadastro.ESTABELECIMENTO) {
-            Estabelecimento estabelecimento = estabelecimentoRepository.findById(solicitanteId).orElse(null);
-            return estabelecimento != null ? estabelecimento.getNomeFantasia() : null;
+            return estabelecimentoRepository.findById(solicitanteId).map(Estabelecimento::getNomeFantasia).orElse(null);
+        }
+        return null;
+    }
+
+    private String buscarEmailSolicitante(TipoCadastro tipoSolicitante, Long solicitanteId) {
+        if (tipoSolicitante == TipoCadastro.PROFISSIONAL) {
+            return profissionalRepository.findById(solicitanteId).map(Profissional::getEmail).orElse(null);
+        }
+        if (tipoSolicitante == TipoCadastro.ESTABELECIMENTO) {
+            return estabelecimentoRepository.findById(solicitanteId).map(Estabelecimento::getEmail).orElse(null);
         }
         return null;
     }
