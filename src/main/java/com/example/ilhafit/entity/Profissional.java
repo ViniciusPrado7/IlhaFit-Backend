@@ -1,8 +1,11 @@
 package com.example.ilhafit.entity;
 
+import com.example.ilhafit.enums.TipoCadastro;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -59,6 +62,10 @@ public class Profissional {
 
     @Column(name = "regiao")
     private String regiao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
+    private TipoCadastro role = TipoCadastro.PROFISSIONAL;
 
     @Column(name = "exclusivo_mulheres")
     private Boolean exclusivoMulheres = false;
