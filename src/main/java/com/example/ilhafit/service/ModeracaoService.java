@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ModeracaoService {
 
     private static final String GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -43,11 +45,20 @@ public class ModeracaoService {
             return;
         }
 
-        String apiKey = buscarGroqApiKey()
-                .orElseThrow(() -> new ModeracaoIndisponivelException(
-                        "Configure GROQ_API_KEY para validar mensagens ofensivas."));
+        Optional<String> apiKey = buscarGroqApiKey();
+        if (apiKey.isEmpty()) {
+            log.warn("GROQ_API_KEY nao configurada. Moderacao automatica ignorada.");
+            return;
+        }
 
-        ResultadoModeracao resultado = consultarGroq(apiKey, texto);
+        ResultadoModeracao resultado;
+        try {
+            resultado = consultarGroq(apiKey.get(), texto);
+        } catch (ModeracaoIndisponivelException e) {
+            log.warn("Moderacao automatica indisponivel. Conteudo liberado sem validacao externa: {}", e.getMessage());
+            return;
+        }
+
         if (resultado.bloquear()) {
             throw new ConteudoInadequadoException(MENSAGEM_BLOQUEIO);
         }

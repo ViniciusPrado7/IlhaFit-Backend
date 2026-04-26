@@ -1,9 +1,5 @@
 package com.example.ilhafit.service;
 
-import com.example.ilhafit.entity.Administrador;
-import com.example.ilhafit.entity.Estabelecimento;
-import com.example.ilhafit.entity.Profissional;
-import com.example.ilhafit.entity.Usuario;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
