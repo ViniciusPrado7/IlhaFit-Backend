@@ -23,4 +23,7 @@ public class Categoria {
 
     @Column(length = 500)
     private String descricao;
+
+    @Column(name = "icone_url", length = 1000)
+    private String iconeUrl;
 }
