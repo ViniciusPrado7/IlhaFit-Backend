@@ -34,6 +34,7 @@ public class AvaliacaoService {
     @Transactional
     public AvaliacaoDTO.Resposta avaliar(AvaliacaoDTO.Requisicao requisicao, JwtAuthenticatedUser autor) {
         validarAutorAutenticado(autor);
+        validarPermissaoParaAvaliar(autor);
         validarDestinoUnico(requisicao);
         moderacaoService.validarTextoPermitido(requisicao.getComentario());
 
@@ -135,6 +136,12 @@ public class AvaliacaoService {
 
         if (temEstabelecimento == temProfissional) {
             throw new IllegalArgumentException("Informe apenas estabelecimentoId ou profissionalId.");
+        }
+    }
+
+    private void validarPermissaoParaAvaliar(JwtAuthenticatedUser autor) {
+        if (TipoCadastro.ESTABELECIMENTO.name().equals(autor.getTipo())) {
+            throw new SecurityException("Usuarios do tipo estabelecimento nao podem realizar avaliacoes.");
         }
     }
 
