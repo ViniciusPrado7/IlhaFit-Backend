@@ -55,14 +55,6 @@ public class JwtService {
                 usuario.getRole().name());
     }
 
-    public String gerarTokenProfissional(Profissional profissional) {
-        return gerarToken(
-                profissional.getId(),
-                profissional.getEmail(),
-                TipoCadastro.PROFISSIONAL.name(),
-                TipoCadastro.PROFISSIONAL.name());
-    }
-
     public String gerarTokenAdministrador(Administrador administrador) {
         return gerarToken(
                 administrador.getId(),
