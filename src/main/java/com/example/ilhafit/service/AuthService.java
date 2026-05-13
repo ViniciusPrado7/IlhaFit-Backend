@@ -19,9 +19,11 @@ import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -62,6 +64,17 @@ public class AuthService {
     }
 
     public AuthLoginResponseDTO login(UsuarioLoginDTO dto) {
+        log.info("[AuthService] Tentativa de login para email: {}", dto.getEmail());
+
+        var adminOpt = administradorRepository.findByEmail(dto.getEmail());
+        if (adminOpt.isPresent()) {
+            boolean senhaOk = senhaCorreta(dto.getSenha(), adminOpt.get().getSenha());
+            log.info("[AuthService] Admin encontrado. Senha correta: {}", senhaOk);
+            log.info("[AuthService] Hash no banco: {}", adminOpt.get().getSenha());
+        } else {
+            log.info("[AuthService] Nenhum admin encontrado com email: {}", dto.getEmail());
+        }
+
         return usuarioRepository.findByEmail(dto.getEmail())
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
                 .map(this::toUsuarioLoginResponse)

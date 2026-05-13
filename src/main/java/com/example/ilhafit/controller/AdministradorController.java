@@ -1,6 +1,8 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AdministradorDTO;
+import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.service.AdministradorService;
 import com.example.ilhafit.service.AuthService;
 import jakarta.validation.Valid;
@@ -19,6 +21,16 @@ public class AdministradorController {
 
     private final AdministradorService administradorService;
     private final AuthService authService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody UsuarioLoginDTO dto) {
+        try {
+            AuthLoginResponseDTO response = authService.login(dto);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("erro", e.getMessage()));
+        }
+    }
 
     @PostMapping("/cadastrar")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody AdministradorDTO.Registro dto) {

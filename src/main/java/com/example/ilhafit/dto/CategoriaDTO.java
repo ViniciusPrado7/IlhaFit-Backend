@@ -10,6 +10,7 @@ public class CategoriaDTO {
         @NotBlank(message = "Nome é obrigatório")
         private String nome;
         private String descricao;
+        private String iconeUrl;
     }
 
     @Data
@@ -17,5 +18,6 @@ public class CategoriaDTO {
         private Long id;
         private String nome;
         private String descricao;
+        private String iconeUrl;
     }
 }

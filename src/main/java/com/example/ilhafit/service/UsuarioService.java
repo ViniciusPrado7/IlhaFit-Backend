@@ -29,6 +29,12 @@ public class UsuarioService {
     private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
 
+    public List<UsuarioResponseDTO> listarTodos() {
+        return usuarioRepository.findAll().stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRegistroDTO dto) {
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.USUARIO, null);

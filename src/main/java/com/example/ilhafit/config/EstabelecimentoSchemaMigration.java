@@ -15,6 +15,7 @@ public class EstabelecimentoSchemaMigration implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         jdbcTemplate.execute("ALTER TABLE estabelecimentos ADD COLUMN IF NOT EXISTS razao_social varchar(255)");
+        jdbcTemplate.execute("ALTER TABLE estabelecimentos ADD COLUMN IF NOT EXISTS role varchar(50)");
 
         jdbcTemplate.execute("""
                 DO $$
@@ -52,7 +53,16 @@ public class EstabelecimentoSchemaMigration implements ApplicationRunner {
                 WHERE nome_fantasia IS NULL OR trim(nome_fantasia) = ''
                 """);
 
+        jdbcTemplate.execute("""
+                UPDATE estabelecimentos
+                SET role = 'ESTABELECIMENTO'
+                WHERE role IS NULL OR trim(role) = ''
+                """);
+
         jdbcTemplate.execute("ALTER TABLE estabelecimentos ALTER COLUMN nome_fantasia SET NOT NULL");
         jdbcTemplate.execute("ALTER TABLE estabelecimentos ALTER COLUMN razao_social SET NOT NULL");
+        jdbcTemplate.execute("ALTER TABLE estabelecimentos ALTER COLUMN role SET NOT NULL");
+
+      
     }
 }

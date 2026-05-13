@@ -50,6 +50,7 @@ public class CategoriaService {
 
         categoria.setNome(dto.getNome());
         categoria.setDescricao(dto.getDescricao());
+        categoria.setIconeUrl(dto.getIconeUrl());
 
         return toDTO(categoriaRepository.save(categoria));
     }
@@ -67,6 +68,7 @@ public class CategoriaService {
         Categoria categoria = new Categoria();
         categoria.setNome(dto.getNome());
         categoria.setDescricao(dto.getDescricao());
+        categoria.setIconeUrl(dto.getIconeUrl());
         return categoria;
     }
 
@@ -75,6 +77,7 @@ public class CategoriaService {
         dto.setId(categoria.getId());
         dto.setNome(categoria.getNome());
         dto.setDescricao(categoria.getDescricao());
+        dto.setIconeUrl(categoria.getIconeUrl());
         return dto;
     }
 }

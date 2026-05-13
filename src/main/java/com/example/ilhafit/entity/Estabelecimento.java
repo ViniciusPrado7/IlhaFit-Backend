@@ -1,11 +1,14 @@
 package com.example.ilhafit.entity;
 
+import com.example.ilhafit.enums.TipoCadastro;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -57,6 +60,10 @@ public class Estabelecimento {
     @NotBlank(message = "CNPJ e obrigatorio")
     @Column(nullable = false, unique = true)
     private String cnpj;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
+    private TipoCadastro role = TipoCadastro.ESTABELECIMENTO;
 
     @Embedded
     private Endereco endereco;
