@@ -2,14 +2,19 @@ package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
+import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,5 +26,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid UsuarioLoginDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@AuthenticationPrincipal JwtAuthenticatedUser user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("erro", "Sessão inválida ou expirada."));
+        }
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "tipo", user.getTipo(),
+                "email", user.getUsername()
+        ));
     }
 }
