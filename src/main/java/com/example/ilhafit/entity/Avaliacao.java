@@ -57,6 +57,9 @@ public class Avaliacao {
     @Column(name = "data_avaliacao", nullable = false, updatable = false)
     private LocalDateTime dataAvaliacao;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @PrePersist
     protected void onCreate() {
         dataAvaliacao = LocalDateTime.now();

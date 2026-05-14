@@ -6,9 +6,11 @@ import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.Profissional;
 import com.example.ilhafit.entity.Usuario;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class AvaliacaoService {
 
     private final AvaliacaoRepository avaliacaoRepository;
+    private final DenunciaRepository denunciaRepository;
     private final UsuarioRepository usuarioRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final ProfissionalRepository profissionalRepository;
@@ -96,7 +100,10 @@ public class AvaliacaoService {
             throw new SecurityException("Sem permissao para excluir esta avaliacao");
         }
 
-        avaliacaoRepository.delete(avaliacao);
+        LocalDateTime agora = LocalDateTime.now();
+        avaliacao.setDeletedAt(agora);
+        avaliacaoRepository.save(avaliacao);
+        denunciaRepository.deleteByAvaliacaoId(avaliacao.getId(), StatusDenuncia.EXCLUIDO);
     }
 
     public List<AvaliacaoDTO.Resposta> listarPorEstabelecimento(Long id) {
