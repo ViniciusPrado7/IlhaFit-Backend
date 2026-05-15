@@ -19,4 +19,6 @@ public interface DenunciaRepository extends JpaRepository<Denuncia, Long> {
     List<Denuncia> findByAvaliacaoId(Long avaliacaoId);
 
     void deleteByAvaliacaoId(Long avaliacaoId);
+
+    void deleteByDenuncianteEmail(String denuncianteEmail);
 }

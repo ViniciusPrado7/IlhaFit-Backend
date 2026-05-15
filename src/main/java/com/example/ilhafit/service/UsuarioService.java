@@ -3,10 +3,13 @@ package com.example.ilhafit.service;
 import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
 import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
 import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
+import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Usuario;
 import com.example.ilhafit.enums.Role;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.UsuarioMapper;
+import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,13 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
+    private final DenunciaRepository denunciaRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
@@ -77,6 +81,11 @@ public class UsuarioService {
     @Transactional
     public void deletar(Long id) {
         Usuario usuario = buscarUsuarioOuErro(id);
+        List<Avaliacao> avaliacoesDoUsuario = avaliacaoRepository.findByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id);
+
+        denunciaRepository.deleteByDenuncianteEmail(usuario.getEmail());
+        avaliacoesDoUsuario.forEach(avaliacao -> denunciaRepository.deleteByAvaliacaoId(avaliacao.getId()));
+        avaliacaoRepository.deleteByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id);
         usuarioRepository.delete(usuario);
     }
 
