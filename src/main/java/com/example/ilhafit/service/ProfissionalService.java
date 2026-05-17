@@ -59,12 +59,14 @@ public class ProfissionalService {
         List<Avaliacao> avaliacoes = avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(p.getId());
         if (avaliacoes.isEmpty()) {
             dto.setAvaliacao(0.0);
+            dto.setTotalAvaliacoes(0);
         } else {
             double media = avaliacoes.stream()
                     .mapToInt(Avaliacao::getNota)
                     .average()
                     .orElse(0.0);
             dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
+            dto.setTotalAvaliacoes(avaliacoes.size());
         }
         return dto;
     }

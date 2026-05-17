@@ -51,5 +51,6 @@ public class ProfissionalDTO {
         private List<GradeAtividadeDTO.Resposta> gradeAtividades;
         private String fotoUrl;
         private Double avaliacao;
+        private Integer totalAvaliacoes;
     }
 }
