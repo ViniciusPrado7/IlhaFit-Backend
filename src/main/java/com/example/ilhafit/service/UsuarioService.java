@@ -6,6 +6,7 @@ import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
 import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Usuario;
 import com.example.ilhafit.enums.Role;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.UsuarioMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
@@ -16,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,8 +87,8 @@ public class UsuarioService {
         List<Avaliacao> avaliacoesDoUsuario = avaliacaoRepository.findByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id);
 
         denunciaRepository.deleteByDenuncianteEmail(usuario.getEmail());
-        avaliacoesDoUsuario.forEach(avaliacao -> denunciaRepository.deleteByAvaliacaoId(avaliacao.getId()));
-        avaliacaoRepository.deleteByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id);
+        avaliacoesDoUsuario.forEach(avaliacao -> denunciaRepository.deleteByAvaliacaoId(avaliacao.getId(), StatusDenuncia.EXCLUIDO));
+        avaliacaoRepository.deleteByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id, LocalDateTime.now());
         usuarioRepository.delete(usuario);
     }
 
