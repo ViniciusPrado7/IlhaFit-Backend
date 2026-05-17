@@ -43,6 +43,12 @@ public class Denuncia {
     @Column(name = "data_denuncia", nullable = false, updatable = false)
     private LocalDateTime dataDenuncia;
 
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
+
+    @Column(name = "resolved_by")
+    private Long resolvedBy;
+
     @PrePersist
     protected void onCreate() {
         dataDenuncia = LocalDateTime.now();

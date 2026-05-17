@@ -59,9 +59,12 @@ public class DenunciaController {
     @PutMapping("/{id}/status")
     public ResponseEntity<?> atualizarStatus(
             @PathVariable Long id,
-            @RequestBody DenunciaDTO.AtualizarStatus dto) {
+            @RequestBody DenunciaDTO.AtualizarStatus dto,
+            @AuthenticationPrincipal JwtAuthenticatedUser admin) {
         try {
-            return ResponseEntity.ok(denunciaService.atualizarStatus(id, dto.getStatus()));
+            return ResponseEntity.ok(denunciaService.atualizarStatus(id, dto.getStatus(), admin.getId()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
         }
@@ -72,8 +75,12 @@ public class DenunciaController {
         try {
             denunciaService.excluirAvaliacaoDenunciada(id);
             return ResponseEntity.ok(Map.of("mensagem", "Avaliacao e denuncias associadas excluidas com sucesso."));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("erro", "Erro ao excluir avaliacao: " + e.getMessage()));
         }
     }
 }

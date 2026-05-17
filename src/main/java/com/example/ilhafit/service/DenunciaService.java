@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,7 @@ public class DenunciaService {
             throw new IllegalStateException("Voce nao pode denunciar sua propria avaliacao.");
         }
 
-        if (denunciaRepository.existsByAvaliacaoIdAndDenuncianteEmail(requisicao.getAvaliacaoId(), denunciante.getUsername())) {
+        if (denunciaRepository.existsByAvaliacaoIdAndDenuncianteEmail(requisicao.getAvaliacaoId(), denunciante.getUsername(), StatusDenuncia.EXCLUIDO)) {
             throw new IllegalStateException("Voce ja denunciou esta avaliacao.");
         }
 
@@ -51,25 +52,35 @@ public class DenunciaService {
     }
 
     public List<DenunciaDTO.Resposta> listarTodas() {
-        return denunciaRepository.findAllByOrderByDataDenunciaDesc()
+        return denunciaRepository.findAllByOrderByDataDenunciaDesc(StatusDenuncia.EXCLUIDO)
                 .stream()
                 .map(this::toResposta)
                 .collect(Collectors.toList());
     }
 
     public List<DenunciaDTO.Resposta> listarPorStatus(StatusDenuncia status) {
-        return denunciaRepository.findByStatusOrderByDataDenunciaDesc(status)
-                .stream()
-                .map(this::toResposta)
-                .collect(Collectors.toList());
+        List<Denuncia> lista = status == StatusDenuncia.PENDENTE
+                ? denunciaRepository.findPendentesComAvaliacaoAtiva()
+                : denunciaRepository.findByStatusOrderByDataDenunciaDesc(status);
+        return lista.stream().map(this::toResposta).collect(Collectors.toList());
     }
 
     @Transactional
-    public DenunciaDTO.Resposta atualizarStatus(Long denunciaId, StatusDenuncia novoStatus) {
+    public DenunciaDTO.Resposta atualizarStatus(Long denunciaId, StatusDenuncia novoStatus, Long adminId) {
         Denuncia denuncia = denunciaRepository.findById(denunciaId)
                 .orElseThrow(() -> new IllegalArgumentException("Denuncia nao encontrada."));
 
+        if (denuncia.getStatus() != StatusDenuncia.PENDENTE) {
+            throw new IllegalStateException("Esta denúncia já foi julgada.");
+        }
+
+        if (denuncia.getAvaliacao().getDeletedAt() != null) {
+            throw new IllegalStateException("Comentário já foi excluído. Não é possível julgar esta denúncia.");
+        }
+
         denuncia.setStatus(novoStatus);
+        denuncia.setResolvedAt(LocalDateTime.now());
+        denuncia.setResolvedBy(adminId);
         return toResposta(denunciaRepository.save(denuncia));
     }
 
@@ -79,8 +90,16 @@ public class DenunciaService {
                 .orElseThrow(() -> new IllegalArgumentException("Denuncia nao encontrada."));
 
         Long avaliacaoId = denuncia.getAvaliacao().getId();
-        denunciaRepository.deleteByAvaliacaoId(avaliacaoId);
-        avaliacaoRepository.deleteById(avaliacaoId);
+        Avaliacao avaliacao = avaliacaoRepository.findById(avaliacaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Avaliacao nao encontrada."));
+
+        if (avaliacao.getDeletedAt() != null) {
+            throw new IllegalStateException("Comentário já foi excluído.");
+        }
+
+        denunciaRepository.deleteByAvaliacaoId(avaliacaoId, StatusDenuncia.EXCLUIDO);
+        avaliacao.setDeletedAt(LocalDateTime.now());
+        avaliacaoRepository.save(avaliacao);
     }
 
     private DenunciaDTO.Resposta toResposta(Denuncia denuncia) {
@@ -96,6 +115,8 @@ public class DenunciaService {
                 denuncia.getDescricaoAdicional(),
                 denuncia.getStatus(),
                 denuncia.getDataDenuncia(),
+                denuncia.getResolvedAt(),
+                denuncia.getResolvedBy(),
                 avaliacao.getEstabelecimento() != null ? avaliacao.getEstabelecimento().getId() : null,
                 avaliacao.getEstabelecimento() != null ? avaliacao.getEstabelecimento().getNomeFantasia() : null,
                 avaliacao.getProfissional() != null ? avaliacao.getProfissional().getId() : null,

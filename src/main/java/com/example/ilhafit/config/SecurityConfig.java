@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -51,7 +52,17 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avaliacoes").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/denuncias").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/denuncias").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"erro\":\"Token ausente ou expirado\"}");
+                        })
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

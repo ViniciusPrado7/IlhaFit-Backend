@@ -33,6 +33,8 @@ public class DenunciaDTO {
         private String descricaoAdicional;
         private StatusDenuncia status;
         private LocalDateTime dataDenuncia;
+        private LocalDateTime resolvedAt;
+        private Long resolvedBy;
         private Long estabelecimentoId;
         private String estabelecimentoNome;
         private Long profissionalId;
