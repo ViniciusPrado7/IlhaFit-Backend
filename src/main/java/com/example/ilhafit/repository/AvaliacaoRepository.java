@@ -19,6 +19,9 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
     @Query("SELECT a FROM Avaliacao a WHERE a.profissional.id = :id AND a.deletedAt IS NULL ORDER BY a.dataAvaliacao DESC")
     List<Avaliacao> findByProfissionalIdOrderByDataAvaliacaoDesc(@Param("id") Long profissionalId);
 
+    @Query("SELECT a FROM Avaliacao a WHERE a.autorTipo = :autorTipo AND a.autorId = :autorId AND a.deletedAt IS NULL")
+    List<Avaliacao> findByAutorTipoAndAutorId(@Param("autorTipo") String autorTipo, @Param("autorId") Long autorId);
+
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END FROM Avaliacao a WHERE a.autorTipo = :autorTipo AND a.autorId = :autorId AND a.estabelecimento.id = :estabelecimentoId AND a.deletedAt IS NULL")
     boolean existsByAutorTipoAndAutorIdAndEstabelecimentoId(@Param("autorTipo") String autorTipo, @Param("autorId") Long autorId, @Param("estabelecimentoId") Long estabelecimentoId);
 

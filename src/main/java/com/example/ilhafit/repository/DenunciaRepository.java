@@ -27,6 +27,10 @@ public interface DenunciaRepository extends JpaRepository<Denuncia, Long> {
     List<Denuncia> findByAvaliacaoId(Long avaliacaoId);
 
     @Modifying(clearAutomatically = true)
+    @Query("UPDATE Denuncia d SET d.status = com.example.ilhafit.enums.StatusDenuncia.EXCLUIDO WHERE d.denuncianteEmail = :email AND d.status <> com.example.ilhafit.enums.StatusDenuncia.EXCLUIDO")
+    void deleteByDenuncianteEmail(@Param("email") String email);
+
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Denuncia d SET d.status = :excluido WHERE d.avaliacao.id = :avaliacaoId AND d.status <> :excluido")
     void deleteByAvaliacaoId(@Param("avaliacaoId") Long avaliacaoId, @Param("excluido") StatusDenuncia excluido);
 }
