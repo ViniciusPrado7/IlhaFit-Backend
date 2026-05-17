@@ -1,8 +1,8 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: ilhafit_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ilhafit
       POSTGRES_USER: postgres
@@ -12,16 +12,15 @@ services:
     volumes:
       - ilhafit_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ilhafit"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - ilhafit-network
 
   backend:
-    build: ./backend
+    build: .
     container_name: ilhafit_backend
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
@@ -32,20 +31,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - ilhafit-network
-
-  frontend:
-    build: ./frontend
-    container_name: ilhafit_frontend
-    ports:
-      - "5173:80"
-    networks:
-      - ilhafit-network
 
 volumes:
   ilhafit_data:
-
-networks:
-  ilhafit-network:
-    driver: bridge
