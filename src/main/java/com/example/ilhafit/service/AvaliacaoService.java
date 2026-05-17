@@ -102,7 +102,7 @@ public class AvaliacaoService {
 
         LocalDateTime agora = LocalDateTime.now();
         avaliacao.setDeletedAt(agora);
-        avaliacaoRepository.save(avaliacao);
+        avaliacaoRepository.saveAndFlush(avaliacao);
         denunciaRepository.deleteByAvaliacaoId(avaliacao.getId(), StatusDenuncia.EXCLUIDO);
     }
 
