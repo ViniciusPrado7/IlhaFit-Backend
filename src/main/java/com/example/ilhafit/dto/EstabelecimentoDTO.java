@@ -93,5 +93,6 @@ public class EstabelecimentoDTO {
         private List<GradeAtividadeDTO.Resposta> gradeAtividades;
         private List<String> fotosUrl;
         private Double avaliacao;
+        private Integer totalAvaliacoes;
     }
 }
