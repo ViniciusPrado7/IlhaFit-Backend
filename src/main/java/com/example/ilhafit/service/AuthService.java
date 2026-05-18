@@ -3,6 +3,7 @@ package com.example.ilhafit.service;
 import com.example.ilhafit.dto.AdministradorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.dto.EstabelecimentoDTO;
+import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ProfissionalDTO;
 import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
@@ -10,11 +11,13 @@ import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
 import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
 import com.example.ilhafit.entity.Administrador;
 import com.example.ilhafit.entity.Estabelecimento;
+import com.example.ilhafit.entity.PasswordResetToken;
 import com.example.ilhafit.entity.Profissional;
 import com.example.ilhafit.entity.Usuario;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
+import com.example.ilhafit.repository.PasswordResetTokenRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import com.example.ilhafit.security.JwtService;
@@ -22,11 +25,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private static final int RESET_TOKEN_EXPIRATION_MINUTES = 30;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final AdministradorService administradorService;
     private final EstabelecimentoService estabelecimentoService;
@@ -36,6 +48,7 @@ public class AuthService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final ProfissionalRepository profissionalRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -90,8 +103,48 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
     }
 
+    @Transactional
+    public void solicitarRecuperacaoSenha(ForgotPasswordRequestDTO dto) {
+        buscarContaPorEmail(dto.getEmail())
+                .ifPresent(this::criarTokenRecuperacao);
+    }
+
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
         return passwordEncoder.matches(senhaInformada, senhaCriptografada);
+    }
+
+    private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .map(usuario -> new ContaRecuperacaoSenha(usuario.getId(), usuario.getEmail(), TipoCadastro.USUARIO))
+                .or(() -> estabelecimentoRepository.findByEmail(email)
+                        .map(estabelecimento -> new ContaRecuperacaoSenha(estabelecimento.getId(), estabelecimento.getEmail(), TipoCadastro.ESTABELECIMENTO)))
+                .or(() -> profissionalRepository.findByEmail(email)
+                        .map(profissional -> new ContaRecuperacaoSenha(profissional.getId(), profissional.getEmail(), TipoCadastro.PROFISSIONAL)))
+                .or(() -> administradorRepository.findByEmail(email)
+                        .map(administrador -> new ContaRecuperacaoSenha(administrador.getId(), administrador.getEmail(), TipoCadastro.ADMINISTRADOR)));
+    }
+
+    private void criarTokenRecuperacao(ContaRecuperacaoSenha conta) {
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(gerarTokenSeguro());
+        resetToken.setCadastroId(conta.cadastroId());
+        resetToken.setEmail(conta.email());
+        resetToken.setTipoCadastro(conta.tipoCadastro());
+        resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_EXPIRATION_MINUTES));
+        resetToken.setUsed(false);
+
+        passwordResetTokenRepository.save(resetToken);
+        log.info("[AuthService] Token de recuperacao de senha criado para tipo {} e email {}.",
+                conta.tipoCadastro(), conta.email());
+    }
+
+    private String gerarTokenSeguro() {
+        byte[] bytes = new byte[48];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private record ContaRecuperacaoSenha(Long cadastroId, String email, TipoCadastro tipoCadastro) {
     }
 
     private AuthLoginResponseDTO toUsuarioLoginResponse(Usuario usuario) {
