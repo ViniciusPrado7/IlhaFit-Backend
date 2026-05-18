@@ -77,11 +77,15 @@ public class Estabelecimento {
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private List<String> fotosUrl;
 
-    @Column(name = "data_cadastro", nullable = false, updatable = false)
+    @Column(name = "data_cadastro", nullable = true, updatable = false)
     private LocalDateTime dataCadastro;
 
     @PrePersist
     protected void onCreate() {
         dataCadastro = LocalDateTime.now();
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro != null ? dataCadastro : LocalDateTime.of(2026, 1, 1, 0, 0);
     }
 }
