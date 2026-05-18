@@ -9,6 +9,8 @@ import com.example.ilhafit.mapper.ProfissionalMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProfissionalService {
 
+    private static final Logger log = LoggerFactory.getLogger(ProfissionalService.class);
+
     private final ProfissionalRepository profissionalRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final CategoriaPendenteService categoriaPendenteService;
     private final ProfissionalMapper profissionalMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public ProfissionalDTO.Resposta cadastrar(ProfissionalDTO.Registro dto) {
@@ -40,6 +45,7 @@ public class ProfissionalService {
         }
         Profissional salvo = profissionalRepository.save(profissional);
         registrarCategoriasPendentes(salvo);
+        enviarBoasVindas(salvo.getEmail(), salvo.getNome(), "profissional");
         return mappedWithRating(salvo);
     }
 
@@ -137,6 +143,14 @@ public class ProfissionalService {
                     TipoCadastro.PROFISSIONAL,
                     profissional.getId()
             );
+        }
+    }
+
+    private void enviarBoasVindas(String email, String nome, String tipoConta) {
+        try {
+            emailService.enviarEmailBoasVindas(email, nome, tipoConta);
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de boas-vindas para profissional {}.", email, e);
         }
     }
 }

@@ -7,6 +7,8 @@ import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.AdministradorMapper;
 import com.example.ilhafit.repository.AdministradorRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +21,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdministradorService {
 
+    private static final Logger log = LoggerFactory.getLogger(AdministradorService.class);
+
     private final AdministradorRepository administradorRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final AdministradorMapper administradorMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public AdministradorDTO.Resposta cadastrar(AdministradorDTO.Registro dto) {
@@ -33,7 +38,9 @@ public class AdministradorService {
             admin.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         admin.setRole(Role.ADMIN);
-        return administradorMapper.toDTO(administradorRepository.save(admin));
+        Administrador salvo = administradorRepository.save(admin);
+        enviarBoasVindas(salvo.getEmail(), salvo.getNome(), "administrador");
+        return administradorMapper.toDTO(salvo);
     }
 
     public List<AdministradorDTO.Resposta> listarTodos() {
@@ -72,6 +79,14 @@ public class AdministradorService {
         }
 
         return administradorMapper.toDTO(administradorRepository.save(atualizado));
+    }
+
+    private void enviarBoasVindas(String email, String nome, String tipoConta) {
+        try {
+            emailService.enviarEmailBoasVindas(email, nome, tipoConta);
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de boas-vindas para administrador {}.", email, e);
+        }
     }
 
     @Transactional

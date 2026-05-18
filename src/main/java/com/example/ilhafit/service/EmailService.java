@@ -26,4 +26,21 @@ public class EmailService {
 
         mailSender.send(mensagem);
     }
+
+    public void enviarEmailBoasVindas(String destinatario, String nome, String tipoConta) {
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setFrom(from);
+        mensagem.setTo(destinatario);
+        mensagem.setSubject("Bem-vindo ao IlhaFit");
+        mensagem.setText(montarMensagemBoasVindas(nome, tipoConta));
+
+        mailSender.send(mensagem);
+    }
+
+    private String montarMensagemBoasVindas(String nome, String tipoConta) {
+        return "Ola, " + nome + "!\n\n"
+                + "Seu cadastro como " + tipoConta + " foi criado com sucesso no IlhaFit.\n\n"
+                + "Agora voce ja pode acessar a plataforma e aproveitar os recursos disponiveis.\n\n"
+                + "Equipe IlhaFit";
+    }
 }

@@ -9,6 +9,8 @@ import com.example.ilhafit.mapper.EstabelecimentoMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EstabelecimentoService {
 
+    private static final Logger log = LoggerFactory.getLogger(EstabelecimentoService.class);
+
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final CategoriaPendenteService categoriaPendenteService;
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public EstabelecimentoDTO.Resposta cadastrar(EstabelecimentoDTO.Registro dto) {
@@ -40,6 +45,7 @@ public class EstabelecimentoService {
         }
         Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
         registrarCategoriasPendentes(salvo);
+        enviarBoasVindas(salvo.getEmail(), salvo.getNomeFantasia(), "estabelecimento");
         return mappedWithRating(salvo);
     }
 
@@ -133,6 +139,14 @@ public class EstabelecimentoService {
                     TipoCadastro.ESTABELECIMENTO,
                     estabelecimento.getId()
             );
+        }
+    }
+
+    private void enviarBoasVindas(String email, String nome, String tipoConta) {
+        try {
+            emailService.enviarEmailBoasVindas(email, nome, tipoConta);
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de boas-vindas para estabelecimento {}.", email, e);
         }
     }
 }
