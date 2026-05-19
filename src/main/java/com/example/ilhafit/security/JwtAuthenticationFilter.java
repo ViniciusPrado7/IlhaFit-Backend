@@ -20,7 +20,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -52,8 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = claims.getSubject();
             String tipo = claims.get("tipo", String.class);
             String role = claims.get("role", String.class);
-            Long id = claims.get("id", Number.class).longValue();
-            boolean tokenValido = email != null && cadastroExiste(id, email, tipo);
+            Number idClaim = claims.get("id", Number.class);
+            Long id = idClaim != null ? idClaim.longValue() : null;
+            boolean tokenValido = email != null && id != null && cadastroExiste(id, email, tipo);
 
             if (tokenValido
                     && SecurityContextHolder.getContext().getAuthentication() == null
@@ -81,26 +84,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean cadastroExiste(Long id, String email, String tipo) {
         if (TipoCadastro.USUARIO.name().equals(tipo)) {
-            return usuarioRepository.findByEmail(email)
-                    .filter(usuario -> usuario.getId().equals(id))
+            return usuarioRepository.findById(id)
+                    .filter(usuario -> email.equalsIgnoreCase(usuario.getEmail()))
                     .isPresent();
         }
 
         if (TipoCadastro.ESTABELECIMENTO.name().equals(tipo)) {
-            return estabelecimentoRepository.findByEmail(email)
-                    .filter(estabelecimento -> estabelecimento.getId().equals(id))
+            return estabelecimentoRepository.findById(id)
+                    .filter(estabelecimento -> email.equalsIgnoreCase(estabelecimento.getEmail()))
                     .isPresent();
         }
 
         if (TipoCadastro.PROFISSIONAL.name().equals(tipo)) {
-            return profissionalRepository.findByEmail(email)
-                    .filter(profissional -> profissional.getId().equals(id))
+            return profissionalRepository.findById(id)
+                    .filter(profissional -> email.equalsIgnoreCase(profissional.getEmail()))
                     .isPresent();
         }
 
         if (TipoCadastro.ADMINISTRADOR.name().equals(tipo)) {
-            return administradorRepository.findByEmail(email)
-                    .filter(administrador -> administrador.getId().equals(id))
+            return administradorRepository.findById(id)
+                    .filter(administrador -> email.equalsIgnoreCase(administrador.getEmail()))
                     .isPresent();
         }
 
@@ -108,12 +111,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private List<SimpleGrantedAuthority> authorities(String tipo, String role) {
-        if (role == null || role.equals(tipo)) {
-            return List.of(new SimpleGrantedAuthority(tipo));
+        Set<SimpleGrantedAuthority> authorities = new LinkedHashSet<>();
+
+        adicionarAuthority(authorities, tipo);
+        adicionarAuthority(authorities, role);
+
+        if (authorities.isEmpty() && tipo != null) {
+            authorities.add(new SimpleGrantedAuthority(tipo));
         }
 
-        return List.of(
-                new SimpleGrantedAuthority(tipo),
-                new SimpleGrantedAuthority(role));
+        return List.copyOf(authorities);
+    }
+
+    private void adicionarAuthority(Set<SimpleGrantedAuthority> authorities, String authority) {
+        if (authority == null || authority.isBlank()) {
+            return;
+        }
+
+        authorities.add(new SimpleGrantedAuthority(authority));
+        if (!authority.startsWith("ROLE_")) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + authority));
+        }
     }
 }

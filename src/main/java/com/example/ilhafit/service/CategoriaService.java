@@ -4,6 +4,10 @@ import com.example.ilhafit.dto.CategoriaDTO;
 import com.example.ilhafit.entity.Categoria;
 import com.example.ilhafit.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +32,30 @@ public class CategoriaService {
     }
 
     public List<CategoriaDTO.Resposta> listarTodas() {
-        return categoriaRepository.findAll().stream()
+        return categoriaRepository.findAll(Sort.by(Sort.Direction.ASC, "nome")).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public CategoriaDTO.PaginadaResposta listarPaginadas(int page, int size, String search) {
+        int pagina = Math.max(page, 0);
+        int tamanho = size > 0 ? size : 10;
+        Pageable pageable = PageRequest.of(pagina, tamanho, Sort.by(Sort.Direction.ASC, "nome"));
+
+        String filtro = search == null ? "" : search.trim();
+        Page<Categoria> categorias = filtro.isEmpty()
+                ? categoriaRepository.findAll(pageable)
+                : categoriaRepository.findByNomeContainingIgnoreCase(filtro, pageable);
+
+        return new CategoriaDTO.PaginadaResposta(
+                categorias.getContent().stream().map(this::toDTO).collect(Collectors.toList()),
+                categorias.getNumber(),
+                categorias.getSize(),
+                categorias.getTotalElements(),
+                categorias.getTotalPages(),
+                categorias.isFirst(),
+                categorias.isLast()
+        );
     }
 
     public Optional<CategoriaDTO.Resposta> buscarPorId(Long id) {
@@ -49,9 +74,6 @@ public class CategoriaService {
         });
 
         categoria.setNome(dto.getNome());
-        categoria.setDescricao(dto.getDescricao());
-        categoria.setIconeUrl(dto.getIconeUrl());
-
         return toDTO(categoriaRepository.save(categoria));
     }
 
@@ -67,8 +89,6 @@ public class CategoriaService {
     private Categoria toEntity(CategoriaDTO.Registro dto) {
         Categoria categoria = new Categoria();
         categoria.setNome(dto.getNome());
-        categoria.setDescricao(dto.getDescricao());
-        categoria.setIconeUrl(dto.getIconeUrl());
         return categoria;
     }
 
@@ -76,8 +96,6 @@ public class CategoriaService {
         CategoriaDTO.Resposta dto = new CategoriaDTO.Resposta();
         dto.setId(categoria.getId());
         dto.setNome(categoria.getNome());
-        dto.setDescricao(categoria.getDescricao());
-        dto.setIconeUrl(categoria.getIconeUrl());
         return dto;
     }
 }

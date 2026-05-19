@@ -3,6 +3,7 @@ package com.example.ilhafit.config;
 import com.example.ilhafit.entity.Administrador;
 import com.example.ilhafit.enums.Role;
 import com.example.ilhafit.repository.AdministradorRepository;
+import com.example.ilhafit.service.CategoriaPendenteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -18,6 +19,7 @@ public class DataInitializer implements ApplicationRunner {
     private final AdministradorRepository administradorRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminProperties adminProperties;
+    private final CategoriaPendenteService categoriaPendenteService;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -49,5 +51,8 @@ public class DataInitializer implements ApplicationRunner {
                 }
             }
         );
+
+        categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente();
+        log.info("[DataInitializer] Limpeza de atividades legadas de categorias pendentes concluída.");
     }
 }

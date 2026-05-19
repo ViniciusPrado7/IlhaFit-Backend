@@ -1,7 +1,11 @@
 package com.example.ilhafit.dto;
 
+import lombok.AllArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 public class CategoriaDTO {
 
@@ -9,15 +13,24 @@ public class CategoriaDTO {
     public static class Registro {
         @NotBlank(message = "Nome é obrigatório")
         private String nome;
-        private String descricao;
-        private String iconeUrl;
     }
 
     @Data
     public static class Resposta {
         private Long id;
         private String nome;
-        private String descricao;
-        private String iconeUrl;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PaginadaResposta {
+        private List<Resposta> content;
+        private int page;
+        private int size;
+        private long totalElements;
+        private int totalPages;
+        private boolean first;
+        private boolean last;
     }
 }
