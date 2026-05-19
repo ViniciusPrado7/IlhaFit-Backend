@@ -35,11 +35,13 @@ public class EstabelecimentoService {
         cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
 
         Estabelecimento estabelecimento = estabelecimentoMapper.toEntity(dto);
+        List<GradeAtividade> atividadesSolicitadas = estabelecimento.getGradeAtividades();
+        estabelecimento.setGradeAtividades(null);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
-        registrarCategoriasPendentes(salvo);
+        atualizarGradeAtividades(salvo, atividadesSolicitadas);
         return mappedWithRating(salvo);
     }
 
@@ -55,6 +57,7 @@ public class EstabelecimentoService {
     }
 
     private EstabelecimentoDTO.Resposta mappedWithRating(Estabelecimento e) {
+        categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente(e);
         EstabelecimentoDTO.Resposta dto = estabelecimentoMapper.toDTO(e);
         List<Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(e.getId());
         if (avaliacoes.isEmpty()) {
@@ -73,7 +76,7 @@ public class EstabelecimentoService {
 
     public Optional<EstabelecimentoDTO.Resposta> buscarPorEmail(String email) {
         return estabelecimentoRepository.findByEmail(email)
-                .map(estabelecimentoMapper::toDTO);
+                .map(this::mappedWithRating);
     }
 
     @Transactional
@@ -100,17 +103,14 @@ public class EstabelecimentoService {
         }
 
         if (dto.getGradeAtividades() != null) {
-            estabelecimento.getGradeAtividades().clear();
-            estabelecimento.getGradeAtividades().addAll(estabelecimentoMapper.toEntity(dto).getGradeAtividades());
+            atualizarGradeAtividades(estabelecimento, estabelecimentoMapper.toEntity(dto).getGradeAtividades());
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
-        registrarCategoriasPendentes(salvo);
-        return mappedWithRating(salvo);
+        return mappedWithRating(estabelecimentoRepository.save(estabelecimento));
     }
 
     @Transactional
@@ -122,17 +122,13 @@ public class EstabelecimentoService {
         estabelecimentoRepository.deleteById(id);
     }
 
-    private void registrarCategoriasPendentes(Estabelecimento estabelecimento) {
-        if (estabelecimento.getGradeAtividades() == null) {
-            return;
-        }
-
-        for (GradeAtividade atividade : estabelecimento.getGradeAtividades()) {
-            categoriaPendenteService.registrarPendenciaSeNecessario(
-                    atividade.getAtividade(),
-                    TipoCadastro.ESTABELECIMENTO,
-                    estabelecimento.getId()
-            );
-        }
+    private void atualizarGradeAtividades(Estabelecimento estabelecimento, List<GradeAtividade> atividades) {
+        List<GradeAtividade> aprovadas = categoriaPendenteService.filtrarAtividadesAprovadasESolicitarPendentes(
+                atividades,
+                TipoCadastro.ESTABELECIMENTO,
+                estabelecimento.getId()
+        );
+        estabelecimento.setGradeAtividades(aprovadas);
+        estabelecimentoRepository.save(estabelecimento);
     }
 }
