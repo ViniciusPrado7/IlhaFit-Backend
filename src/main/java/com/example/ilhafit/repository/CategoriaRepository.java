@@ -1,6 +1,8 @@
 package com.example.ilhafit.repository;
 
 import com.example.ilhafit.entity.Categoria;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +18,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     boolean existsByNome(String nome);
 
     boolean existsByNomeIgnoreCase(String nome);
+
+    Page<Categoria> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 }

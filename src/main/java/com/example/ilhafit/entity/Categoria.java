@@ -1,6 +1,11 @@
 package com.example.ilhafit.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,10 +25,4 @@ public class Categoria {
     @NotBlank(message = "Nome é obrigatório")
     @Column(nullable = false, unique = true)
     private String nome;
-
-    @Column(length = 500)
-    private String descricao;
-
-    @Column(name = "icone_url", length = 1000)
-    private String iconeUrl;
 }
