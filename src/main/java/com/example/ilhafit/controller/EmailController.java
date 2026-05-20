@@ -3,6 +3,8 @@ package com.example.ilhafit.controller;
 import com.example.ilhafit.dto.EmailDTO;
 import com.example.ilhafit.service.EmailService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -17,6 +19,8 @@ import java.util.Map;
 @RequestMapping("/api/email")
 public class EmailController {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailController.class);
+
     private final EmailService emailService;
 
     public EmailController(EmailService emailService) {
@@ -29,8 +33,21 @@ public class EmailController {
             emailService.enviarEmail(emailDTO);
             return ResponseEntity.ok(Map.of("mensagem", "Email enviado com sucesso!"));
         } catch (MailException e) {
+            String detalhe = detalheErro(e);
+            log.warn("Nao foi possivel enviar email para {}. {}", emailDTO.getTo(), detalhe, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("erro", "Nao foi possivel enviar o email."));
+                    .body(Map.of(
+                            "erro", "Nao foi possivel enviar o email.",
+                            "detalhe", detalhe
+                    ));
         }
+    }
+
+    private String detalheErro(Exception e) {
+        Throwable causa = e;
+        while (causa.getCause() != null) {
+            causa = causa.getCause();
+        }
+        return causa.getMessage() != null ? causa.getMessage() : e.getMessage();
     }
 }

@@ -27,6 +27,9 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       JWT_SECRET: ilhaFitJwtSecretKeyForDevelopmentOnlyChangeInProduction123456
+      MAIL_USER: ${MAIL_USER:-ilhaffit@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM:-ilhaffit@gmail.com}
     ports:
       - "8080:8080"
     depends_on:

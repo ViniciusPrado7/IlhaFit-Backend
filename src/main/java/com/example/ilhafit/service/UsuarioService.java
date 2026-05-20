@@ -13,8 +13,6 @@ import com.example.ilhafit.repository.AvaliacaoRepository;
 import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +24,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
-
-    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
 
     private final UsuarioRepository usuarioRepository;
     private final AvaliacaoRepository avaliacaoRepository;
@@ -53,7 +49,7 @@ public class UsuarioService {
 
         usuario = usuarioRepository.save(usuario);
 
-        enviarBoasVindas(usuario.getEmail(), usuario.getNome(), "usuario");
+        emailService.enviarEmailCadastro(usuario.getEmail(), usuario.getNome(), TipoCadastro.USUARIO);
 
         return mapper.toResponse(usuario);
     }
@@ -97,14 +93,6 @@ public class UsuarioService {
         avaliacoesDoUsuario.forEach(avaliacao -> denunciaRepository.deleteByAvaliacaoId(avaliacao.getId(), StatusDenuncia.EXCLUIDO));
         avaliacaoRepository.deleteByAutorTipoAndAutorId(TipoCadastro.USUARIO.name(), id, LocalDateTime.now());
         usuarioRepository.delete(usuario);
-    }
-
-    private void enviarBoasVindas(String email, String nome, String tipoConta) {
-        try {
-            emailService.enviarEmailBoasVindas(email, nome, tipoConta);
-        } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de boas-vindas para usuario {}.", email, e);
-        }
     }
 
     private Usuario buscarUsuarioOuErro(Long id) {

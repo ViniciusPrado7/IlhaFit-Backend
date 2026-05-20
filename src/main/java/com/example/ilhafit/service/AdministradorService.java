@@ -7,8 +7,6 @@ import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.AdministradorMapper;
 import com.example.ilhafit.repository.AdministradorRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +18,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AdministradorService {
-
-    private static final Logger log = LoggerFactory.getLogger(AdministradorService.class);
 
     private final AdministradorRepository administradorRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
@@ -39,7 +35,7 @@ public class AdministradorService {
         }
         admin.setRole(Role.ADMIN);
         Administrador salvo = administradorRepository.save(admin);
-        enviarBoasVindas(salvo.getEmail(), salvo.getNome(), "administrador");
+        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), TipoCadastro.ADMINISTRADOR);
         return administradorMapper.toDTO(salvo);
     }
 
@@ -79,14 +75,6 @@ public class AdministradorService {
         }
 
         return administradorMapper.toDTO(administradorRepository.save(atualizado));
-    }
-
-    private void enviarBoasVindas(String email, String nome, String tipoConta) {
-        try {
-            emailService.enviarEmailBoasVindas(email, nome, tipoConta);
-        } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de boas-vindas para administrador {}.", email, e);
-        }
     }
 
     @Transactional
