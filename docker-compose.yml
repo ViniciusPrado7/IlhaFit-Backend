@@ -29,6 +29,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ilhafit
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
+      MAIL_USER: ${MAIL_USER:-ilhaffit@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM:-ilhaffit@gmail.com}
       JWT_SECRET: ilhaFitJwtSecretKeyForDevelopmentOnlyChangeInProduction123456
     depends_on:
       postgres:

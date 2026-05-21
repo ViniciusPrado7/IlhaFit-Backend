@@ -28,6 +28,7 @@ public class EstabelecimentoService {
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public EstabelecimentoDTO.Resposta cadastrar(EstabelecimentoDTO.Registro dto) {
@@ -42,6 +43,7 @@ public class EstabelecimentoService {
         }
         Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
         atualizarGradeAtividades(salvo, atividadesSolicitadas);
+        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNomeFantasia(), TipoCadastro.ESTABELECIMENTO);
         return mappedWithRating(salvo);
     }
 
@@ -131,4 +133,5 @@ public class EstabelecimentoService {
         estabelecimento.setGradeAtividades(aprovadas);
         estabelecimentoRepository.save(estabelecimento);
     }
+
 }

@@ -23,6 +23,7 @@ public class AdministradorService {
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final AdministradorMapper administradorMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public AdministradorDTO.Resposta cadastrar(AdministradorDTO.Registro dto) {
@@ -33,7 +34,9 @@ public class AdministradorService {
             admin.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         admin.setRole(Role.ADMIN);
-        return administradorMapper.toDTO(administradorRepository.save(admin));
+        Administrador salvo = administradorRepository.save(admin);
+        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), TipoCadastro.ADMINISTRADOR);
+        return administradorMapper.toDTO(salvo);
     }
 
     public List<AdministradorDTO.Resposta> listarTodos() {

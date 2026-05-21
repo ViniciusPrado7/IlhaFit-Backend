@@ -1,6 +1,7 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AuthService;
@@ -26,6 +27,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid UsuarioLoginDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequestDTO dto) {
+        authService.solicitarRecuperacaoSenha(dto);
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Se o email estiver cadastrado, enviaremos as instrucoes de recuperacao."
+        ));
     }
 
     @GetMapping("/me")

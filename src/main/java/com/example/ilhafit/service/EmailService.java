@@ -1,0 +1,103 @@
+package com.example.ilhafit.service;
+
+import com.example.ilhafit.dto.EmailDTO;
+import com.example.ilhafit.enums.TipoCadastro;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSendException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+
+    private final JavaMailSender mailSender;
+    private final String from;
+    private final String username;
+    private final String password;
+
+    public EmailService(JavaMailSender mailSender,
+                        @Value("${app.mail.from}") String from,
+                        @Value("${spring.mail.username:}") String username,
+                        @Value("${spring.mail.password:}") String password) {
+        this.mailSender = mailSender;
+        this.from = from;
+        this.username = username;
+        this.password = password;
+
+        log.info("Email configurado com remetente {} e usuario SMTP {}. Senha SMTP configurada: {}",
+                from,
+                username == null || username.isBlank() ? "(vazio)" : username,
+                password != null && !password.isBlank() ? "sim" : "nao");
+    }
+
+    public void enviarEmail(EmailDTO emailDTO) {
+        validarConfiguracaoSmtp();
+
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setFrom(from);
+        mensagem.setTo(emailDTO.getTo());
+        mensagem.setSubject(emailDTO.getSubject());
+        mensagem.setText(emailDTO.getMessage());
+
+        mailSender.send(mensagem);
+    }
+
+    public void enviarEmailCadastro(String destinatario, String nome, TipoCadastro tipoCadastro) {
+        try {
+            enviarEmailBoasVindas(destinatario, nome, descricaoTipoCadastro(tipoCadastro));
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de cadastro para {} {}. Motivo: {}",
+                    tipoCadastro,
+                    destinatario,
+                    detalheErro(e),
+                    e);
+        }
+    }
+
+    public void enviarEmailBoasVindas(String destinatario, String nome, String tipoConta) {
+        validarConfiguracaoSmtp();
+
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setFrom(from);
+        mensagem.setTo(destinatario);
+        mensagem.setSubject("Bem-vindo ao IlhaFit");
+        mensagem.setText(montarMensagemBoasVindas(nome, tipoConta));
+
+        mailSender.send(mensagem);
+    }
+
+    private String montarMensagemBoasVindas(String nome, String tipoConta) {
+        return "Ola, " + nome + "!\n\n"
+                + "Seu cadastro como " + tipoConta + " foi criado com sucesso no IlhaFit.\n\n"
+                + "Agora voce ja pode acessar a plataforma e aproveitar os recursos disponiveis.\n\n"
+                + "Equipe IlhaFit";
+    }
+
+    private String descricaoTipoCadastro(TipoCadastro tipoCadastro) {
+        return switch (tipoCadastro) {
+            case USUARIO -> "usuario";
+            case ESTABELECIMENTO -> "estabelecimento";
+            case PROFISSIONAL -> "profissional";
+            case ADMINISTRADOR -> "administrador";
+        };
+    }
+
+    private void validarConfiguracaoSmtp() {
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            throw new MailSendException("SMTP nao configurado. Verifique MAIL_USER e MAIL_PASSWORD no arquivo .env ou nas variaveis de ambiente.");
+        }
+    }
+
+    private String detalheErro(Exception e) {
+        Throwable causa = e;
+        while (causa.getCause() != null) {
+            causa = causa.getCause();
+        }
+        return causa.getMessage() != null ? causa.getMessage() : e.getMessage();
+    }
+}

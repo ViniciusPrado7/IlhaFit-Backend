@@ -31,6 +31,7 @@ public class UsuarioService {
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll().stream()
@@ -47,6 +48,8 @@ public class UsuarioService {
         usuario.setRole(Role.USUARIO);
 
         usuario = usuarioRepository.save(usuario);
+
+        emailService.enviarEmailCadastro(usuario.getEmail(), usuario.getNome(), TipoCadastro.USUARIO);
 
         return mapper.toResponse(usuario);
     }
