@@ -19,50 +19,6 @@ public class CategoriaVinculoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
 
     @Transactional
-    public void adicionarCategoriaNoProfissional(Long profissionalId, String categoriaNome) {
-        Profissional profissional = profissionalRepository.findById(profissionalId).orElse(null);
-        if (profissional == null) return;
-
-        boolean jaTemCategoria = profissional.getGradeAtividades() != null &&
-                profissional.getGradeAtividades().stream()
-                        .anyMatch(a -> nomeIgual(a.getAtividade(), categoriaNome));
-        if (jaTemCategoria) return;
-
-        if (profissional.getGradeAtividades() == null) {
-            profissional.setGradeAtividades(new java.util.ArrayList<>());
-        }
-        GradeAtividade nova = new GradeAtividade();
-        nova.setAtividade(categoriaNome);
-        nova.setExclusivoMulheres(false);
-        nova.setDiasSemana(java.util.List.of());
-        nova.setPeriodos(java.util.List.of());
-        profissional.getGradeAtividades().add(nova);
-        profissionalRepository.save(profissional);
-    }
-
-    @Transactional
-    public void adicionarCategoriaNaEstabelecimento(Long estabelecimentoId, String categoriaNome) {
-        Estabelecimento estabelecimento = estabelecimentoRepository.findById(estabelecimentoId).orElse(null);
-        if (estabelecimento == null) return;
-
-        boolean jaTemCategoria = estabelecimento.getGradeAtividades() != null &&
-                estabelecimento.getGradeAtividades().stream()
-                        .anyMatch(a -> nomeIgual(a.getAtividade(), categoriaNome));
-        if (jaTemCategoria) return;
-
-        if (estabelecimento.getGradeAtividades() == null) {
-            estabelecimento.setGradeAtividades(new java.util.ArrayList<>());
-        }
-        GradeAtividade nova = new GradeAtividade();
-        nova.setAtividade(categoriaNome);
-        nova.setExclusivoMulheres(false);
-        nova.setDiasSemana(java.util.List.of());
-        nova.setPeriodos(java.util.List.of());
-        estabelecimento.getGradeAtividades().add(nova);
-        estabelecimentoRepository.save(estabelecimento);
-    }
-
-    @Transactional
     public void removerCategoriaDoProfissional(Long profissionalId, String categoriaNome) {
         Profissional profissional = profissionalRepository.findById(profissionalId)
                 .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));

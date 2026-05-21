@@ -22,4 +22,21 @@ public interface CategoriaPendenteRepository extends JpaRepository<CategoriaPend
     List<CategoriaPendente> findByStatusOrderByDataSolicitacaoAsc(StatusCategoriaPendente status);
 
     List<CategoriaPendente> findByNomeIgnoreCaseAndStatus(String nome, StatusCategoriaPendente status);
+
+    long countByTipoSolicitanteAndSolicitanteIdAndStatus(
+            TipoCadastro tipoSolicitante,
+            Long solicitanteId,
+            StatusCategoriaPendente status
+    );
+
+    List<CategoriaPendente> findByTipoSolicitanteAndSolicitanteIdOrderByDataSolicitacaoDesc(
+            TipoCadastro tipoSolicitante,
+            Long solicitanteId
+    );
+
+    List<CategoriaPendente> findByTipoSolicitanteAndSolicitanteIdAndStatusOrderByDataSolicitacaoDesc(
+            TipoCadastro tipoSolicitante,
+            Long solicitanteId,
+            StatusCategoriaPendente status
+    );
 }

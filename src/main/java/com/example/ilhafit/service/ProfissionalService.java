@@ -36,11 +36,13 @@ public class ProfissionalService {
         cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
 
         Profissional profissional = profissionalMapper.toEntity(dto);
+        List<GradeAtividade> atividadesSolicitadas = profissional.getGradeAtividades();
+        profissional.setGradeAtividades(null);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         Profissional salvo = profissionalRepository.save(profissional);
-        registrarCategoriasPendentes(salvo);
+        atualizarGradeAtividades(salvo, atividadesSolicitadas);
         emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), TipoCadastro.PROFISSIONAL);
         return mappedWithRating(salvo);
     }
@@ -57,6 +59,7 @@ public class ProfissionalService {
     }
 
     private ProfissionalDTO.Resposta mappedWithRating(Profissional p) {
+        categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente(p);
         ProfissionalDTO.Resposta dto = profissionalMapper.toDTO(p);
         List<Avaliacao> avaliacoes = avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(p.getId());
         if (avaliacoes.isEmpty()) {
@@ -75,12 +78,12 @@ public class ProfissionalService {
 
     public Optional<ProfissionalDTO.Resposta> buscarPorEmail(String email) {
         return profissionalRepository.findByEmail(email)
-                .map(profissionalMapper::toDTO);
+                .map(this::mappedWithRating);
     }
 
     public Optional<ProfissionalDTO.Resposta> buscarPorCpf(String cpf) {
         return profissionalRepository.findByCpf(cpf)
-                .map(profissionalMapper::toDTO);
+                .map(this::mappedWithRating);
     }
 
     @Transactional
@@ -106,17 +109,14 @@ public class ProfissionalService {
         profissional.setFotoUrl(dto.getFotoUrl());
 
         if (dto.getGradeAtividades() != null) {
-            profissional.getGradeAtividades().clear();
-            profissional.getGradeAtividades().addAll(profissionalMapper.toEntity(dto).getGradeAtividades());
+            atualizarGradeAtividades(profissional, profissionalMapper.toEntity(dto).getGradeAtividades());
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        Profissional salvo = profissionalRepository.save(profissional);
-        registrarCategoriasPendentes(salvo);
-        return mappedWithRating(salvo);
+        return mappedWithRating(profissionalRepository.save(profissional));
     }
 
     @Transactional
@@ -128,18 +128,14 @@ public class ProfissionalService {
         profissionalRepository.deleteById(id);
     }
 
-    private void registrarCategoriasPendentes(Profissional profissional) {
-        if (profissional.getGradeAtividades() == null) {
-            return;
-        }
-
-        for (GradeAtividade atividade : profissional.getGradeAtividades()) {
-            categoriaPendenteService.registrarPendenciaSeNecessario(
-                    atividade.getAtividade(),
-                    TipoCadastro.PROFISSIONAL,
-                    profissional.getId()
-            );
-        }
+    private void atualizarGradeAtividades(Profissional profissional, List<GradeAtividade> atividades) {
+        List<GradeAtividade> aprovadas = categoriaPendenteService.filtrarAtividadesAprovadasESolicitarPendentes(
+                atividades,
+                TipoCadastro.PROFISSIONAL,
+                profissional.getId()
+        );
+        profissional.setGradeAtividades(aprovadas);
+        profissionalRepository.save(profissional);
     }
 
 }

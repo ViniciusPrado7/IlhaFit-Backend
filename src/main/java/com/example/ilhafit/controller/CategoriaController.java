@@ -32,6 +32,14 @@ public class CategoriaController {
         return ResponseEntity.ok(categoriaService.listarTodas());
     }
 
+    @GetMapping("/categorias/paginadas")
+    public ResponseEntity<CategoriaDTO.PaginadaResposta> listarPaginadas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(categoriaService.listarPaginadas(page, size, search));
+    }
+
     @GetMapping("/categorias/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         return categoriaService.buscarPorId(id)
