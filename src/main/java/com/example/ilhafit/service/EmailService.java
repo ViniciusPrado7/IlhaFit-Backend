@@ -51,7 +51,11 @@ public class EmailService {
         try {
             enviarEmailBoasVindas(destinatario, nome, descricaoTipoCadastro(tipoCadastro));
         } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de cadastro para {} {}.", tipoCadastro, destinatario, e);
+            log.warn("Nao foi possivel enviar email de cadastro para {} {}. Motivo: {}",
+                    tipoCadastro,
+                    destinatario,
+                    detalheErro(e),
+                    e);
         }
     }
 
@@ -87,5 +91,13 @@ public class EmailService {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new MailSendException("SMTP nao configurado. Verifique MAIL_USER e MAIL_PASSWORD no arquivo .env ou nas variaveis de ambiente.");
         }
+    }
+
+    private String detalheErro(Exception e) {
+        Throwable causa = e;
+        while (causa.getCause() != null) {
+            causa = causa.getCause();
+        }
+        return causa.getMessage() != null ? causa.getMessage() : e.getMessage();
     }
 }
