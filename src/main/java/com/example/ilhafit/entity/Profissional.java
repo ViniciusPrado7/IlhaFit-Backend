@@ -78,7 +78,7 @@ public class Profissional {
     private String fotoUrl;
 
     @Column(name = "data_cadastro", nullable = true, updatable = false)
-    private LocalDateTime dataCadastro;
+    private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @PrePersist
     protected void onCreate() {
@@ -86,6 +86,6 @@ public class Profissional {
     }
 
     public LocalDateTime getDataCadastro() {
-        return dataCadastro != null ? dataCadastro : LocalDateTime.of(2026, 1, 1, 0, 0);
+        return dataCadastro != null ? dataCadastro : LocalDateTime.now();
     }
 }
