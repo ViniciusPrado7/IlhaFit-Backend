@@ -23,34 +23,17 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("[DataInitializer] email configurado: {}", adminProperties.getEmail());
-        log.info("[DataInitializer] total de admins no banco: {}", administradorRepository.count());
-
-        administradorRepository.findByEmail(adminProperties.getEmail()).ifPresentOrElse(
-            admin -> {
-                if (!passwordEncoder.matches(adminProperties.getSenha(), admin.getSenha())) {
-                    log.warn("[DataInitializer] Senha do admin padrão diverge da configuração. Sincronizando...");
-                    admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
-                    administradorRepository.save(admin);
-                    log.info("[DataInitializer] Senha sincronizada com sucesso.");
-                } else {
-                    log.info("[DataInitializer] Admin padrão OK. Nenhuma ação necessária.");
-                }
-            },
-            () -> {
-                if (administradorRepository.count() == 0) {
-                    Administrador admin = new Administrador();
-                    admin.setNome(adminProperties.getNome());
-                    admin.setEmail(adminProperties.getEmail());
-                    admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
-                    admin.setRole(Role.ADMIN);
-                    administradorRepository.save(admin);
-                    log.info("[DataInitializer] Admin padrão criado: {}", adminProperties.getEmail());
-                } else {
-                    log.warn("[DataInitializer] Existem admins no banco mas nenhum com o email padrão. Nenhum admin criado.");
-                }
-            }
-        );
+        if (administradorRepository.count() > 0) {
+            log.info("[DataInitializer] Admin já existe. Nenhuma ação necessária.");
+        } else {
+            Administrador admin = new Administrador();
+            admin.setNome(adminProperties.getNome());
+            admin.setEmail(adminProperties.getEmail());
+            admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
+            admin.setRole(Role.ADMIN);
+            administradorRepository.save(admin);
+            log.info("[DataInitializer] Admin padrão criado: {}", adminProperties.getEmail());
+        }
 
         categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente();
         log.info("[DataInitializer] Limpeza de atividades legadas de categorias pendentes concluída.");
