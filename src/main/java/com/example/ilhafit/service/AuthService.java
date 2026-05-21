@@ -5,6 +5,7 @@ import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.dto.EstabelecimentoDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ProfissionalDTO;
+import com.example.ilhafit.dto.ResetPasswordRequestDTO;
 import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
 import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
@@ -23,6 +24,7 @@ import com.example.ilhafit.repository.UsuarioRepository;
 import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,10 @@ public class AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailService emailService;
+
+    @Value("${app.frontend.reset-password-url:http://localhost:5173/esqueci-senha}")
+    private String resetPasswordUrl;
 
     public AdministradorDTO.Resposta registerAdministrador(AdministradorDTO.Registro dto) {
         return administradorService.cadastrar(dto);
@@ -109,6 +115,21 @@ public class AuthService {
                 .ifPresent(this::criarTokenRecuperacao);
     }
 
+    @Transactional
+    public void redefinirSenha(ResetPasswordRequestDTO dto) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Token invalido ou expirado"));
+
+        if (resetToken.isUsed() || resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Token invalido ou expirado");
+        }
+
+        String senhaCriptografada = passwordEncoder.encode(dto.getNovaSenha());
+        atualizarSenha(resetToken, senhaCriptografada);
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+    }
+
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
         return passwordEncoder.matches(senhaInformada, senhaCriptografada);
     }
@@ -125,6 +146,8 @@ public class AuthService {
     }
 
     private void criarTokenRecuperacao(ContaRecuperacaoSenha conta) {
+        invalidarTokensAnteriores(conta.email());
+
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(gerarTokenSeguro());
         resetToken.setCadastroId(conta.cadastroId());
@@ -134,8 +157,53 @@ public class AuthService {
         resetToken.setUsed(false);
 
         passwordResetTokenRepository.save(resetToken);
+        emailService.enviarEmailRecuperacaoSenha(
+                conta.email(),
+                montarLinkRecuperacao(resetToken.getToken()),
+                RESET_TOKEN_EXPIRATION_MINUTES
+        );
         log.info("[AuthService] Token de recuperacao de senha criado para tipo {} e email {}.",
                 conta.tipoCadastro(), conta.email());
+    }
+
+    private void invalidarTokensAnteriores(String email) {
+        var tokensAtivos = passwordResetTokenRepository.findByEmailAndUsedFalse(email);
+        tokensAtivos.forEach(token -> token.setUsed(true));
+        passwordResetTokenRepository.saveAll(tokensAtivos);
+    }
+
+    private String montarLinkRecuperacao(String token) {
+        String separador = resetPasswordUrl.contains("?") ? "&" : "?";
+        return resetPasswordUrl + separador + "token=" + token;
+    }
+
+    private void atualizarSenha(PasswordResetToken resetToken, String senhaCriptografada) {
+        switch (resetToken.getTipoCadastro()) {
+            case USUARIO -> {
+                Usuario usuario = usuarioRepository.findById(resetToken.getCadastroId())
+                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                usuario.setSenha(senhaCriptografada);
+                usuarioRepository.save(usuario);
+            }
+            case ESTABELECIMENTO -> {
+                Estabelecimento estabelecimento = estabelecimentoRepository.findById(resetToken.getCadastroId())
+                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                estabelecimento.setSenha(senhaCriptografada);
+                estabelecimentoRepository.save(estabelecimento);
+            }
+            case PROFISSIONAL -> {
+                Profissional profissional = profissionalRepository.findById(resetToken.getCadastroId())
+                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                profissional.setSenha(senhaCriptografada);
+                profissionalRepository.save(profissional);
+            }
+            case ADMINISTRADOR -> {
+                Administrador administrador = administradorRepository.findById(resetToken.getCadastroId())
+                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                administrador.setSenha(senhaCriptografada);
+                administradorRepository.save(administrador);
+            }
+        }
     }
 
     private String gerarTokenSeguro() {

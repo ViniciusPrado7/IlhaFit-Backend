@@ -59,6 +59,25 @@ public class EmailService {
         }
     }
 
+    public void enviarEmailRecuperacaoSenha(String destinatario, String link, int validadeMinutos) {
+        try {
+            validarConfiguracaoSmtp();
+
+            SimpleMailMessage mensagem = new SimpleMailMessage();
+            mensagem.setFrom(from);
+            mensagem.setTo(destinatario);
+            mensagem.setSubject("Recuperacao de senha IlhaFit");
+            mensagem.setText(montarMensagemRecuperacaoSenha(link, validadeMinutos));
+
+            mailSender.send(mensagem);
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de recuperacao de senha para {}. Motivo: {}",
+                    destinatario,
+                    detalheErro(e),
+                    e);
+        }
+    }
+
     public void enviarEmailBoasVindas(String destinatario, String nome, String tipoConta) {
         validarConfiguracaoSmtp();
 
@@ -75,6 +94,16 @@ public class EmailService {
         return "Ola, " + nome + "!\n\n"
                 + "Seu cadastro como " + tipoConta + " foi criado com sucesso no IlhaFit.\n\n"
                 + "Agora voce ja pode acessar a plataforma e aproveitar os recursos disponiveis.\n\n"
+                + "Equipe IlhaFit";
+    }
+
+    private String montarMensagemRecuperacaoSenha(String link, int validadeMinutos) {
+        return "Ola!\n\n"
+                + "Recebemos uma solicitacao para redefinir sua senha no IlhaFit.\n\n"
+                + "Acesse o link abaixo para criar uma nova senha:\n"
+                + link + "\n\n"
+                + "Este link expira em " + validadeMinutos + " minutos.\n\n"
+                + "Se voce nao solicitou essa alteracao, ignore este email.\n\n"
                 + "Equipe IlhaFit";
     }
 
