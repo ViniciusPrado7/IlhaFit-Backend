@@ -77,11 +77,15 @@ public class Profissional {
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private String fotoUrl;
 
-    @Column(name = "data_cadastro", nullable = false, updatable = false)
-    private LocalDateTime dataCadastro;
+    @Column(name = "data_cadastro", nullable = true, updatable = false)
+    private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @PrePersist
     protected void onCreate() {
         dataCadastro = LocalDateTime.now();
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro != null ? dataCadastro : LocalDateTime.now();
     }
 }

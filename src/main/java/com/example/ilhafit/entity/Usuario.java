@@ -32,11 +32,15 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "data_cadastro", nullable = false, updatable = false)
-    private LocalDateTime dataCadastro;
+    @Column(name = "data_cadastro", nullable = true, updatable = false)
+    private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro != null ? dataCadastro : LocalDateTime.now();
     }
 }

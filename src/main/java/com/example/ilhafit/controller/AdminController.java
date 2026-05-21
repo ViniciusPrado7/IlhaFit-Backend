@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,16 +29,16 @@ public class AdminController {
         List<Map<String, Object>> users = new ArrayList<>();
 
         usuarioRepository.findAll().forEach(u ->
-                users.add(entry(u.getId(), "aluno", u.getNome(), null, u.getEmail())));
+                users.add(entry(u.getId(), "aluno", u.getNome(), null, u.getEmail(), u.getDataCadastro())));
 
         profissionalRepository.findAll().forEach(p ->
-                users.add(entry(p.getId(), "profissional", p.getNome(), null, p.getEmail())));
+                users.add(entry(p.getId(), "profissional", p.getNome(), null, p.getEmail(), p.getDataCadastro())));
 
         estabelecimentoRepository.findAll().forEach(e ->
-                users.add(entry(e.getId(), "estabelecimento", null, e.getNomeFantasia(), e.getEmail())));
+                users.add(entry(e.getId(), "estabelecimento", null, e.getNomeFantasia(), e.getEmail(), e.getDataCadastro())));
 
         administradorRepository.findAll().forEach(a ->
-                users.add(entry(a.getId(), "admin", a.getNome(), null, a.getEmail())));
+                users.add(entry(a.getId(), "admin", a.getNome(), null, a.getEmail(), a.getDataCadastro())));
 
         return ResponseEntity.ok(users);
     }
@@ -54,13 +55,14 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    private Map<String, Object> entry(Long id, String tipo, String nome, String nomeFantasia, String email) {
+    private Map<String, Object> entry(Long id, String tipo, String nome, String nomeFantasia, String email, LocalDateTime dataCadastro) {
         Map<String, Object> m = new HashMap<>();
         m.put("id", id);
         m.put("tipo", tipo);
         m.put("nome", nome != null ? nome : "");
         m.put("nomeFantasia", nomeFantasia != null ? nomeFantasia : "");
         m.put("email", email != null ? email : "");
+        m.put("dataCadastro", dataCadastro);
         return m;
     }
 }

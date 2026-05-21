@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "administradores")
 @Data
@@ -35,4 +37,16 @@ public class Administrador {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private Role role = Role.ADMIN;
+
+    @Column(name = "data_cadastro", nullable = true, updatable = false)
+    private LocalDateTime dataCadastro;
+
+    @PrePersist
+    protected void onCreate() {
+        this.dataCadastro = LocalDateTime.now();
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro != null ? dataCadastro : LocalDateTime.of(2026, 1, 1, 0, 0);
+    }
 }
