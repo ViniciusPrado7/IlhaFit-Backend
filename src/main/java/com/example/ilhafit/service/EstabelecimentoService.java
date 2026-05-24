@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class EstabelecimentoService {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
     private final CategoriaPendenteService categoriaPendenteService;
+    private final GradeAtividadeDuplicidadeValidator gradeAtividadeDuplicidadeValidator;
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
@@ -130,8 +132,16 @@ public class EstabelecimentoService {
                 TipoCadastro.ESTABELECIMENTO,
                 estabelecimento.getId()
         );
+        gradeAtividadeDuplicidadeValidator.validarListaEstabelecimento(aprovadas);
         estabelecimento.setGradeAtividades(aprovadas);
-        estabelecimentoRepository.save(estabelecimento);
+        try {
+            estabelecimentoRepository.save(estabelecimento);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException(
+                    "Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.",
+                    ex
+            );
+        }
     }
 
 }
