@@ -32,6 +32,7 @@ public class UsuarioService {
     private final UsuarioMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final EmailConfirmationCodeService emailConfirmationCodeService;
 
     public List<UsuarioResponseDTO> listarTodos() {
         return usuarioRepository.findAll().stream()
@@ -46,10 +47,19 @@ public class UsuarioService {
         Usuario usuario = mapper.toEntity(dto);
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         usuario.setRole(Role.USUARIO);
+        String codigoConfirmacao = emailConfirmationCodeService.gerarCodigo();
+        usuario.setEmailConfirmado(false);
+        usuario.setCodigoConfirmacaoEmail(emailConfirmationCodeService.criptografar(codigoConfirmacao));
+        usuario.setCodigoConfirmacaoExpiraEm(emailConfirmationCodeService.expiraEm());
 
         usuario = usuarioRepository.save(usuario);
 
-        emailService.enviarEmailCadastro(usuario.getEmail(), usuario.getNome(), TipoCadastro.USUARIO);
+        emailService.enviarCodigoConfirmacaoCadastro(
+                usuario.getEmail(),
+                usuario.getNome(),
+                codigoConfirmacao,
+                EmailConfirmationCodeService.CODE_EXPIRATION_MINUTES
+        );
 
         return mapper.toResponse(usuario);
     }

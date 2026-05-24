@@ -41,6 +41,15 @@ public class Administrador {
     @Column(name = "data_cadastro", nullable = true, updatable = false)
     private LocalDateTime dataCadastro;
 
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado;
+
+    @Column(name = "codigo_confirmacao_email")
+    private String codigoConfirmacaoEmail;
+
+    @Column(name = "codigo_confirmacao_expira_em")
+    private LocalDateTime codigoConfirmacaoExpiraEm;
+
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();

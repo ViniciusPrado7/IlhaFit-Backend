@@ -1,6 +1,7 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.ConfirmacaoEmailDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
 import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
@@ -28,6 +29,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid UsuarioLoginDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @PostMapping("/confirmar-email")
+    public ResponseEntity<Map<String, String>> confirmarEmail(@RequestBody @Valid ConfirmacaoEmailDTO dto) {
+        authService.confirmarEmail(dto);
+        return ResponseEntity.ok(Map.of("mensagem", "Email confirmado com sucesso."));
     }
 
     @PostMapping("/forgot-password")

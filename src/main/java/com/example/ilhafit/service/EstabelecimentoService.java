@@ -31,6 +31,7 @@ public class EstabelecimentoService {
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final EmailConfirmationCodeService emailConfirmationCodeService;
 
     @Transactional
     public EstabelecimentoDTO.Resposta cadastrar(EstabelecimentoDTO.Registro dto) {
@@ -43,9 +44,18 @@ public class EstabelecimentoService {
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
+        String codigoConfirmacao = emailConfirmationCodeService.gerarCodigo();
+        estabelecimento.setEmailConfirmado(false);
+        estabelecimento.setCodigoConfirmacaoEmail(emailConfirmationCodeService.criptografar(codigoConfirmacao));
+        estabelecimento.setCodigoConfirmacaoExpiraEm(emailConfirmationCodeService.expiraEm());
         Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
         atualizarGradeAtividades(salvo, atividadesSolicitadas);
-        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNomeFantasia(), TipoCadastro.ESTABELECIMENTO);
+        emailService.enviarCodigoConfirmacaoCadastro(
+                salvo.getEmail(),
+                salvo.getNomeFantasia(),
+                codigoConfirmacao,
+                EmailConfirmationCodeService.CODE_EXPIRATION_MINUTES
+        );
         return mappedWithRating(salvo);
     }
 

@@ -31,6 +31,7 @@ public class ProfissionalService {
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final EmailConfirmationCodeService emailConfirmationCodeService;
 
     @Transactional
     public ProfissionalDTO.Resposta cadastrar(ProfissionalDTO.Registro dto) {
@@ -43,9 +44,18 @@ public class ProfissionalService {
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
+        String codigoConfirmacao = emailConfirmationCodeService.gerarCodigo();
+        profissional.setEmailConfirmado(false);
+        profissional.setCodigoConfirmacaoEmail(emailConfirmationCodeService.criptografar(codigoConfirmacao));
+        profissional.setCodigoConfirmacaoExpiraEm(emailConfirmationCodeService.expiraEm());
         Profissional salvo = profissionalRepository.save(profissional);
         atualizarGradeAtividades(salvo, atividadesSolicitadas);
-        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), TipoCadastro.PROFISSIONAL);
+        emailService.enviarCodigoConfirmacaoCadastro(
+                salvo.getEmail(),
+                salvo.getNome(),
+                codigoConfirmacao,
+                EmailConfirmationCodeService.CODE_EXPIRATION_MINUTES
+        );
         return mappedWithRating(salvo);
     }
 

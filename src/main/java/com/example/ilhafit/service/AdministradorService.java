@@ -24,6 +24,7 @@ public class AdministradorService {
     private final AdministradorMapper administradorMapper;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final EmailConfirmationCodeService emailConfirmationCodeService;
 
     @Transactional
     public AdministradorDTO.Resposta cadastrar(AdministradorDTO.Registro dto) {
@@ -34,8 +35,17 @@ public class AdministradorService {
             admin.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         admin.setRole(Role.ADMIN);
+        String codigoConfirmacao = emailConfirmationCodeService.gerarCodigo();
+        admin.setEmailConfirmado(false);
+        admin.setCodigoConfirmacaoEmail(emailConfirmationCodeService.criptografar(codigoConfirmacao));
+        admin.setCodigoConfirmacaoExpiraEm(emailConfirmationCodeService.expiraEm());
         Administrador salvo = administradorRepository.save(admin);
-        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), TipoCadastro.ADMINISTRADOR);
+        emailService.enviarCodigoConfirmacaoCadastro(
+                salvo.getEmail(),
+                salvo.getNome(),
+                codigoConfirmacao,
+                EmailConfirmationCodeService.CODE_EXPIRATION_MINUTES
+        );
         return administradorMapper.toDTO(salvo);
     }
 

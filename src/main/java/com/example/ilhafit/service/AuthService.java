@@ -2,6 +2,7 @@ package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.AdministradorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.ConfirmacaoEmailDTO;
 import com.example.ilhafit.dto.EstabelecimentoDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ProfissionalDTO;
@@ -54,6 +55,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final EmailConfirmationCodeService emailConfirmationCodeService;
 
     @Value("${app.frontend.reset-password-url:http://localhost:5173/esqueci-senha}")
     private String resetPasswordUrl;
@@ -96,17 +98,52 @@ public class AuthService {
 
         return usuarioRepository.findByEmail(dto.getEmail())
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
-                .map(this::toUsuarioLoginResponse)
+                .map(usuario -> {
+                    validarEmailConfirmado(usuario.getEmailConfirmado());
+                    return toUsuarioLoginResponse(usuario);
+                })
                 .or(() -> estabelecimentoRepository.findByEmail(dto.getEmail())
                         .filter(estabelecimento -> senhaCorreta(dto.getSenha(), estabelecimento.getSenha()))
-                        .map(this::toEstabelecimentoLoginResponse))
+                        .map(estabelecimento -> {
+                            validarEmailConfirmado(estabelecimento.getEmailConfirmado());
+                            return toEstabelecimentoLoginResponse(estabelecimento);
+                        }))
                 .or(() -> profissionalRepository.findByEmail(dto.getEmail())
                         .filter(profissional -> senhaCorreta(dto.getSenha(), profissional.getSenha()))
-                        .map(this::toProfissionalLoginResponse))
+                        .map(profissional -> {
+                            validarEmailConfirmado(profissional.getEmailConfirmado());
+                            return toProfissionalLoginResponse(profissional);
+                        }))
                 .or(() -> administradorRepository.findByEmail(dto.getEmail())
                         .filter(administrador -> senhaCorreta(dto.getSenha(), administrador.getSenha()))
-                        .map(this::toAdministradorLoginResponse))
+                        .map(administrador -> {
+                            validarEmailConfirmado(administrador.getEmailConfirmado());
+                            return toAdministradorLoginResponse(administrador);
+                        }))
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
+    }
+
+    @Transactional
+    public void confirmarEmail(ConfirmacaoEmailDTO dto) {
+        usuarioRepository.findByEmail(dto.getEmail())
+                .ifPresentOrElse(
+                        usuario -> confirmarEmailUsuario(usuario, dto.getCodigo()),
+                        () -> estabelecimentoRepository.findByEmail(dto.getEmail())
+                                .ifPresentOrElse(
+                                        estabelecimento -> confirmarEmailEstabelecimento(estabelecimento, dto.getCodigo()),
+                                        () -> profissionalRepository.findByEmail(dto.getEmail())
+                                                .ifPresentOrElse(
+                                                        profissional -> confirmarEmailProfissional(profissional, dto.getCodigo()),
+                                                        () -> administradorRepository.findByEmail(dto.getEmail())
+                                                                .ifPresentOrElse(
+                                                                        administrador -> confirmarEmailAdministrador(administrador, dto.getCodigo()),
+                                                                        () -> {
+                                                                            throw new IllegalArgumentException("Cadastro nao encontrado");
+                                                                        }
+                                                                )
+                                                )
+                                )
+                );
     }
 
     @Transactional
@@ -132,6 +169,58 @@ public class AuthService {
 
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
         return passwordEncoder.matches(senhaInformada, senhaCriptografada);
+    }
+
+    private void validarEmailConfirmado(Boolean emailConfirmado) {
+        if (Boolean.FALSE.equals(emailConfirmado)) {
+            throw new IllegalArgumentException("Confirme seu email antes de fazer login");
+        }
+    }
+
+    private void confirmarEmailUsuario(Usuario usuario, String codigo) {
+        validarCodigoConfirmacao(usuario.getEmailConfirmado(), usuario.getCodigoConfirmacaoEmail(), usuario.getCodigoConfirmacaoExpiraEm(), codigo);
+        usuario.setEmailConfirmado(true);
+        usuario.setCodigoConfirmacaoEmail(null);
+        usuario.setCodigoConfirmacaoExpiraEm(null);
+        usuarioRepository.save(usuario);
+    }
+
+    private void confirmarEmailEstabelecimento(Estabelecimento estabelecimento, String codigo) {
+        validarCodigoConfirmacao(estabelecimento.getEmailConfirmado(), estabelecimento.getCodigoConfirmacaoEmail(), estabelecimento.getCodigoConfirmacaoExpiraEm(), codigo);
+        estabelecimento.setEmailConfirmado(true);
+        estabelecimento.setCodigoConfirmacaoEmail(null);
+        estabelecimento.setCodigoConfirmacaoExpiraEm(null);
+        estabelecimentoRepository.save(estabelecimento);
+    }
+
+    private void confirmarEmailProfissional(Profissional profissional, String codigo) {
+        validarCodigoConfirmacao(profissional.getEmailConfirmado(), profissional.getCodigoConfirmacaoEmail(), profissional.getCodigoConfirmacaoExpiraEm(), codigo);
+        profissional.setEmailConfirmado(true);
+        profissional.setCodigoConfirmacaoEmail(null);
+        profissional.setCodigoConfirmacaoExpiraEm(null);
+        profissionalRepository.save(profissional);
+    }
+
+    private void confirmarEmailAdministrador(Administrador administrador, String codigo) {
+        validarCodigoConfirmacao(administrador.getEmailConfirmado(), administrador.getCodigoConfirmacaoEmail(), administrador.getCodigoConfirmacaoExpiraEm(), codigo);
+        administrador.setEmailConfirmado(true);
+        administrador.setCodigoConfirmacaoEmail(null);
+        administrador.setCodigoConfirmacaoExpiraEm(null);
+        administradorRepository.save(administrador);
+    }
+
+    private void validarCodigoConfirmacao(Boolean emailConfirmado, String codigoCriptografado, LocalDateTime expiraEm, String codigoInformado) {
+        if (Boolean.TRUE.equals(emailConfirmado) || emailConfirmado == null) {
+            return;
+        }
+
+        if (codigoCriptografado == null || expiraEm == null || expiraEm.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Codigo invalido ou expirado");
+        }
+
+        if (!emailConfirmationCodeService.codigoCorreto(codigoInformado, codigoCriptografado)) {
+            throw new IllegalArgumentException("Codigo invalido ou expirado");
+        }
     }
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
