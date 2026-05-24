@@ -24,6 +24,8 @@ public class ProfissionalController {
     public ResponseEntity<?> cadastrar(@Valid @RequestBody ProfissionalDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerProfissional(dto));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
@@ -63,6 +65,8 @@ public class ProfissionalController {
             return ResponseEntity.ok(Map.of(
                     "mensagem", "Profissional atualizado com sucesso!",
                     "profissional", profissionalAtualizado));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

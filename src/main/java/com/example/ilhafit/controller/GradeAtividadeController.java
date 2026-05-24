@@ -29,6 +29,8 @@ public class GradeAtividadeController {
         try {
             GradeAtividadeDTO.Resposta resposta = gradeAtividadeService.adicionarAoProfissional(profissionalId, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
@@ -52,6 +54,8 @@ public class GradeAtividadeController {
             return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
@@ -69,6 +73,8 @@ public class GradeAtividadeController {
         try {
             GradeAtividadeDTO.Resposta atualizado = gradeAtividadeService.atualizar(id, dto);
             return ResponseEntity.ok(Map.of("mensagem", "Atividade atualizada com sucesso!", "atividade", atualizado));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
