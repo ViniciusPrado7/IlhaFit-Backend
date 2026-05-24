@@ -69,6 +69,7 @@ public class EmailService {
         mensagem.setText(montarMensagemConfirmacaoCadastro(nome, codigo, validadeMinutos));
 
         mailSender.send(mensagem);
+        log.info("Codigo de confirmacao de cadastro enviado para {}.", destinatario);
     }
 
     public void enviarEmailRecuperacaoSenha(String destinatario, String link, int validadeMinutos) {
