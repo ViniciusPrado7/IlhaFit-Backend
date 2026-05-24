@@ -42,7 +42,7 @@ public class Administrador {
     private LocalDateTime dataCadastro;
 
     @Column(name = "email_confirmado")
-    private Boolean emailConfirmado;
+    private Boolean emailConfirmado = false;
 
     @Column(name = "codigo_confirmacao_email")
     private String codigoConfirmacaoEmail;
@@ -53,6 +53,9 @@ public class Administrador {
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
+        if (this.emailConfirmado == null) {
+            this.emailConfirmado = false;
+        }
     }
 
     public LocalDateTime getDataCadastro() {

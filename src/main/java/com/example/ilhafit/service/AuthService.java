@@ -172,7 +172,7 @@ public class AuthService {
     }
 
     private void validarEmailConfirmado(Boolean emailConfirmado) {
-        if (Boolean.FALSE.equals(emailConfirmado)) {
+        if (!Boolean.TRUE.equals(emailConfirmado)) {
             throw new IllegalArgumentException("Confirme seu email antes de fazer login");
         }
     }
@@ -210,7 +210,7 @@ public class AuthService {
     }
 
     private void validarCodigoConfirmacao(Boolean emailConfirmado, String codigoCriptografado, LocalDateTime expiraEm, String codigoInformado) {
-        if (Boolean.TRUE.equals(emailConfirmado) || emailConfirmado == null) {
+        if (Boolean.TRUE.equals(emailConfirmado)) {
             return;
         }
 

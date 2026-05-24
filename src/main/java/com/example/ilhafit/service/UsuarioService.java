@@ -72,6 +72,10 @@ public class UsuarioService {
             throw new IllegalArgumentException("Credenciais invÃ¡lidas");
         }
 
+        if (!Boolean.TRUE.equals(usuario.getEmailConfirmado())) {
+            throw new IllegalArgumentException("Confirme seu email antes de fazer login");
+        }
+
         return mapper.toResponse(usuario);
     }
 

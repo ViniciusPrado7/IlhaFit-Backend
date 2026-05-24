@@ -81,7 +81,7 @@ public class Estabelecimento {
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @Column(name = "email_confirmado")
-    private Boolean emailConfirmado;
+    private Boolean emailConfirmado = false;
 
     @Column(name = "codigo_confirmacao_email")
     private String codigoConfirmacaoEmail;
@@ -92,6 +92,9 @@ public class Estabelecimento {
     @PrePersist
     protected void onCreate() {
         dataCadastro = LocalDateTime.now();
+        if (this.emailConfirmado == null) {
+            this.emailConfirmado = false;
+        }
     }
 
     public LocalDateTime getDataCadastro() {

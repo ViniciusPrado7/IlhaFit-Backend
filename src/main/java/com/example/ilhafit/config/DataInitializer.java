@@ -29,6 +29,13 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (administradorRepository.count() > 0) {
+            administradorRepository.findByEmail(adminProperties.getEmail())
+                    .filter(admin -> admin.getEmailConfirmado() == null)
+                    .ifPresent(admin -> {
+                        admin.setEmailConfirmado(true);
+                        administradorRepository.save(admin);
+                        log.info("[DataInitializer] Admin padrao marcado como email confirmado: {}", adminProperties.getEmail());
+                    });
             log.info("[DataInitializer] Admin ja existe. Nenhuma acao necessaria.");
         } else {
             Administrador admin = new Administrador();
@@ -36,6 +43,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setEmail(adminProperties.getEmail());
             admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
             admin.setRole(Role.ADMIN);
+            admin.setEmailConfirmado(true);
             administradorRepository.save(admin);
             log.info("[DataInitializer] Admin padrao criado: {}", adminProperties.getEmail());
         }
