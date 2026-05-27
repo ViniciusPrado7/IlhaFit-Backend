@@ -6,6 +6,7 @@ import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class AdminController {
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final AdministradorRepository administradorRepository;
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping("/users")
     public ResponseEntity<List<Map<String, Object>>> listarTodos() {
         List<Map<String, Object>> users = new ArrayList<>();
@@ -43,6 +45,7 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id, @RequestParam String tipo) {
         switch (tipo.toLowerCase()) {

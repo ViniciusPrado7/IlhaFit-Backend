@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class AdministradorController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping("/cadastrar")
     public ResponseEntity<?> cadastrar(@Valid @RequestBody AdministradorDTO.Registro dto) {
         try {
@@ -53,6 +55,7 @@ public class AdministradorController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody AdministradorDTO.Registro dto) {
         try {
@@ -62,6 +65,7 @@ public class AdministradorController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
         try {
