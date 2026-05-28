@@ -7,6 +7,8 @@ import com.example.ilhafit.exception.ModeracaoIndisponivelException;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.DenunciaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/denuncias")
 @RequiredArgsConstructor
@@ -47,6 +50,7 @@ public class DenunciaController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping
     public ResponseEntity<?> listarTodas(
             @RequestParam(required = false) StatusDenuncia status) {
@@ -56,6 +60,7 @@ public class DenunciaController {
         return ResponseEntity.ok(denunciaService.listarTodas());
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}/status")
     public ResponseEntity<?> atualizarStatus(
             @PathVariable Long id,
@@ -70,6 +75,7 @@ public class DenunciaController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @DeleteMapping("/{id}/avaliacao")
     public ResponseEntity<?> excluirAvaliacaoDenunciada(@PathVariable Long id) {
         try {
@@ -80,7 +86,8 @@ public class DenunciaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("erro", "Erro ao excluir avaliacao: " + e.getMessage()));
+            log.error("Erro ao excluir avaliação ID {}", id, e);
+            return ResponseEntity.status(500).body(Map.of("erro", "Erro interno ao excluir avaliação."));
         }
     }
 }

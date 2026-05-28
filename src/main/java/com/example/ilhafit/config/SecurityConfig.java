@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -46,16 +48,30 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                        // Auth público
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/email/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
+                        // Email — restrito a administradores
+                        .requestMatchers("/api/email/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        // Usuários
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
                         .requestMatchers("/api/usuarios/**").authenticated()
-                        .requestMatchers("/api/estabelecimentos/cadastrar").permitAll()
-                        .requestMatchers("/api/estabelecimentos/estabelecimentos/**").permitAll()
+                        // Estabelecimentos
+                        .requestMatchers(HttpMethod.POST, "/api/estabelecimentos/cadastrar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos/**").permitAll()
                         .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers("/api/estabelecimentos/deletar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
-                        .requestMatchers("/api/profissionais/**").permitAll()
-                        .requestMatchers("/api/administradores/**").permitAll()
+                        // Profissionais — cadastro e listagem pública; edição/deleção/dados pessoais exigem auth
+                        .requestMatchers(HttpMethod.POST, "/api/profissionais/cadastrar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/{id}").permitAll()
+                        .requestMatchers("/api/profissionais/**").authenticated()
+                        // Administradores — apenas login é público
+                        .requestMatchers(HttpMethod.POST, "/api/administradores/login").permitAll()
+                        .requestMatchers("/api/administradores/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        // Painel admin — exclusivo para administradores
+                        .requestMatchers("/api/admin/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        // Categorias
                         .requestMatchers(HttpMethod.POST, "/api/categorias/pendentes/solicitar")
                         .hasAnyAuthority(TipoCadastro.PROFISSIONAL.name(), TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers(HttpMethod.GET, "/api/categorias/pendentes/minhas")
@@ -65,12 +81,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/pendentes/**")
                         .hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         .requestMatchers("/api/categorias/**").permitAll()
+                        // Grade de atividades
                         .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers("/api/grade-atividades/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/avaliacoes/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avaliacoes").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/denuncias").authenticated()
+                        // Avaliações
+                        .requestMatchers(HttpMethod.GET, "/api/avaliacoes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/avaliacoes").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
+                        // Denúncias
+                        .requestMatchers(HttpMethod.POST, "/api/denuncias").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/denuncias").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.PUT, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
@@ -80,6 +99,11 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter().write("{\"erro\":\"Token ausente ou expirado\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"erro\":\"Acesso negado\"}");
                         })
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -96,7 +120,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(allowedOriginPatterns);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
