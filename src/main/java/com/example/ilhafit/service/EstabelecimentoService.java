@@ -1,20 +1,25 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.EstabelecimentoDTO;
+import com.example.ilhafit.dto.GradeAtividadeDTO;
 import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.GradeAtividade;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.EstabelecimentoMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,10 +28,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EstabelecimentoService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final CadastroIdentityValidator cadastroIdentityValidator;
-    private final CategoriaPendenteService categoriaPendenteService;
     private final GradeAtividadeDuplicidadeValidator gradeAtividadeDuplicidadeValidator;
+    private final GradeAtividadeService gradeAtividadeService;
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
@@ -38,15 +46,20 @@ public class EstabelecimentoService {
         cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
 
         Estabelecimento estabelecimento = estabelecimentoMapper.toEntity(dto);
-        List<GradeAtividade> atividadesSolicitadas = estabelecimento.getGradeAtividades();
-        estabelecimento.setGradeAtividades(null);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         Estabelecimento salvo = estabelecimentoRepository.save(estabelecimento);
-        atualizarGradeAtividades(salvo, atividadesSolicitadas);
+        atualizarGradeAtividades(salvo, dto.getGradeAtividades());
         emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNomeFantasia(), TipoCadastro.ESTABELECIMENTO);
-        return mappedWithRating(salvo);
+        Long estabelecimentoId = salvo.getId();
+        try {
+            entityManager.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.", ex);
+        }
+        entityManager.clear();
+        return mappedWithRating(estabelecimentoRepository.findById(estabelecimentoId).orElseThrow());
     }
 
     public List<EstabelecimentoDTO.Resposta> listarTodos() {
@@ -56,31 +69,11 @@ public class EstabelecimentoService {
     }
 
     public Optional<EstabelecimentoDTO.Resposta> buscarPorId(Long id) {
-        return estabelecimentoRepository.findById(id)
-                .map(this::mappedWithRating);
-    }
-
-    private EstabelecimentoDTO.Resposta mappedWithRating(Estabelecimento e) {
-        categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente(e);
-        EstabelecimentoDTO.Resposta dto = estabelecimentoMapper.toDTO(e);
-        List<Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(e.getId());
-        if (avaliacoes.isEmpty()) {
-            dto.setAvaliacao(0.0);
-            dto.setTotalAvaliacoes(0);
-        } else {
-            double media = avaliacoes.stream()
-                    .mapToInt(Avaliacao::getNota)
-                    .average()
-                    .orElse(0.0);
-            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
-            dto.setTotalAvaliacoes(avaliacoes.size());
-        }
-        return dto;
+        return estabelecimentoRepository.findById(id).map(this::mappedWithRating);
     }
 
     public Optional<EstabelecimentoDTO.Resposta> buscarPorEmail(String email) {
-        return estabelecimentoRepository.findByEmail(email)
-                .map(this::mappedWithRating);
+        return estabelecimentoRepository.findByEmail(email).map(this::mappedWithRating);
     }
 
     @Transactional
@@ -88,8 +81,9 @@ public class EstabelecimentoService {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado"));
 
-        if (!estabelecimento.getEmail().equals(dto.getEmail())) {
-            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.ESTABELECIMENTO, id);
+        String novoEmail = StringNormalizer.normalizeEmail(dto.getEmail());
+        if (!estabelecimento.getEmail().equals(novoEmail)) {
+            cadastroIdentityValidator.validarEmailDisponivel(novoEmail, TipoCadastro.ESTABELECIMENTO, id);
         }
         if (!estabelecimento.getCnpj().equals(dto.getCnpj())) {
             cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), id);
@@ -107,14 +101,21 @@ public class EstabelecimentoService {
         }
 
         if (dto.getGradeAtividades() != null) {
-            atualizarGradeAtividades(estabelecimento, estabelecimentoMapper.toEntity(dto).getGradeAtividades());
+            atualizarGradeAtividades(estabelecimento, dto.getGradeAtividades());
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return mappedWithRating(estabelecimentoRepository.save(estabelecimento));
+        try {
+            estabelecimentoRepository.save(estabelecimento);
+            entityManager.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.", ex);
+        }
+        entityManager.clear();
+        return mappedWithRating(estabelecimentoRepository.findById(id).orElseThrow());
     }
 
     @Transactional
@@ -126,22 +127,37 @@ public class EstabelecimentoService {
         estabelecimentoRepository.deleteById(id);
     }
 
-    private void atualizarGradeAtividades(Estabelecimento estabelecimento, List<GradeAtividade> atividades) {
-        List<GradeAtividade> aprovadas = categoriaPendenteService.filtrarAtividadesAprovadasESolicitarPendentes(
-                atividades,
-                TipoCadastro.ESTABELECIMENTO,
-                estabelecimento.getId()
-        );
-        gradeAtividadeDuplicidadeValidator.validarListaEstabelecimento(aprovadas);
-        estabelecimento.setGradeAtividades(aprovadas);
-        try {
-            estabelecimentoRepository.save(estabelecimento);
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException(
-                    "Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.",
-                    ex
-            );
+    private EstabelecimentoDTO.Resposta mappedWithRating(Estabelecimento e) {
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(e.getId());
+        EstabelecimentoDTO.Resposta dto = estabelecimentoMapper.toDTO(e);
+        if (avaliacoes.isEmpty()) {
+            dto.setAvaliacao(0.0);
+            dto.setTotalAvaliacoes(0);
+        } else {
+            double media = avaliacoes.stream().mapToInt(Avaliacao::getNota).average().orElse(0.0);
+            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
+            dto.setTotalAvaliacoes(avaliacoes.size());
         }
+        return dto;
     }
 
+    private void atualizarGradeAtividades(Estabelecimento estabelecimento, List<GradeAtividadeDTO.Registro> dtos) {
+        if (dtos == null) {
+            return;
+        }
+
+        List<GradeAtividade> grade = dtos.stream()
+                .map(gradeAtividadeService::toEntity)
+                .collect(Collectors.toList());
+
+        gradeAtividadeDuplicidadeValidator.validarListaEstabelecimento(grade);
+        List<GradeAtividade> listaAtual = estabelecimento.getGradeAtividades();
+        if (listaAtual == null) {
+            estabelecimento.setGradeAtividades(new ArrayList<>(grade));
+        } else {
+            listaAtual.clear();
+            listaAtual.addAll(grade);
+        }
+        // save delegado ao caller para evitar double-flush e estado inconsistente
+    }
 }

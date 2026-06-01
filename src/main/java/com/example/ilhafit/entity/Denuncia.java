@@ -2,6 +2,7 @@ package com.example.ilhafit.entity;
 
 import com.example.ilhafit.enums.MotivoDenuncia;
 import com.example.ilhafit.enums.StatusDenuncia;
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,5 +53,16 @@ public class Denuncia {
     @PrePersist
     protected void onCreate() {
         dataDenuncia = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.denuncianteEmail = StringNormalizer.normalizeEmail(denuncianteEmail);
+        this.descricaoAdicional = StringNormalizer.normalize(descricaoAdicional);
     }
 }

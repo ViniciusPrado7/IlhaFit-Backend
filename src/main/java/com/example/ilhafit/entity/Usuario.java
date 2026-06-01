@@ -1,6 +1,7 @@
 package com.example.ilhafit.entity;
 
 import com.example.ilhafit.enums.Role;
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,6 +39,17 @@ public class Usuario {
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.nome = StringNormalizer.normalize(nome);
+        this.email = StringNormalizer.normalizeEmail(email);
     }
 
     public LocalDateTime getDataCadastro() {

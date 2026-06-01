@@ -2,6 +2,7 @@ package com.example.ilhafit.service;
 
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.repository.AdministradorRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
@@ -18,6 +19,7 @@ public class CadastroIdentityValidator {
     private final EstabelecimentoRepository estabelecimentoRepository;
 
     public void validarEmailDisponivel(String email, TipoCadastro tipoCadastro, Long idAtual) {
+        email = StringNormalizer.normalizeEmail(email);
         usuarioRepository.findByEmail(email)
                 .filter(usuario -> deveBloquear(usuario.getId(), idAtual, tipoCadastro != TipoCadastro.USUARIO))
                 .ifPresent(usuario -> lancarConflitoEmail(TipoCadastro.USUARIO));

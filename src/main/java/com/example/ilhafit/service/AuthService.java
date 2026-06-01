@@ -22,6 +22,7 @@ import com.example.ilhafit.repository.PasswordResetTokenRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
 import com.example.ilhafit.security.JwtService;
+import com.example.ilhafit.util.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,9 +84,10 @@ public class AuthService {
     }
 
     public AuthLoginResponseDTO login(UsuarioLoginDTO dto) {
-        log.info("[AuthService] Tentativa de login para email: {}", dto.getEmail());
+        String email = StringNormalizer.normalizeEmail(dto.getEmail());
+        log.info("[AuthService] Tentativa de login para email: {}", email);
 
-        var adminOpt = administradorRepository.findByEmail(dto.getEmail());
+        var adminOpt = administradorRepository.findByEmail(email);
         if (adminOpt.isPresent()) {
             boolean senhaOk = senhaCorreta(dto.getSenha(), adminOpt.get().getSenha());
             log.info("[AuthService] Admin encontrado. Senha correta: {}", senhaOk);
@@ -94,16 +96,16 @@ public class AuthService {
             log.info("[AuthService] Nenhum admin encontrado com email: {}", dto.getEmail());
         }
 
-        return usuarioRepository.findByEmail(dto.getEmail())
+        return usuarioRepository.findByEmail(email)
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
                 .map(this::toUsuarioLoginResponse)
-                .or(() -> estabelecimentoRepository.findByEmail(dto.getEmail())
+                .or(() -> estabelecimentoRepository.findByEmail(email)
                         .filter(estabelecimento -> senhaCorreta(dto.getSenha(), estabelecimento.getSenha()))
                         .map(this::toEstabelecimentoLoginResponse))
-                .or(() -> profissionalRepository.findByEmail(dto.getEmail())
+                .or(() -> profissionalRepository.findByEmail(email)
                         .filter(profissional -> senhaCorreta(dto.getSenha(), profissional.getSenha()))
                         .map(this::toProfissionalLoginResponse))
-                .or(() -> administradorRepository.findByEmail(dto.getEmail())
+                .or(() -> administradorRepository.findByEmail(email)
                         .filter(administrador -> senhaCorreta(dto.getSenha(), administrador.getSenha()))
                         .map(this::toAdministradorLoginResponse))
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
@@ -135,6 +137,7 @@ public class AuthService {
     }
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
+        email = StringNormalizer.normalizeEmail(email);
         return usuarioRepository.findByEmail(email)
                 .map(usuario -> new ContaRecuperacaoSenha(usuario.getId(), usuario.getEmail(), TipoCadastro.USUARIO))
                 .or(() -> estabelecimentoRepository.findByEmail(email)

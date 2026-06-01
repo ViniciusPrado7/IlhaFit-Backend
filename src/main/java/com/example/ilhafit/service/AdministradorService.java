@@ -6,6 +6,7 @@ import com.example.ilhafit.enums.Role;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.AdministradorMapper;
 import com.example.ilhafit.repository.AdministradorRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -60,8 +61,9 @@ public class AdministradorService {
         Administrador admin = administradorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Administrador nÃ£o encontrado"));
 
-        if (!admin.getEmail().equals(dto.getEmail())) {
-            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), TipoCadastro.ADMINISTRADOR, id);
+        String novoEmail = StringNormalizer.normalizeEmail(dto.getEmail());
+        if (!admin.getEmail().equals(novoEmail)) {
+            cadastroIdentityValidator.validarEmailDisponivel(novoEmail, TipoCadastro.ADMINISTRADOR, id);
         }
 
         Administrador atualizado = administradorMapper.toEntity(dto);

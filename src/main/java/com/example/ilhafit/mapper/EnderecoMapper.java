@@ -2,6 +2,7 @@ package com.example.ilhafit.mapper;
 
 import com.example.ilhafit.dto.EnderecoDTO;
 import com.example.ilhafit.entity.Endereco;
+import com.example.ilhafit.util.StringNormalizer;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,11 +12,11 @@ public class EnderecoMapper {
         if (dto == null)
             return null;
         Endereco endereco = new Endereco();
-        endereco.setRua(dto.getRua());
-        endereco.setNumero(dto.getNumero());
-        endereco.setComplemento(dto.getComplemento());
-        endereco.setBairro(dto.getBairro());
-        endereco.setCidade(dto.getCidade());
+        endereco.setRua(StringNormalizer.normalize(dto.getRua()));
+        endereco.setNumero(StringNormalizer.normalize(dto.getNumero()));
+        endereco.setComplemento(StringNormalizer.normalize(dto.getComplemento()));
+        endereco.setBairro(StringNormalizer.normalize(dto.getBairro()));
+        endereco.setCidade(StringNormalizer.normalize(dto.getCidade()));
         endereco.setEstado(dto.getEstado());
         endereco.setCep(dto.getCep());
         endereco.setLatitude(dto.getLatitude());
