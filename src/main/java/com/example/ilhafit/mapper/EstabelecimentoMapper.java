@@ -22,17 +22,8 @@ public class EstabelecimentoMapper {
         est.setNomeFantasia(dto.getNomeFantasia());
         est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
-        if (dto.getGradeAtividades() != null) {
-            est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
-                GradeAtividade entity = new GradeAtividade();
-                entity.setAtividade(g.getAtividade());
-                entity.setExclusivoMulheres(g.getExclusivoMulheres());
-                entity.setDiasSemana(g.getDiasSemana());
-                entity.setPeriodos(g.getPeriodos());
-                return entity;
-            }).toList());
-        }
         est.setFotosUrl(dto.getFotosUrl());
+        // grade mapeada pelo EstabelecimentoService via GradeAtividadeService.toEntity()
         return est;
     }
 
@@ -45,17 +36,8 @@ public class EstabelecimentoMapper {
         est.setNomeFantasia(dto.getNomeFantasia());
         est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
-        if (dto.getGradeAtividades() != null) {
-            est.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
-                GradeAtividade entity = new GradeAtividade();
-                entity.setAtividade(g.getAtividade());
-                entity.setExclusivoMulheres(g.getExclusivoMulheres());
-                entity.setDiasSemana(g.getDiasSemana());
-                entity.setPeriodos(g.getPeriodos());
-                return entity;
-            }).toList());
-        }
         est.setFotosUrl(dto.getFotosUrl());
+        // grade mapeada pelo EstabelecimentoService via GradeAtividadeService.toEntity()
         return est;
     }
 
@@ -68,18 +50,24 @@ public class EstabelecimentoMapper {
         dto.setNomeFantasia(est.getNomeFantasia());
         dto.setRazaoSocial(est.getRazaoSocial());
         dto.setEndereco(enderecoMapper.toDTO(est.getEndereco()));
-        if (est.getGradeAtividades() != null) {
-            dto.setGradeAtividades(est.getGradeAtividades().stream().map(g -> {
-                GradeAtividadeDTO.Resposta d = new GradeAtividadeDTO.Resposta();
-                d.setId(g.getId());
-                d.setAtividade(g.getAtividade());
-                d.setExclusivoMulheres(g.getExclusivoMulheres());
-                d.setDiasSemana(g.getDiasSemana());
-                d.setPeriodos(g.getPeriodos());
-                return d;
-            }).toList());
-        }
         dto.setFotosUrl(est.getFotosUrl());
+        if (est.getGradeAtividades() != null) {
+            dto.setGradeAtividades(est.getGradeAtividades().stream()
+                    .filter(g -> g.getCategoria() != null && g.getCategoria().isAtiva())
+                    .map(this::gradeToDTO)
+                    .toList());
+        }
         return dto;
+    }
+
+    private GradeAtividadeDTO.Resposta gradeToDTO(GradeAtividade g) {
+        GradeAtividadeDTO.Resposta d = new GradeAtividadeDTO.Resposta();
+        d.setId(g.getId());
+        d.setCategoriaId(g.getCategoria().getId());
+        d.setCategoriaNome(g.getCategoria().getNome());
+        d.setExclusivoMulheres(g.getExclusivoMulheres());
+        d.setDiasSemana(g.getDiasSemana());
+        d.setPeriodos(g.getPeriodos());
+        return d;
     }
 }

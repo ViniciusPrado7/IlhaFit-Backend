@@ -1,6 +1,7 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.GradeAtividadeDTO;
+import com.example.ilhafit.entity.Categoria;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.GradeAtividade;
 import com.example.ilhafit.entity.Profissional;
@@ -38,8 +39,7 @@ public class GradeAtividadeService {
                 .orElseThrow(() -> new IllegalArgumentException("Profissional nao encontrado"));
 
         GradeAtividade atividade = toEntity(dto);
-        validarCategoriaAprovada(atividade.getAtividade());
-        gradeAtividadeDuplicidadeValidator.validarProfissional(profissional, atividade.getAtividade(), null);
+        gradeAtividadeDuplicidadeValidator.validarProfissional(profissional, dto.getCategoriaId(), null);
 
         salvarAtividade(atividade, MENSAGEM_DUPLICIDADE_PROFISSIONAL);
         profissional.setGradeAtividades(garantirListaInicializada(profissional.getGradeAtividades()));
@@ -53,6 +53,7 @@ public class GradeAtividadeService {
         Profissional profissional = profissionalRepository.findById(profissionalId)
                 .orElseThrow(() -> new IllegalArgumentException("Profissional nao encontrado"));
         return profissional.getGradeAtividades().stream()
+                .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -63,8 +64,7 @@ public class GradeAtividadeService {
                 .orElseThrow(() -> new IllegalArgumentException("Estabelecimento nao encontrado"));
 
         GradeAtividade atividade = toEntity(dto);
-        validarCategoriaAprovada(atividade.getAtividade());
-        gradeAtividadeDuplicidadeValidator.validarEstabelecimento(estabelecimento, atividade.getAtividade(), null);
+        gradeAtividadeDuplicidadeValidator.validarEstabelecimento(estabelecimento, dto.getCategoriaId(), null);
 
         salvarAtividade(atividade, MENSAGEM_DUPLICIDADE_ESTABELECIMENTO);
         estabelecimento.setGradeAtividades(garantirListaInicializada(estabelecimento.getGradeAtividades()));
@@ -78,6 +78,7 @@ public class GradeAtividadeService {
         Estabelecimento estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new IllegalArgumentException("Estabelecimento nao encontrado"));
         return estabelecimento.getGradeAtividades().stream()
+                .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -91,17 +92,17 @@ public class GradeAtividadeService {
         Estabelecimento estabelecimento = estabelecimentoRepository.findByGradeAtividadesId(id).orElse(null);
 
         if (profissional != null) {
-            gradeAtividadeDuplicidadeValidator.validarProfissional(profissional, dto.getAtividade(), id);
+            gradeAtividadeDuplicidadeValidator.validarProfissional(profissional, dto.getCategoriaId(), id);
         }
         if (estabelecimento != null) {
-            gradeAtividadeDuplicidadeValidator.validarEstabelecimento(estabelecimento, dto.getAtividade(), id);
+            gradeAtividadeDuplicidadeValidator.validarEstabelecimento(estabelecimento, dto.getCategoriaId(), id);
         }
 
-        atividade.setAtividade(dto.getAtividade());
+        Categoria categoria = validarCategoriaAtiva(dto.getCategoriaId());
+        atividade.setCategoria(categoria);
         atividade.setExclusivoMulheres(dto.getExclusivoMulheres());
         atividade.setDiasSemana(dto.getDiasSemana());
         atividade.setPeriodos(dto.getPeriodos());
-        validarCategoriaAprovada(atividade.getAtividade());
 
         String mensagemDuplicidade = profissional != null
                 ? MENSAGEM_DUPLICIDADE_PROFISSIONAL
@@ -117,35 +118,38 @@ public class GradeAtividadeService {
         gradeAtividadeRepository.deleteById(id);
     }
 
-    private GradeAtividade toEntity(GradeAtividadeDTO.Registro dto) {
+    public GradeAtividade toEntity(GradeAtividadeDTO.Registro dto) {
+        Categoria categoria = validarCategoriaAtiva(dto.getCategoriaId());
         GradeAtividade entity = new GradeAtividade();
-        entity.setAtividade(dto.getAtividade());
+        entity.setCategoria(categoria);
         entity.setExclusivoMulheres(dto.getExclusivoMulheres() != null ? dto.getExclusivoMulheres() : false);
         entity.setDiasSemana(dto.getDiasSemana());
         entity.setPeriodos(dto.getPeriodos());
         return entity;
     }
 
-    private GradeAtividadeDTO.Resposta toDTO(GradeAtividade entity) {
+    public GradeAtividadeDTO.Resposta toDTO(GradeAtividade entity) {
         GradeAtividadeDTO.Resposta dto = new GradeAtividadeDTO.Resposta();
         dto.setId(entity.getId());
-        dto.setAtividade(entity.getAtividade());
+        if (entity.getCategoria() != null) {
+            dto.setCategoriaId(entity.getCategoria().getId());
+            dto.setCategoriaNome(entity.getCategoria().getNome());
+        }
         dto.setExclusivoMulheres(entity.getExclusivoMulheres());
         dto.setDiasSemana(entity.getDiasSemana());
         dto.setPeriodos(entity.getPeriodos());
         return dto;
     }
 
-    private void validarCategoriaAprovada(String nomeCategoria) {
-        if (nomeCategoria == null || nomeCategoria.isBlank()) {
+    private Categoria validarCategoriaAtiva(Long categoriaId) {
+        if (categoriaId == null) {
             throw new IllegalArgumentException("Categoria invalida");
         }
-
-        if (!categoriaRepository.existsByNomeIgnoreCase(nomeCategoria.trim())) {
-            throw new IllegalArgumentException(
-                    "Categoria ainda nao aprovada. Solicite uma nova categoria em /api/categorias/pendentes/solicitar"
-            );
-        }
+        return categoriaRepository.findById(categoriaId)
+                .filter(Categoria::isAtiva)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Categoria nao encontrada ou inativa. Verifique as categorias disponíveis em /api/categorias"
+                ));
     }
 
     private GradeAtividade salvarAtividade(GradeAtividade atividade, String mensagemDuplicidade) {

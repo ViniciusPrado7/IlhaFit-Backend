@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,19 +21,28 @@ import java.util.stream.Collectors;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
-    private final CategoriaVinculoService categoriaVinculoService;
 
     @Transactional
     public CategoriaDTO.Resposta criar(CategoriaDTO.Registro dto) {
-        if (categoriaRepository.existsByNomeIgnoreCase(dto.getNome())) {
-            throw new IllegalArgumentException("Categoria com este nome já existe");
+        Optional<Categoria> existente = categoriaRepository.findByNomeIgnoreCase(dto.getNome());
+
+        if (existente.isPresent()) {
+            Categoria categoria = existente.get();
+            if (categoria.isAtiva()) {
+                throw new IllegalArgumentException("Categoria com este nome já existe");
+            }
+            // reativa categoria soft-deletada com mesmo nome em vez de criar duplicata
+            categoria.setDeletedAt(null);
+            return toDTO(categoriaRepository.save(categoria));
         }
-        Categoria categoria = toEntity(dto);
+
+        Categoria categoria = new Categoria();
+        categoria.setNome(dto.getNome());
         return toDTO(categoriaRepository.save(categoria));
     }
 
     public List<CategoriaDTO.Resposta> listarTodas() {
-        return categoriaRepository.findAll(Sort.by(Sort.Direction.ASC, "nome")).stream()
+        return categoriaRepository.findByDeletedAtIsNullOrderByNomeAsc().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -44,8 +54,8 @@ public class CategoriaService {
 
         String filtro = search == null ? "" : search.trim();
         Page<Categoria> categorias = filtro.isEmpty()
-                ? categoriaRepository.findAll(pageable)
-                : categoriaRepository.findByNomeContainingIgnoreCase(filtro, pageable);
+                ? categoriaRepository.findByDeletedAtIsNull(pageable)
+                : categoriaRepository.findByNomeContainingIgnoreCaseAndDeletedAtIsNull(filtro, pageable);
 
         return new CategoriaDTO.PaginadaResposta(
                 categorias.getContent().stream().map(this::toDTO).collect(Collectors.toList()),
@@ -59,16 +69,19 @@ public class CategoriaService {
     }
 
     public Optional<CategoriaDTO.Resposta> buscarPorId(Long id) {
-        return categoriaRepository.findById(id).map(this::toDTO);
+        return categoriaRepository.findById(id)
+                .filter(Categoria::isAtiva)
+                .map(this::toDTO);
     }
 
     @Transactional
     public CategoriaDTO.Resposta atualizar(Long id, CategoriaDTO.Registro dto) {
         Categoria categoria = categoriaRepository.findById(id)
+                .filter(Categoria::isAtiva)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
         categoriaRepository.findByNomeIgnoreCase(dto.getNome()).ifPresent(existing -> {
-            if (!existing.getId().equals(id)) {
+            if (!existing.getId().equals(id) && existing.isAtiva()) {
                 throw new IllegalArgumentException("Categoria com este nome já existe");
             }
         });
@@ -80,22 +93,20 @@ public class CategoriaService {
     @Transactional
     public void deletar(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
+                .filter(Categoria::isAtiva)
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
-        categoriaVinculoService.removerCategoriaDeTodos(categoria.getNome());
-        categoriaRepository.delete(categoria);
-    }
-
-    private Categoria toEntity(CategoriaDTO.Registro dto) {
-        Categoria categoria = new Categoria();
-        categoria.setNome(dto.getNome());
-        return categoria;
+        categoria.setDeletedAt(LocalDateTime.now());
+        categoriaRepository.save(categoria);
+        // GradeAtividades vinculadas permanecem fisicamente no banco mas desaparecem
+        // das listagens porque categoria.isAtiva() retorna false — sem O(n) em memória.
     }
 
     CategoriaDTO.Resposta toDTO(Categoria categoria) {
         CategoriaDTO.Resposta dto = new CategoriaDTO.Resposta();
         dto.setId(categoria.getId());
         dto.setNome(categoria.getNome());
+        dto.setAtivo(categoria.isAtiva());
         return dto;
     }
 }

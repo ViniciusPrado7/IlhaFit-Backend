@@ -19,6 +19,7 @@ public class CategoriaDTO {
     public static class Resposta {
         private Long id;
         private String nome;
+        private boolean ativo;
     }
 
     @Data

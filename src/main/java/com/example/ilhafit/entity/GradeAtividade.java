@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Locale;
 
 @Entity
 @Table(name = "grade_atividades")
@@ -19,10 +18,9 @@ public class GradeAtividade {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String atividade;
-
-    @Column(name = "atividade_normalizada")
-    private String atividadeNormalizada;
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
     @Column(name = "exclusivo_mulheres")
     private Boolean exclusivoMulheres = false;
@@ -36,24 +34,4 @@ public class GradeAtividade {
     @CollectionTable(name = "grade_atividade_periodos", joinColumns = @JoinColumn(name = "grade_id"))
     @Column(name = "periodo")
     private List<String> periodos;
-
-    public void setAtividade(String atividade) {
-        this.atividade = atividade;
-        this.atividadeNormalizada = normalizarAtividade(atividade);
-    }
-
-    @PrePersist
-    @PreUpdate
-    public void sincronizarAtividadeNormalizada() {
-        this.atividadeNormalizada = normalizarAtividade(this.atividade);
-    }
-
-    public static String normalizarAtividade(String atividade) {
-        if (atividade == null) {
-            return null;
-        }
-
-        String normalizada = atividade.trim().replaceAll("\\s+", " ");
-        return normalizada.isBlank() ? null : normalizada.toLowerCase(Locale.ROOT);
-    }
 }
