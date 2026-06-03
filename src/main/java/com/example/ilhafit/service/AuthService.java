@@ -137,14 +137,14 @@ public class AuthService {
     }
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
-        email = StringNormalizer.normalizeEmail(email);
-        return usuarioRepository.findByEmail(email)
+        final String normalizedEmail = StringNormalizer.normalizeEmail(email);
+        return usuarioRepository.findByEmail(normalizedEmail)
                 .map(usuario -> new ContaRecuperacaoSenha(usuario.getId(), usuario.getEmail(), TipoCadastro.USUARIO))
-                .or(() -> estabelecimentoRepository.findByEmail(email)
+                .or(() -> estabelecimentoRepository.findByEmail(normalizedEmail)
                         .map(estabelecimento -> new ContaRecuperacaoSenha(estabelecimento.getId(), estabelecimento.getEmail(), TipoCadastro.ESTABELECIMENTO)))
-                .or(() -> profissionalRepository.findByEmail(email)
+                .or(() -> profissionalRepository.findByEmail(normalizedEmail)
                         .map(profissional -> new ContaRecuperacaoSenha(profissional.getId(), profissional.getEmail(), TipoCadastro.PROFISSIONAL)))
-                .or(() -> administradorRepository.findByEmail(email)
+                .or(() -> administradorRepository.findByEmail(normalizedEmail)
                         .map(administrador -> new ContaRecuperacaoSenha(administrador.getId(), administrador.getEmail(), TipoCadastro.ADMINISTRADOR)));
     }
 
