@@ -9,7 +9,7 @@ public final class StringNormalizer {
     public static String normalize(String value) {
         if (value == null) return null;
         String trimmed = value.trim().replaceAll("\\s+", " ");
-        return trimmed.isEmpty() ? null : trimmed.toLowerCase(Locale.ROOT);
+        return trimmed.isEmpty() ? null : trimmed.toLowerCase(Locale.forLanguageTag("pt-BR"));
     }
 
     public static String normalizeEmail(String value) {

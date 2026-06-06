@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     // --- qualquer status (inclui soft-deletadas) ---
-    Optional<Categoria> findByNome(String nome);
     Optional<Categoria> findByNomeIgnoreCase(String nome);
 
     // --- somente ativas (deleted_at IS NULL) ---

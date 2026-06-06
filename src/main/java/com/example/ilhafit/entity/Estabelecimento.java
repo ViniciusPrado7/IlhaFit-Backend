@@ -97,6 +97,11 @@ public class Estabelecimento {
         this.nomeFantasia = StringNormalizer.normalize(nomeFantasia);
         this.razaoSocial = StringNormalizer.normalize(razaoSocial);
         this.email = StringNormalizer.normalizeEmail(email);
+        if (this.endereco != null) {
+            this.endereco.setRua(StringNormalizer.normalize(this.endereco.getRua()));
+            this.endereco.setBairro(StringNormalizer.normalize(this.endereco.getBairro()));
+            this.endereco.setCidade(StringNormalizer.normalize(this.endereco.getCidade()));
+        }
     }
 
     public LocalDateTime getDataCadastro() {
