@@ -5,9 +5,11 @@ import com.example.ilhafit.dto.ProfissionalDTO;
 import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.GradeAtividade;
 import com.example.ilhafit.entity.Profissional;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.ProfissionalMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.util.StringNormalizer;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import jakarta.persistence.EntityManager;
@@ -37,6 +39,7 @@ public class ProfissionalService {
     private final GradeAtividadeService gradeAtividadeService;
     private final ProfissionalMapper profissionalMapper;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final DenunciaRepository denunciaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -126,6 +129,8 @@ public class ProfissionalService {
         if (!profissionalRepository.existsById(id)) {
             throw new IllegalArgumentException("Profissional não encontrado");
         }
+        avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(id)
+                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), StatusDenuncia.EXCLUIDO));
         avaliacaoRepository.deleteByProfissionalId(id, LocalDateTime.now());
         profissionalRepository.deleteById(id);
     }

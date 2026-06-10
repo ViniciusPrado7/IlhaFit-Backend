@@ -5,9 +5,11 @@ import com.example.ilhafit.dto.GradeAtividadeDTO;
 import com.example.ilhafit.entity.Avaliacao;
 import com.example.ilhafit.entity.Estabelecimento;
 import com.example.ilhafit.entity.GradeAtividade;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.enums.TipoCadastro;
 import com.example.ilhafit.mapper.EstabelecimentoMapper;
 import com.example.ilhafit.repository.AvaliacaoRepository;
+import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.util.StringNormalizer;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import jakarta.persistence.EntityManager;
@@ -37,6 +39,7 @@ public class EstabelecimentoService {
     private final GradeAtividadeService gradeAtividadeService;
     private final EstabelecimentoMapper estabelecimentoMapper;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final DenunciaRepository denunciaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -123,6 +126,8 @@ public class EstabelecimentoService {
         if (!estabelecimentoRepository.existsById(id)) {
             throw new IllegalArgumentException("Estabelecimento não encontrado");
         }
+        avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(id)
+                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), StatusDenuncia.EXCLUIDO));
         avaliacaoRepository.deleteByEstabelecimentoId(id, LocalDateTime.now());
         estabelecimentoRepository.deleteById(id);
     }
