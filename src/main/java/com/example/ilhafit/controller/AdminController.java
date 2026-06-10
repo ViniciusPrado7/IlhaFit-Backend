@@ -4,7 +4,12 @@ import com.example.ilhafit.repository.AdministradorRepository;
 import com.example.ilhafit.repository.EstabelecimentoRepository;
 import com.example.ilhafit.repository.ProfissionalRepository;
 import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.service.AdministradorService;
+import com.example.ilhafit.service.EstabelecimentoService;
+import com.example.ilhafit.service.ProfissionalService;
+import com.example.ilhafit.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,22 +29,28 @@ public class AdminController {
     private final ProfissionalRepository profissionalRepository;
     private final EstabelecimentoRepository estabelecimentoRepository;
     private final AdministradorRepository administradorRepository;
+    private final UsuarioService usuarioService;
+    private final ProfissionalService profissionalService;
+    private final EstabelecimentoService estabelecimentoService;
+    private final AdministradorService administradorService;
+
+    private static final PageRequest LIMITE_SEGURANCA = PageRequest.of(0, 2000);
 
     @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping("/users")
     public ResponseEntity<List<Map<String, Object>>> listarTodos() {
         List<Map<String, Object>> users = new ArrayList<>();
 
-        usuarioRepository.findAll().forEach(u ->
+        usuarioRepository.findAll(LIMITE_SEGURANCA).forEach(u ->
                 users.add(entry(u.getId(), "aluno", u.getNome(), null, u.getEmail(), u.getDataCadastro())));
 
-        profissionalRepository.findAll().forEach(p ->
+        profissionalRepository.findAll(LIMITE_SEGURANCA).forEach(p ->
                 users.add(entry(p.getId(), "profissional", p.getNome(), null, p.getEmail(), p.getDataCadastro())));
 
-        estabelecimentoRepository.findAll().forEach(e ->
+        estabelecimentoRepository.findAll(LIMITE_SEGURANCA).forEach(e ->
                 users.add(entry(e.getId(), "estabelecimento", null, e.getNomeFantasia(), e.getEmail(), e.getDataCadastro())));
 
-        administradorRepository.findAll().forEach(a ->
+        administradorRepository.findAll(LIMITE_SEGURANCA).forEach(a ->
                 users.add(entry(a.getId(), "admin", a.getNome(), null, a.getEmail(), a.getDataCadastro())));
 
         return ResponseEntity.ok(users);
@@ -48,14 +59,18 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deletar(@PathVariable Long id, @RequestParam String tipo) {
-        switch (tipo.toLowerCase()) {
-            case "aluno" -> usuarioRepository.deleteById(id);
-            case "profissional" -> profissionalRepository.deleteById(id);
-            case "estabelecimento" -> estabelecimentoRepository.deleteById(id);
-            case "admin" -> administradorRepository.deleteById(id);
-            default -> { return ResponseEntity.badRequest().body(Map.of("erro", "Tipo inválido: " + tipo)); }
+        try {
+            switch (tipo.toLowerCase()) {
+                case "aluno"           -> usuarioService.deletar(id);
+                case "profissional"    -> profissionalService.deletar(id);
+                case "estabelecimento" -> estabelecimentoService.deletar(id);
+                case "admin"           -> administradorService.deletar(id);
+                default -> { return ResponseEntity.badRequest().body(Map.of("erro", "Tipo inválido: " + tipo)); }
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
         }
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("mensagem", "Usuário removido com sucesso!"));
     }
 
     private Map<String, Object> entry(Long id, String tipo, String nome, String nomeFantasia, String email, LocalDateTime dataCadastro) {
