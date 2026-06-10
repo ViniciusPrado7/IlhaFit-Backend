@@ -65,6 +65,7 @@ public class CategoriaPendenteService {
         categoriaPendente.setNome(nomeNormalizado);
         categoriaPendente.setTipoSolicitante(tipoSolicitante);
         categoriaPendente.setSolicitanteId(solicitanteId);
+        categoriaPendente.setEmailSnapshot(buscarEmailSolicitante(tipoSolicitante, solicitanteId));
         categoriaPendente.setStatus(StatusCategoriaPendente.PENDENTE);
         return toDTO(categoriaPendenteRepository.save(categoriaPendente));
     }
@@ -188,7 +189,9 @@ public class CategoriaPendenteService {
         dto.setTipoSolicitante(entity.getTipoSolicitante());
         dto.setSolicitanteId(entity.getSolicitanteId());
         dto.setNomeSolicitante(buscarNomeSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
-        dto.setSolicitanteEmail(buscarEmailSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
+        dto.setSolicitanteEmail(entity.getEmailSnapshot() != null
+                ? entity.getEmailSnapshot()
+                : buscarEmailSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
         dto.setStatus(entity.getStatus());
         dto.setDataSolicitacao(entity.getDataSolicitacao());
         dto.setDataAnalise(entity.getDataAnalise());

@@ -50,6 +50,9 @@ public class CategoriaPendente {
     @Column(name = "data_analise")
     private LocalDateTime dataAnalise;
 
+    @Column(name = "email_solicitante_snapshot")
+    private String emailSnapshot;
+
     @Column(name = "observacao_admin")
     private String observacaoAdmin;
 
