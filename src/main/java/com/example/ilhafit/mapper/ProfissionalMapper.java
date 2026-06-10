@@ -23,7 +23,6 @@ public class ProfissionalMapper {
         pro.setRegiao(dto.getRegiao());
         pro.setExclusivoMulheres(dto.getExclusivoMulheres());
         pro.setFotoUrl(dto.getFotoUrl());
-        // grade mapeada pelo ProfissionalService via GradeAtividadeService.toEntity()
         return pro;
     }
 

@@ -23,7 +23,6 @@ public class EstabelecimentoMapper {
         est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
         est.setFotosUrl(dto.getFotosUrl());
-        // grade mapeada pelo EstabelecimentoService via GradeAtividadeService.toEntity()
         return est;
     }
 
@@ -37,7 +36,6 @@ public class EstabelecimentoMapper {
         est.setRazaoSocial(dto.getRazaoSocial());
         est.setEndereco(enderecoMapper.toEntity(dto.getEndereco()));
         est.setFotosUrl(dto.getFotosUrl());
-        // grade mapeada pelo EstabelecimentoService via GradeAtividadeService.toEntity()
         return est;
     }
 

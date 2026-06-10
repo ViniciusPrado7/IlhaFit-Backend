@@ -19,18 +19,15 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        // Passo 1 — colunas sempre idempotentes
         jdbcTemplate.execute("ALTER TABLE categorias ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
         jdbcTemplate.execute("ALTER TABLE grade_atividades ADD COLUMN IF NOT EXISTS categoria_id BIGINT NULL");
 
-        // Passo 2 — índice parcial único em categorias (nome ativo)
         jdbcTemplate.execute("""
                 CREATE UNIQUE INDEX IF NOT EXISTS uq_categorias_nome_ativo
                 ON categorias (LOWER(nome))
                 WHERE deleted_at IS NULL
                 """);
 
-        // Guarda de idempotência: se atividade_normalizada não existe, a migration de dados já rodou
         Boolean migracaoPendente = jdbcTemplate.queryForObject("""
                 SELECT EXISTS (
                     SELECT 1 FROM information_schema.columns
@@ -44,17 +41,13 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
             executarMigracaoDados();
         }
 
-        // Passo 8 — índices únicos por FK (sempre, idempotentes)
         jdbcTemplate.execute("DROP INDEX IF EXISTS uq_grade_atividades_profissional_categoria");
         jdbcTemplate.execute("DROP INDEX IF EXISTS uq_grade_atividades_estabelecimento_categoria");
         criarIndiceUnicoFkSeNaoHouverDuplicidade("profissional_id",   "uq_grade_prof_cat");
         criarIndiceUnicoFkSeNaoHouverDuplicidade("estabelecimento_id", "uq_grade_estab_cat");
     }
 
-    // ─── migração de dados (roda apenas uma vez) ─────────────────────────────
-
     private void executarMigracaoDados() {
-        // Passo 3 — popular categoria_id via match de string normalizada
         jdbcTemplate.execute("""
                 UPDATE grade_atividades ga
                 SET categoria_id = (
@@ -67,7 +60,6 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
                   AND ga.atividade_normalizada IS NOT NULL
                 """);
 
-        // Passo 4 — logar órfãs (sem match de categoria)
         List<Map<String, Object>> orfas = jdbcTemplate.queryForList("""
                 SELECT id, atividade, profissional_id, estabelecimento_id
                 FROM grade_atividades
@@ -79,7 +71,6 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
                     row.get("id"), row.get("atividade"), row.get("profissional_id"), row.get("estabelecimento_id")));
         }
 
-        // Passo 5 — resolver duplicatas (mesmo dono + mesma categoria_id): manter o menor id
         jdbcTemplate.execute("""
                 DO $$
                 DECLARE duplicata RECORD;
@@ -116,7 +107,6 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
                 END $$;
                 """);
 
-        // Passo 6 — deletar órfãs e suas linhas de element collections
         jdbcTemplate.execute("""
                 DELETE FROM grade_atividade_dias
                 WHERE grade_id IN (SELECT id FROM grade_atividades WHERE categoria_id IS NULL)
@@ -127,7 +117,6 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
                 """);
         jdbcTemplate.execute("DELETE FROM grade_atividades WHERE categoria_id IS NULL");
 
-        // Passo 7 — NOT NULL + FK
         jdbcTemplate.execute("ALTER TABLE grade_atividades ALTER COLUMN categoria_id SET NOT NULL");
         jdbcTemplate.execute("""
                 DO $$
@@ -144,17 +133,13 @@ public class GradeAtividadeSchemaMigration implements ApplicationRunner {
                 END $$;
                 """);
 
-        // Passo 9 — dropar colunas antigas
         jdbcTemplate.execute("ALTER TABLE grade_atividades DROP COLUMN IF EXISTS atividade");
         jdbcTemplate.execute("ALTER TABLE grade_atividades DROP COLUMN IF EXISTS atividade_normalizada");
 
         log.info("[GradeAtividadeSchemaMigration] Migration de dados concluida com sucesso.");
     }
 
-    // ─── índices únicos baseados em FK ───────────────────────────────────────
-
     private void criarIndiceUnicoFkSeNaoHouverDuplicidade(String colunaDono, String nomeIndice) {
-        // só tenta criar se categoria_id já é NOT NULL (migration de dados concluída)
         Boolean colunaExiste = jdbcTemplate.queryForObject("""
                 SELECT EXISTS (
                     SELECT 1 FROM information_schema.columns

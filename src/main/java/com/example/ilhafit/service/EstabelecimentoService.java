@@ -163,6 +163,5 @@ public class EstabelecimentoService {
             listaAtual.clear();
             listaAtual.addAll(grade);
         }
-        // save delegado ao caller para evitar double-flush e estado inconsistente
     }
 }
