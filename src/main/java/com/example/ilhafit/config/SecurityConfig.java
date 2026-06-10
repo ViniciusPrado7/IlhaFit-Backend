@@ -61,10 +61,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos/**").permitAll()
                         .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
                         .requestMatchers("/api/estabelecimentos/deletar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
-                        // Profissionais — cadastro e listagem pública; edição/deleção/dados pessoais exigem auth
+                        // Profissionais — cadastro e listagem pública; edição/deleção exigem dono ou admin
                         .requestMatchers(HttpMethod.POST, "/api/profissionais/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/**").permitAll()
+                        .requestMatchers("/api/profissionais/atualizar/**")
+                        .hasAnyAuthority(TipoCadastro.PROFISSIONAL.name(), TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers("/api/profissionais/deletar/**")
+                        .hasAnyAuthority(TipoCadastro.PROFISSIONAL.name(), TipoCadastro.ADMINISTRADOR.name())
                         .requestMatchers("/api/profissionais/**").authenticated()
                         // Administradores — apenas login é público
                         .requestMatchers(HttpMethod.POST, "/api/administradores/login").permitAll()
@@ -80,10 +84,16 @@ public class SecurityConfig {
                         .hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/pendentes/**")
                         .hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        .requestMatchers("/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
                         // Grade de atividades
+                        .requestMatchers(HttpMethod.GET, "/api/grade-atividades/**").permitAll()
+                        .requestMatchers("/api/grade-atividades/cadastrar/profissional/**").hasAuthority(TipoCadastro.PROFISSIONAL.name())
                         .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
-                        .requestMatchers("/api/grade-atividades/**").permitAll()
+                        .requestMatchers("/api/grade-atividades/atualizar/**").authenticated()
+                        .requestMatchers("/api/grade-atividades/deletar/**").authenticated()
                         // Avaliações
                         .requestMatchers(HttpMethod.GET, "/api/avaliacoes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/avaliacoes").authenticated()

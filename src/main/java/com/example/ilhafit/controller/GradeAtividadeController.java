@@ -25,10 +25,14 @@ public class GradeAtividadeController {
     @PostMapping("/cadastrar/profissional/{profissionalId}")
     public ResponseEntity<?> adicionarAoProfissional(
             @PathVariable Long profissionalId,
-            @Valid @RequestBody GradeAtividadeDTO.Registro dto) {
+            @Valid @RequestBody GradeAtividadeDTO.Registro dto,
+            @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
+            validarProfissionalAutenticado(profissionalId, userDetails);
             GradeAtividadeDTO.Resposta resposta = gradeAtividadeService.adicionarAoProfissional(profissionalId, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
@@ -87,6 +91,12 @@ public class GradeAtividadeController {
             return ResponseEntity.ok(Map.of("mensagem", "Atividade removida com sucesso!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    private void validarProfissionalAutenticado(Long profissionalId, JwtAuthenticatedUser userDetails) {
+        if (userDetails == null || !profissionalId.equals(userDetails.getId())) {
+            throw new SecurityException("Sem permissao para alterar este profissional");
         }
     }
 
