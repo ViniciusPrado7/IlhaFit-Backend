@@ -1,7 +1,7 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.EmailDTO;
-import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.enums.RegistrationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,9 +47,9 @@ public class EmailService {
         mailSender.send(mensagem);
     }
 
-    public void enviarEmailCadastro(String destinatario, String nome, TipoCadastro tipoCadastro) {
+    public void enviarEmailCadastro(String destinatario, String nome, RegistrationType tipoCadastro) {
         try {
-            enviarEmailBoasVindas(destinatario, nome, descricaoTipoCadastro(tipoCadastro));
+            enviarEmailBoasVindas(destinatario, nome, descricaoRegistrationType(tipoCadastro));
         } catch (Exception e) {
             log.warn("Nao foi possivel enviar email de cadastro para {} {}. Motivo: {}",
                     tipoCadastro,
@@ -107,7 +107,7 @@ public class EmailService {
                 + "Equipe IlhaFit";
     }
 
-    private String descricaoTipoCadastro(TipoCadastro tipoCadastro) {
+    private String descricaoRegistrationType(RegistrationType tipoCadastro) {
         return switch (tipoCadastro) {
             case USUARIO -> "usuario";
             case ESTABELECIMENTO -> "estabelecimento";
@@ -130,3 +130,4 @@ public class EmailService {
         return causa.getMessage() != null ? causa.getMessage() : e.getMessage();
     }
 }
+

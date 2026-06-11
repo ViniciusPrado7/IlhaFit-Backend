@@ -1,10 +1,10 @@
 package com.example.ilhafit.security;
 
-import com.example.ilhafit.enums.TipoCadastro;
-import com.example.ilhafit.repository.AdministradorRepository;
-import com.example.ilhafit.repository.EstabelecimentoRepository;
-import com.example.ilhafit.repository.ProfissionalRepository;
-import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.enums.RegistrationType;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.EstablishmentRepository;
+import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -31,10 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
-    private final UsuarioRepository usuarioRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
-    private final ProfissionalRepository profissionalRepository;
-    private final AdministradorRepository administradorRepository;
+    private final UserRepository usuarioRepository;
+    private final EstablishmentRepository estabelecimentoRepository;
+    private final ProfessionalRepository profissionalRepository;
+    private final AdministratorRepository administradorRepository;
 
     @Override
     protected void doFilterInternal(
@@ -83,25 +83,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean cadastroExiste(Long id, String email, String tipo) {
-        if (TipoCadastro.USUARIO.name().equals(tipo)) {
+        if (RegistrationType.USUARIO.name().equals(tipo)) {
             return usuarioRepository.findById(id)
                     .filter(usuario -> email.equalsIgnoreCase(usuario.getEmail()))
                     .isPresent();
         }
 
-        if (TipoCadastro.ESTABELECIMENTO.name().equals(tipo)) {
+        if (RegistrationType.ESTABELECIMENTO.name().equals(tipo)) {
             return estabelecimentoRepository.findById(id)
                     .filter(estabelecimento -> email.equalsIgnoreCase(estabelecimento.getEmail()))
                     .isPresent();
         }
 
-        if (TipoCadastro.PROFISSIONAL.name().equals(tipo)) {
+        if (RegistrationType.PROFISSIONAL.name().equals(tipo)) {
             return profissionalRepository.findById(id)
                     .filter(profissional -> email.equalsIgnoreCase(profissional.getEmail()))
                     .isPresent();
         }
 
-        if (TipoCadastro.ADMINISTRADOR.name().equals(tipo)) {
+        if (RegistrationType.ADMINISTRADOR.name().equals(tipo)) {
             return administradorRepository.findById(id)
                     .filter(administrador -> email.equalsIgnoreCase(administrador.getEmail()))
                     .isPresent();
@@ -134,3 +134,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 }
+

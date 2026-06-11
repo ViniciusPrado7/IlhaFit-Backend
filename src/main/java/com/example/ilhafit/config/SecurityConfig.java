@@ -1,6 +1,6 @@
 package com.example.ilhafit.config;
 
-import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.enums.RegistrationType;
 import com.example.ilhafit.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -48,51 +48,51 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                        // Auth público
+                        // Auth pÃºblico
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Email — restrito a administradores
-                        .requestMatchers("/api/email/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        // Usuários
+                        // Email â€” restrito a administradores
+                        .requestMatchers("/api/email/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        // UsuÃ¡rios
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
                         .requestMatchers("/api/usuarios/**").authenticated()
-                        // Estabelecimentos
+                        // Establishments
                         .requestMatchers(HttpMethod.POST, "/api/estabelecimentos/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos/**").permitAll()
-                        .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
-                        .requestMatchers("/api/estabelecimentos/deletar/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
-                        // Profissionais — cadastro e listagem pública; edição/deleção/dados pessoais exigem auth
+                        .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
+                        .requestMatchers("/api/estabelecimentos/deletar/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
+                        // Profissionais â€” cadastro e listagem pÃºblica; ediÃ§Ã£o/deleÃ§Ã£o/dados pessoais exigem auth
                         .requestMatchers(HttpMethod.POST, "/api/profissionais/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/{id}").permitAll()
                         .requestMatchers("/api/profissionais/**").authenticated()
-                        // Administradores — apenas login é público
+                        // Administratores â€” apenas login Ã© pÃºblico
                         .requestMatchers(HttpMethod.POST, "/api/administradores/login").permitAll()
-                        .requestMatchers("/api/administradores/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        // Painel admin — exclusivo para administradores
-                        .requestMatchers("/api/admin/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        // Categorias
+                        .requestMatchers("/api/administradores/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        // Painel admin â€” exclusivo para administradores
+                        .requestMatchers("/api/admin/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        // Categorys
                         .requestMatchers(HttpMethod.POST, "/api/categorias/pendentes/solicitar")
-                        .hasAnyAuthority(TipoCadastro.PROFISSIONAL.name(), TipoCadastro.ESTABELECIMENTO.name())
+                        .hasAnyAuthority(RegistrationType.PROFISSIONAL.name(), RegistrationType.ESTABELECIMENTO.name())
                         .requestMatchers(HttpMethod.GET, "/api/categorias/pendentes/minhas")
-                        .hasAnyAuthority(TipoCadastro.PROFISSIONAL.name(), TipoCadastro.ESTABELECIMENTO.name())
+                        .hasAnyAuthority(RegistrationType.PROFISSIONAL.name(), RegistrationType.ESTABELECIMENTO.name())
                         .requestMatchers(HttpMethod.GET, "/api/categorias/pendentes")
-                        .hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .hasAuthority(RegistrationType.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/pendentes/**")
-                        .hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .hasAuthority(RegistrationType.ADMINISTRADOR.name())
                         .requestMatchers("/api/categorias/**").permitAll()
                         // Grade de atividades
-                        .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(TipoCadastro.ESTABELECIMENTO.name())
+                        .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
                         .requestMatchers("/api/grade-atividades/**").permitAll()
-                        // Avaliações
+                        // AvaliaÃ§Ãµes
                         .requestMatchers(HttpMethod.GET, "/api/avaliacoes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/avaliacoes").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
-                        // Denúncias
+                        // DenÃºncias
                         .requestMatchers(HttpMethod.POST, "/api/denuncias").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/denuncias").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/denuncias/**").hasAuthority(TipoCadastro.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.GET, "/api/denuncias").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/denuncias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/denuncias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -129,3 +129,4 @@ public class SecurityConfig {
         return source;
     }
 }
+
