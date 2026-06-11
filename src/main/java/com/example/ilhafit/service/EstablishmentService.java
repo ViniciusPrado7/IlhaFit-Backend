@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,7 +39,7 @@ public class EstablishmentService {
         cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
 
         Establishment estabelecimento = estabelecimentoMapper.toEntity(dto);
-        List<ActivitySchedule> atividadesSolicitadas = estabelecimento.getGradeAtividades();
+        List<ActivitySchedule> atividadesSolicitadas = copiarAtividades(estabelecimento.getGradeAtividades());
         estabelecimento.setGradeAtividades(null);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             estabelecimento.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -107,7 +108,10 @@ public class EstablishmentService {
         }
 
         if (dto.getGradeAtividades() != null) {
-            atualizarGradeAtividades(estabelecimento, estabelecimentoMapper.toEntity(dto).getGradeAtividades());
+            atualizarGradeAtividades(
+                    estabelecimento,
+                    copiarAtividades(estabelecimentoMapper.toEntity(dto).getGradeAtividades())
+            );
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
@@ -142,6 +146,27 @@ public class EstablishmentService {
                     ex
             );
         }
+    }
+
+    private List<ActivitySchedule> copiarAtividades(List<ActivitySchedule> atividades) {
+        if (atividades == null || atividades.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return atividades.stream()
+                .filter(java.util.Objects::nonNull)
+                .map(this::copiarAtividade)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private ActivitySchedule copiarAtividade(ActivitySchedule atividade) {
+        ActivitySchedule copia = new ActivitySchedule();
+        copia.setId(atividade.getId());
+        copia.setAtividade(atividade.getAtividade());
+        copia.setExclusivoMulheres(Boolean.TRUE.equals(atividade.getExclusivoMulheres()));
+        copia.setDiasSemana(atividade.getDiasSemana() != null ? new ArrayList<>(atividade.getDiasSemana()) : new ArrayList<>());
+        copia.setPeriodos(atividade.getPeriodos() != null ? new ArrayList<>(atividade.getPeriodos()) : new ArrayList<>());
+        return copia;
     }
 
 }

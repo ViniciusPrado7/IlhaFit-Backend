@@ -16,6 +16,7 @@ public class ActivityScheduleSchemaMigration implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        adaptarColunaCategoriaLegada();
         jdbcTemplate.execute("ALTER TABLE grade_atividades ADD COLUMN IF NOT EXISTS atividade_normalizada varchar(255)");
         jdbcTemplate.execute("""
                 UPDATE grade_atividades
@@ -32,6 +33,32 @@ public class ActivityScheduleSchemaMigration implements ApplicationRunner {
                 "estabelecimento_id",
                 "uq_grade_atividades_estabelecimento_categoria"
         );
+    }
+
+    private void adaptarColunaCategoriaLegada() {
+        Boolean categoriaIdExiste = jdbcTemplate.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'grade_atividades'
+                      AND column_name = 'categoria_id'
+                )
+                """, Boolean.class);
+
+        if (!Boolean.TRUE.equals(categoriaIdExiste)) {
+            return;
+        }
+
+        jdbcTemplate.execute("""
+                UPDATE grade_atividades ga
+                SET atividade = c.nome
+                FROM categorias c
+                WHERE ga.categoria_id = c.id
+                  AND (ga.atividade IS NULL OR btrim(ga.atividade) = '')
+                """);
+
+        jdbcTemplate.execute("ALTER TABLE grade_atividades ALTER COLUMN categoria_id DROP NOT NULL");
+        jdbcTemplate.execute("ALTER TABLE grade_atividades DROP CONSTRAINT IF EXISTS ck_grade_atividades_responsavel");
     }
 
     private void criarIndiceUnicoSeNaoHouverDuplicidade(String colunaDono, String nomeIndice) {
