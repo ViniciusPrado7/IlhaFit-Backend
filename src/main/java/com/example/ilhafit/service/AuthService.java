@@ -1,26 +1,26 @@
 package com.example.ilhafit.service;
 
-import com.example.ilhafit.dto.AdministradorDTO;
+import com.example.ilhafit.dto.AdministratorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
-import com.example.ilhafit.dto.EstabelecimentoDTO;
+import com.example.ilhafit.dto.EstablishmentDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
-import com.example.ilhafit.dto.ProfissionalDTO;
+import com.example.ilhafit.dto.ProfessionalDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
-import com.example.ilhafit.dto.usuario.UsuarioAtualizacaoDTO;
-import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
-import com.example.ilhafit.dto.usuario.UsuarioRegistroDTO;
-import com.example.ilhafit.dto.usuario.UsuarioResponseDTO;
-import com.example.ilhafit.entity.Administrador;
-import com.example.ilhafit.entity.Estabelecimento;
+import com.example.ilhafit.dto.user.UserUpdateDTO;
+import com.example.ilhafit.dto.user.UserLoginDTO;
+import com.example.ilhafit.dto.user.UserRegistrationDTO;
+import com.example.ilhafit.dto.user.UserResponseDTO;
+import com.example.ilhafit.entity.Administrator;
+import com.example.ilhafit.entity.Establishment;
 import com.example.ilhafit.entity.PasswordResetToken;
-import com.example.ilhafit.entity.Profissional;
-import com.example.ilhafit.entity.Usuario;
-import com.example.ilhafit.enums.TipoCadastro;
-import com.example.ilhafit.repository.AdministradorRepository;
-import com.example.ilhafit.repository.EstabelecimentoRepository;
+import com.example.ilhafit.entity.Professional;
+import com.example.ilhafit.entity.User;
+import com.example.ilhafit.enums.RegistrationType;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.PasswordResetTokenRepository;
-import com.example.ilhafit.repository.ProfissionalRepository;
-import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.repository.UserRepository;
 import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +42,14 @@ public class AuthService {
     private static final int RESET_TOKEN_EXPIRATION_MINUTES = 30;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    private final AdministradorService administradorService;
-    private final EstabelecimentoService estabelecimentoService;
-    private final ProfissionalService profissionalService;
-    private final UsuarioService usuarioService;
-    private final AdministradorRepository administradorRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
-    private final ProfissionalRepository profissionalRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final AdministratorService administratorService;
+    private final EstablishmentService estabelecimentoService;
+    private final ProfessionalService profissionalService;
+    private final UserService usuarioService;
+    private final AdministratorRepository administradorRepository;
+    private final EstablishmentRepository estabelecimentoRepository;
+    private final ProfessionalRepository profissionalRepository;
+    private final UserRepository usuarioRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -58,31 +58,31 @@ public class AuthService {
     @Value("${app.frontend.reset-password-url:http://localhost:5173/esqueci-senha}")
     private String resetPasswordUrl;
 
-    public AdministradorDTO.Resposta registerAdministrador(AdministradorDTO.Registro dto) {
-        return administradorService.cadastrar(dto);
+    public AdministratorDTO.Resposta registerAdministrator(AdministratorDTO.Registro dto) {
+        return administratorService.cadastrar(dto);
     }
 
-    public EstabelecimentoDTO.Resposta registerEstabelecimento(EstabelecimentoDTO.Registro dto) {
+    public EstablishmentDTO.Resposta registerEstablishment(EstablishmentDTO.Registro dto) {
         return estabelecimentoService.cadastrar(dto);
     }
 
-    public ProfissionalDTO.Resposta registerProfissional(ProfissionalDTO.Registro dto) {
+    public ProfessionalDTO.Resposta registerProfessional(ProfessionalDTO.Registro dto) {
         return profissionalService.cadastrar(dto);
     }
 
-    public UsuarioResponseDTO registerUsuario(UsuarioRegistroDTO dto) {
+    public UserResponseDTO registerUser(UserRegistrationDTO dto) {
         return usuarioService.cadastrar(dto);
     }
 
-    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioAtualizacaoDTO dto) {
+    public UserResponseDTO atualizarUser(Long id, UserUpdateDTO dto) {
         return usuarioService.atualizar(id, dto);
     }
 
-    public void deletarUsuario(Long id) {
+    public void deletarUser(Long id) {
         usuarioService.deletar(id);
     }
 
-    public AuthLoginResponseDTO login(UsuarioLoginDTO dto) {
+    public AuthLoginResponseDTO login(UserLoginDTO dto) {
         log.info("[AuthService] Tentativa de login para email: {}", dto.getEmail());
 
         var adminOpt = administradorRepository.findByEmail(dto.getEmail());
@@ -96,16 +96,16 @@ public class AuthService {
 
         return usuarioRepository.findByEmail(dto.getEmail())
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
-                .map(this::toUsuarioLoginResponse)
+                .map(this::toUserLoginResponse)
                 .or(() -> estabelecimentoRepository.findByEmail(dto.getEmail())
                         .filter(estabelecimento -> senhaCorreta(dto.getSenha(), estabelecimento.getSenha()))
-                        .map(this::toEstabelecimentoLoginResponse))
+                        .map(this::toEstablishmentLoginResponse))
                 .or(() -> profissionalRepository.findByEmail(dto.getEmail())
                         .filter(profissional -> senhaCorreta(dto.getSenha(), profissional.getSenha()))
-                        .map(this::toProfissionalLoginResponse))
+                        .map(this::toProfessionalLoginResponse))
                 .or(() -> administradorRepository.findByEmail(dto.getEmail())
                         .filter(administrador -> senhaCorreta(dto.getSenha(), administrador.getSenha()))
-                        .map(this::toAdministradorLoginResponse))
+                        .map(this::toAdministratorLoginResponse))
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
     }
 
@@ -136,13 +136,13 @@ public class AuthService {
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
-                .map(usuario -> new ContaRecuperacaoSenha(usuario.getId(), usuario.getEmail(), TipoCadastro.USUARIO))
+                .map(usuario -> new ContaRecuperacaoSenha(usuario.getId(), usuario.getEmail(), RegistrationType.USUARIO))
                 .or(() -> estabelecimentoRepository.findByEmail(email)
-                        .map(estabelecimento -> new ContaRecuperacaoSenha(estabelecimento.getId(), estabelecimento.getEmail(), TipoCadastro.ESTABELECIMENTO)))
+                        .map(estabelecimento -> new ContaRecuperacaoSenha(estabelecimento.getId(), estabelecimento.getEmail(), RegistrationType.ESTABELECIMENTO)))
                 .or(() -> profissionalRepository.findByEmail(email)
-                        .map(profissional -> new ContaRecuperacaoSenha(profissional.getId(), profissional.getEmail(), TipoCadastro.PROFISSIONAL)))
+                        .map(profissional -> new ContaRecuperacaoSenha(profissional.getId(), profissional.getEmail(), RegistrationType.PROFISSIONAL)))
                 .or(() -> administradorRepository.findByEmail(email)
-                        .map(administrador -> new ContaRecuperacaoSenha(administrador.getId(), administrador.getEmail(), TipoCadastro.ADMINISTRADOR)));
+                        .map(administrador -> new ContaRecuperacaoSenha(administrador.getId(), administrador.getEmail(), RegistrationType.ADMINISTRADOR)));
     }
 
     private void criarTokenRecuperacao(ContaRecuperacaoSenha conta) {
@@ -152,7 +152,7 @@ public class AuthService {
         resetToken.setToken(gerarTokenSeguro());
         resetToken.setCadastroId(conta.cadastroId());
         resetToken.setEmail(conta.email());
-        resetToken.setTipoCadastro(conta.tipoCadastro());
+        resetToken.setRegistrationType(conta.tipoCadastro());
         resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_EXPIRATION_MINUTES));
         resetToken.setUsed(false);
 
@@ -178,27 +178,27 @@ public class AuthService {
     }
 
     private void atualizarSenha(PasswordResetToken resetToken, String senhaCriptografada) {
-        switch (resetToken.getTipoCadastro()) {
+        switch (resetToken.getRegistrationType()) {
             case USUARIO -> {
-                Usuario usuario = usuarioRepository.findById(resetToken.getCadastroId())
+                User usuario = usuarioRepository.findById(resetToken.getCadastroId())
                         .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
                 usuario.setSenha(senhaCriptografada);
                 usuarioRepository.save(usuario);
             }
             case ESTABELECIMENTO -> {
-                Estabelecimento estabelecimento = estabelecimentoRepository.findById(resetToken.getCadastroId())
+                Establishment estabelecimento = estabelecimentoRepository.findById(resetToken.getCadastroId())
                         .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
                 estabelecimento.setSenha(senhaCriptografada);
                 estabelecimentoRepository.save(estabelecimento);
             }
             case PROFISSIONAL -> {
-                Profissional profissional = profissionalRepository.findById(resetToken.getCadastroId())
+                Professional profissional = profissionalRepository.findById(resetToken.getCadastroId())
                         .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
                 profissional.setSenha(senhaCriptografada);
                 profissionalRepository.save(profissional);
             }
             case ADMINISTRADOR -> {
-                Administrador administrador = administradorRepository.findById(resetToken.getCadastroId())
+                Administrator administrador = administradorRepository.findById(resetToken.getCadastroId())
                         .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
                 administrador.setSenha(senhaCriptografada);
                 administradorRepository.save(administrador);
@@ -212,54 +212,55 @@ public class AuthService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    private record ContaRecuperacaoSenha(Long cadastroId, String email, TipoCadastro tipoCadastro) {
+    private record ContaRecuperacaoSenha(Long cadastroId, String email, RegistrationType tipoCadastro) {
     }
 
-    private AuthLoginResponseDTO toUsuarioLoginResponse(Usuario usuario) {
+    private AuthLoginResponseDTO toUserLoginResponse(User usuario) {
         return AuthLoginResponseDTO.builder()
                 .id(usuario.getId())
                 .nome(usuario.getNome())
                 .email(usuario.getEmail())
-                .tipo(TipoCadastro.USUARIO.name())
+                .tipo(RegistrationType.USUARIO.name())
                 .role(usuario.getRole().name())
-                .token(jwtService.gerarTokenUsuario(usuario))
+                .token(jwtService.gerarTokenUser(usuario))
                 .tokenType("Bearer")
                 .build();
     }
 
-    private AuthLoginResponseDTO toEstabelecimentoLoginResponse(Estabelecimento estabelecimento) {
+    private AuthLoginResponseDTO toEstablishmentLoginResponse(Establishment estabelecimento) {
         return AuthLoginResponseDTO.builder()
                 .id(estabelecimento.getId())
                 .nome(estabelecimento.getNomeFantasia())
                 .email(estabelecimento.getEmail())
-                .tipo(TipoCadastro.ESTABELECIMENTO.name())
-                .role(TipoCadastro.ESTABELECIMENTO.name())
-                .token(jwtService.gerarTokenEstabelecimento(estabelecimento))
+                .tipo(RegistrationType.ESTABELECIMENTO.name())
+                .role(RegistrationType.ESTABELECIMENTO.name())
+                .token(jwtService.gerarTokenEstablishment(estabelecimento))
                 .tokenType("Bearer")
                 .build();
     }
 
-    private AuthLoginResponseDTO toProfissionalLoginResponse(Profissional profissional) {
+    private AuthLoginResponseDTO toProfessionalLoginResponse(Professional profissional) {
         return AuthLoginResponseDTO.builder()
                 .id(profissional.getId())
                 .nome(profissional.getNome())
                 .email(profissional.getEmail())
-                .tipo(TipoCadastro.PROFISSIONAL.name())
-                .role(TipoCadastro.PROFISSIONAL.name())
-                .token(jwtService.gerarTokenProfissional(profissional))
+                .tipo(RegistrationType.PROFISSIONAL.name())
+                .role(RegistrationType.PROFISSIONAL.name())
+                .token(jwtService.gerarTokenProfessional(profissional))
                 .tokenType("Bearer")
                 .build();
     }
 
-    private AuthLoginResponseDTO toAdministradorLoginResponse(Administrador administrador) {
+    private AuthLoginResponseDTO toAdministratorLoginResponse(Administrator administrador) {
         return AuthLoginResponseDTO.builder()
                 .id(administrador.getId())
                 .nome(administrador.getNome())
                 .email(administrador.getEmail())
-                .tipo(TipoCadastro.ADMINISTRADOR.name())
+                .tipo(RegistrationType.ADMINISTRADOR.name())
                 .role(administrador.getRole().name())
-                .token(jwtService.gerarTokenAdministrador(administrador))
+                .token(jwtService.gerarTokenAdministrator(administrador))
                 .tokenType("Bearer")
                 .build();
     }
 }
+

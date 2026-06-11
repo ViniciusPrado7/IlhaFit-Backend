@@ -1,6 +1,6 @@
 package com.example.ilhafit.entity;
 
-import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.enums.RegistrationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,7 +32,7 @@ public class PasswordResetToken {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private TipoCadastro tipoCadastro;
+    private RegistrationType tipoCadastro;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
@@ -80,11 +80,11 @@ public class PasswordResetToken {
         this.email = email;
     }
 
-    public TipoCadastro getTipoCadastro() {
+    public RegistrationType getRegistrationType() {
         return tipoCadastro;
     }
 
-    public void setTipoCadastro(TipoCadastro tipoCadastro) {
+    public void setRegistrationType(RegistrationType tipoCadastro) {
         this.tipoCadastro = tipoCadastro;
     }
 
@@ -112,3 +112,4 @@ public class PasswordResetToken {
         this.createdAt = createdAt;
     }
 }
+

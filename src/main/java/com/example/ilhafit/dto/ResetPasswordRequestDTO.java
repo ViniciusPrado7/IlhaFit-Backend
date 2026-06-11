@@ -1,6 +1,6 @@
 package com.example.ilhafit.dto;
 
-import com.example.ilhafit.validation.SenhaForte;
+import com.example.ilhafit.validation.StrongPassword;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 
@@ -10,7 +10,7 @@ public class ResetPasswordRequestDTO {
     private String token;
 
     @NotBlank(message = "Nova senha e obrigatoria")
-    @SenhaForte
+    @StrongPassword
     private String novaSenha;
 
     @NotBlank(message = "Confirmacao de senha e obrigatoria")
@@ -48,3 +48,4 @@ public class ResetPasswordRequestDTO {
         return novaSenha.equals(confirmacaoSenha);
     }
 }
+

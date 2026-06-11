@@ -1,9 +1,9 @@
 package com.example.ilhafit.controller;
 
-import com.example.ilhafit.repository.AdministradorRepository;
-import com.example.ilhafit.repository.EstabelecimentoRepository;
-import com.example.ilhafit.repository.ProfissionalRepository;
-import com.example.ilhafit.repository.UsuarioRepository;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.EstablishmentRepository;
+import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,10 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final UsuarioRepository usuarioRepository;
-    private final ProfissionalRepository profissionalRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
-    private final AdministradorRepository administradorRepository;
+    private final UserRepository usuarioRepository;
+    private final ProfessionalRepository profissionalRepository;
+    private final EstablishmentRepository estabelecimentoRepository;
+    private final AdministratorRepository administratorRepository;
 
     @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping("/users")
@@ -39,7 +39,7 @@ public class AdminController {
         estabelecimentoRepository.findAll().forEach(e ->
                 users.add(entry(e.getId(), "estabelecimento", null, e.getNomeFantasia(), e.getEmail(), e.getDataCadastro())));
 
-        administradorRepository.findAll().forEach(a ->
+        administratorRepository.findAll().forEach(a ->
                 users.add(entry(a.getId(), "admin", a.getNome(), null, a.getEmail(), a.getDataCadastro())));
 
         return ResponseEntity.ok(users);
@@ -52,8 +52,8 @@ public class AdminController {
             case "aluno" -> usuarioRepository.deleteById(id);
             case "profissional" -> profissionalRepository.deleteById(id);
             case "estabelecimento" -> estabelecimentoRepository.deleteById(id);
-            case "admin" -> administradorRepository.deleteById(id);
-            default -> { return ResponseEntity.badRequest().body(Map.of("erro", "Tipo inválido: " + tipo)); }
+            case "admin" -> administratorRepository.deleteById(id);
+            default -> { return ResponseEntity.badRequest().body(Map.of("erro", "Tipo invÃ¡lido: " + tipo)); }
         }
         return ResponseEntity.noContent().build();
     }
@@ -69,3 +69,4 @@ public class AdminController {
         return m;
     }
 }
+
