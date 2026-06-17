@@ -8,7 +8,7 @@ class EntityNormalizationTest {
 
     @Test
     void profissional_onPersist_normalizesTextFields() {
-        Profissional p = new Profissional();
+        Professional p = new Professional();
         p.setNome("  João Silva  ");
         p.setEmail("JOAO@EMAIL.COM");
         p.setRegiao("  Norte da Ilha  ");
@@ -26,7 +26,7 @@ class EntityNormalizationTest {
 
     @Test
     void estabelecimento_onPersist_normalizesTextFields() {
-        Estabelecimento e = new Estabelecimento();
+        Establishment e = new Establishment();
         e.setNomeFantasia("  Academia Ilha Fit  ");
         e.setRazaoSocial("  Academia Ltda  ");
         e.setEmail("ACADEMIA@ILHA.COM");
@@ -44,7 +44,7 @@ class EntityNormalizationTest {
 
     @Test
     void categoria_onPersistAndUpdate_normalizesNome() {
-        Categoria c = new Categoria();
+        Category c = new Category();
         c.setNome("  YOGA  ");
         c.normalizeFields();
 
@@ -53,7 +53,7 @@ class EntityNormalizationTest {
 
     @Test
     void categoria_collapseSpaces() {
-        Categoria c = new Categoria();
+        Category c = new Category();
         c.setNome("Futebol  de  Praia");
         c.normalizeFields();
 
@@ -62,7 +62,7 @@ class EntityNormalizationTest {
 
     @Test
     void usuario_onPersist_normalizesNomeAndEmail() {
-        Usuario u = new Usuario();
+        User u = new User();
         u.setNome("  Maria Souza  ");
         u.setEmail("MARIA@EMAIL.COM");
         u.setSenha("Senha@123");
@@ -75,7 +75,7 @@ class EntityNormalizationTest {
 
     @Test
     void categoriaPendente_onPersist_normalizesNome() {
-        CategoriaPendente cp = new CategoriaPendente();
+        PendingCategory cp = new PendingCategory();
         cp.setNome("  CrossFit  ");
         cp.setObservacaoAdmin("  Categoria Aprovada  ");
         cp.onCreate();

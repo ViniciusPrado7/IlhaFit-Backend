@@ -4,7 +4,6 @@ import com.example.ilhafit.dto.PendingCategoryDTO;
 import com.example.ilhafit.entity.Category;
 import com.example.ilhafit.entity.PendingCategory;
 import com.example.ilhafit.entity.Establishment;
-import com.example.ilhafit.entity.ActivitySchedule;
 import com.example.ilhafit.entity.Professional;
 import com.example.ilhafit.enums.PendingCategoryStatus;
 import com.example.ilhafit.enums.RegistrationType;
@@ -19,11 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,57 +71,6 @@ public class PendingCategoryService {
         return toDTO(categoriaPendenteRepository.save(categoriaPendente));
     }
 
-    @Transactional
-    public List<ActivitySchedule> filtrarAtividadesAprovadasESolicitarPendentes(
-            List<ActivitySchedule> atividades,
-            RegistrationType tipoSolicitante,
-            Long solicitanteId
-    ) {
-        validarTipoSolicitante(tipoSolicitante);
-
-        if (atividades == null || atividades.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<ActivitySchedule> aprovadas = new ArrayList<>();
-        Set<String> novasPendencias = new LinkedHashSet<>();
-
-        for (ActivitySchedule atividade : atividades) {
-            if (atividade == null) {
-                continue;
-            }
-
-            String nomeNormalizado = normalizarNome(atividade.getAtividade());
-            if (nomeNormalizado == null) {
-                continue;
-            }
-
-            atividade.setAtividade(nomeNormalizado);
-
-            if (categoriaRepository.existsByNomeIgnoreCase(nomeNormalizado)) {
-                aprovadas.add(atividade);
-                continue;
-            }
-
-            if (!existePendenciaIgual(nomeNormalizado, tipoSolicitante, solicitanteId)) {
-                novasPendencias.add(nomeNormalizado);
-            }
-        }
-
-        validarLimitePendencias(tipoSolicitante, solicitanteId, novasPendencias.size());
-
-        for (String nomeCategory : novasPendencias) {
-            PendingCategory categoriaPendente = new PendingCategory();
-            categoriaPendente.setNome(nomeCategory);
-            categoriaPendente.setTipoSolicitante(tipoSolicitante);
-            categoriaPendente.setSolicitanteId(solicitanteId);
-            categoriaPendente.setStatus(PendingCategoryStatus.PENDENTE);
-            categoriaPendenteRepository.save(categoriaPendente);
-        }
-
-        return aprovadas;
-    }
-
     public List<PendingCategoryDTO.Resposta> listarPendentes() {
         return listar(PendingCategoryStatus.PENDENTE);
     }
@@ -151,51 +96,6 @@ public class PendingCategoryService {
                         tipoSolicitante, solicitanteId);
 
         return lista.stream().map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public void limparAtividadesLegadasCriadasAutomaticamente() {
-        profissionalRepository.findAll().forEach(this::limparAtividadesLegadasCriadasAutomaticamente);
-        estabelecimentoRepository.findAll().forEach(this::limparAtividadesLegadasCriadasAutomaticamente);
-    }
-
-    @Transactional
-    public void limparAtividadesLegadasCriadasAutomaticamente(Professional profissional) {
-        if (profissional == null || profissional.getId() == null || profissional.getGradeAtividades() == null) {
-            return;
-        }
-
-        Set<String> categoriasAprovadas = buscarCategorysAprovadasDoSolicitante(
-                RegistrationType.PROFISSIONAL,
-                profissional.getId()
-        );
-
-        boolean removeu = profissional.getGradeAtividades().removeIf(atividade ->
-                isAtividadeLegadaCriadaAutomaticamente(atividade, categoriasAprovadas)
-        );
-
-        if (removeu) {
-            profissionalRepository.save(profissional);
-        }
-    }
-
-    @Transactional
-    public void limparAtividadesLegadasCriadasAutomaticamente(Establishment estabelecimento) {
-        if (estabelecimento == null || estabelecimento.getId() == null || estabelecimento.getGradeAtividades() == null) {
-            return;
-        }
-
-        Set<String> categoriasAprovadas = buscarCategorysAprovadasDoSolicitante(
-                RegistrationType.ESTABELECIMENTO,
-                estabelecimento.getId()
-        );
-
-        boolean removeu = estabelecimento.getGradeAtividades().removeIf(atividade ->
-                isAtividadeLegadaCriadaAutomaticamente(atividade, categoriasAprovadas)
-        );
-
-        if (removeu) {
-            estabelecimentoRepository.save(estabelecimento);
-        }
     }
 
     @Transactional
@@ -251,37 +151,6 @@ public class PendingCategoryService {
                         PendingCategoryStatus.PENDENTE
                 )
                 .isPresent();
-    }
-
-    private Set<String> buscarCategorysAprovadasDoSolicitante(RegistrationType tipoSolicitante, Long solicitanteId) {
-        return categoriaPendenteRepository
-                .findByTipoSolicitanteAndSolicitanteIdAndStatusOrderByDataSolicitacaoDesc(
-                        tipoSolicitante,
-                        solicitanteId,
-                        PendingCategoryStatus.APROVADA
-                )
-                .stream()
-                .map(PendingCategory::getNome)
-                .map(this::normalizarNome)
-                .filter(nome -> nome != null)
-                .collect(Collectors.toSet());
-    }
-
-    private boolean isAtividadeLegadaCriadaAutomaticamente(ActivitySchedule atividade, Set<String> categoriasAprovadas) {
-        if (atividade == null || categoriasAprovadas.isEmpty()) {
-            return false;
-        }
-
-        String nomeAtividade = normalizarNome(atividade.getAtividade());
-        if (nomeAtividade == null || !categoriasAprovadas.contains(nomeAtividade)) {
-            return false;
-        }
-
-        boolean semDias = atividade.getDiasSemana() == null || atividade.getDiasSemana().isEmpty();
-        boolean semPeriodos = atividade.getPeriodos() == null || atividade.getPeriodos().isEmpty();
-        boolean naoExclusiva = !Boolean.TRUE.equals(atividade.getExclusivoMulheres());
-
-        return semDias && semPeriodos && naoExclusiva;
     }
 
     private PendingCategory buscarPendente(Long id) {
