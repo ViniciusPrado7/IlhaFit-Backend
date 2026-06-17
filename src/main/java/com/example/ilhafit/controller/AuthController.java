@@ -46,9 +46,8 @@ public class AuthController {
     }
 
     @PostMapping("/confirm-email")
-    public ResponseEntity<Map<String, String>> confirmEmail(@RequestBody @Valid ConfirmEmailRequestDTO dto) {
-        authService.confirmarEmail(dto);
-        return ResponseEntity.ok(Map.of("mensagem", "Email confirmado com sucesso."));
+    public ResponseEntity<AuthLoginResponseDTO> confirmEmail(@RequestBody @Valid ConfirmEmailRequestDTO dto) {
+        return ResponseEntity.ok(authService.confirmarEmail(dto));
     }
 
     @GetMapping("/me")

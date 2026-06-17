@@ -79,22 +79,15 @@ public class EmailService {
     }
 
     public void enviarEmailConfirmacao(String destinatario, String nome, String codigo, int validadeMinutos) {
-        try {
-            validarConfiguracaoSmtp();
+        validarConfiguracaoSmtp();
 
-            SimpleMailMessage mensagem = new SimpleMailMessage();
-            mensagem.setFrom(from);
-            mensagem.setTo(destinatario);
-            mensagem.setSubject("Codigo de confirmacao IlhaFit");
-            mensagem.setText(montarMensagemConfirmacaoEmail(nome, codigo, validadeMinutos));
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setFrom(from);
+        mensagem.setTo(destinatario);
+        mensagem.setSubject("Codigo de confirmacao IlhaFit");
+        mensagem.setText(montarMensagemConfirmacaoEmail(nome, codigo, validadeMinutos));
 
-            mailSender.send(mensagem);
-        } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de confirmacao para {}. Motivo: {}",
-                    destinatario,
-                    detalheErro(e),
-                    e);
-        }
+        mailSender.send(mensagem);
     }
 
     public void enviarEmailBoasVindas(String destinatario, String nome, String tipoConta) {

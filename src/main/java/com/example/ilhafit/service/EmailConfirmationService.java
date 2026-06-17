@@ -13,6 +13,7 @@ import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
 import com.example.ilhafit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,21 +48,28 @@ public class EmailConfirmationService {
         confirmationCode.setUsed(false);
 
         emailConfirmationCodeRepository.save(confirmationCode);
-        emailService.enviarEmailConfirmacao(
-                email,
-                nome,
-                codigo,
-                CONFIRMATION_CODE_EXPIRATION_MINUTES
-        );
+        try {
+            emailService.enviarEmailConfirmacao(
+                    email,
+                    nome,
+                    codigo,
+                    CONFIRMATION_CODE_EXPIRATION_MINUTES
+            );
+        } catch (MailException e) {
+            throw new IllegalStateException(
+                    "Nao foi possivel enviar o codigo de confirmacao. Verifique o email informado ou tente novamente.",
+                    e
+            );
+        }
     }
 
     @Transactional
-    public void confirmarEmail(ConfirmEmailRequestDTO dto) {
-        confirmarEmail(dto.getEmail(), dto.getCodigo());
+    public ConfirmedEmail confirmarEmail(ConfirmEmailRequestDTO dto) {
+        return confirmarEmail(dto.getEmail(), dto.getCodigo());
     }
 
     @Transactional
-    public void confirmarEmail(String email, String codigo) {
+    public ConfirmedEmail confirmarEmail(String email, String codigo) {
         EmailConfirmationCode confirmationCode = emailConfirmationCodeRepository
                 .findTopByEmailIgnoreCaseAndCodeAndUsedFalseOrderByCreatedAtDesc(email, codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Codigo invalido ou expirado"));
@@ -76,6 +84,11 @@ public class EmailConfirmationService {
         confirmationCode.setUsed(true);
         emailConfirmationCodeRepository.save(confirmationCode);
         invalidarCodigosAnteriores(confirmationCode.getEmail());
+        return new ConfirmedEmail(
+                confirmationCode.getCadastroId(),
+                confirmationCode.getEmail(),
+                confirmationCode.getRegistrationType()
+        );
     }
 
     private void invalidarCodigosAnteriores(String email) {
@@ -115,5 +128,8 @@ public class EmailConfirmationService {
 
     private String gerarCodigo() {
         return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
+    }
+
+    public record ConfirmedEmail(Long cadastroId, String email, RegistrationType tipoCadastro) {
     }
 }

@@ -124,13 +124,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void confirmarEmail(ConfirmEmailRequestDTO dto) {
-        emailConfirmationService.confirmarEmail(dto);
-    }
-
-    @Transactional
-    public void confirmarEmail(String email, String codigo) {
-        emailConfirmationService.confirmarEmail(email, codigo);
+    public AuthLoginResponseDTO confirmarEmail(ConfirmEmailRequestDTO dto) {
+        return autenticarEmailConfirmado(emailConfirmationService.confirmarEmail(dto));
     }
 
     @Transactional
@@ -162,6 +157,23 @@ public class AuthService {
         if (Boolean.FALSE.equals(emailConfirmado)) {
             throw new IllegalArgumentException("Email ainda nao confirmado. Verifique o codigo enviado para seu email.");
         }
+    }
+
+    private AuthLoginResponseDTO autenticarEmailConfirmado(EmailConfirmationService.ConfirmedEmail emailConfirmado) {
+        return switch (emailConfirmado.tipoCadastro()) {
+            case USUARIO -> usuarioRepository.findById(emailConfirmado.cadastroId())
+                    .map(this::toUserLoginResponse)
+                    .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+            case ESTABELECIMENTO -> estabelecimentoRepository.findById(emailConfirmado.cadastroId())
+                    .map(this::toEstablishmentLoginResponse)
+                    .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+            case PROFISSIONAL -> profissionalRepository.findById(emailConfirmado.cadastroId())
+                    .map(this::toProfessionalLoginResponse)
+                    .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+            case ADMINISTRADOR -> administradorRepository.findById(emailConfirmado.cadastroId())
+                    .map(this::toAdministratorLoginResponse)
+                    .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+        };
     }
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {
