@@ -2,6 +2,7 @@ package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.AdministratorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.ConfirmEmailRequestDTO;
 import com.example.ilhafit.dto.EstablishmentDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ProfessionalDTO;
@@ -54,6 +55,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final EmailConfirmationService emailConfirmationService;
 
     @Value("${app.frontend.reset-password-url:http://localhost:5173/esqueci-senha}")
     private String resetPasswordUrl;
@@ -96,17 +98,34 @@ public class AuthService {
 
         return usuarioRepository.findByEmail(dto.getEmail())
                 .filter(usuario -> senhaCorreta(dto.getSenha(), usuario.getSenha()))
-                .map(this::toUserLoginResponse)
+                .map(usuario -> {
+                    validarEmailConfirmado(usuario.getEmailConfirmado());
+                    return toUserLoginResponse(usuario);
+                })
                 .or(() -> estabelecimentoRepository.findByEmail(dto.getEmail())
                         .filter(estabelecimento -> senhaCorreta(dto.getSenha(), estabelecimento.getSenha()))
-                        .map(this::toEstablishmentLoginResponse))
+                        .map(estabelecimento -> {
+                            validarEmailConfirmado(estabelecimento.getEmailConfirmado());
+                            return toEstablishmentLoginResponse(estabelecimento);
+                        }))
                 .or(() -> profissionalRepository.findByEmail(dto.getEmail())
                         .filter(profissional -> senhaCorreta(dto.getSenha(), profissional.getSenha()))
-                        .map(this::toProfessionalLoginResponse))
+                        .map(profissional -> {
+                            validarEmailConfirmado(profissional.getEmailConfirmado());
+                            return toProfessionalLoginResponse(profissional);
+                        }))
                 .or(() -> administradorRepository.findByEmail(dto.getEmail())
                         .filter(administrador -> senhaCorreta(dto.getSenha(), administrador.getSenha()))
-                        .map(this::toAdministratorLoginResponse))
+                        .map(administrador -> {
+                            validarEmailConfirmado(administrador.getEmailConfirmado());
+                            return toAdministratorLoginResponse(administrador);
+                        }))
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
+    }
+
+    @Transactional
+    public void confirmarEmail(ConfirmEmailRequestDTO dto) {
+        emailConfirmationService.confirmarEmail(dto);
     }
 
     @Transactional
@@ -132,6 +151,12 @@ public class AuthService {
 
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
         return passwordEncoder.matches(senhaInformada, senhaCriptografada);
+    }
+
+    private void validarEmailConfirmado(Boolean emailConfirmado) {
+        if (Boolean.FALSE.equals(emailConfirmado)) {
+            throw new IllegalArgumentException("Email ainda nao confirmado. Verifique o codigo enviado para seu email.");
+        }
     }
 
     private Optional<ContaRecuperacaoSenha> buscarContaPorEmail(String email) {

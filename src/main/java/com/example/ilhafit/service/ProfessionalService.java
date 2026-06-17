@@ -31,7 +31,7 @@ public class ProfessionalService {
     private final ProfessionalMapper profissionalMapper;
     private final EvaluationRepository avaliacaoRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final EmailConfirmationService emailConfirmationService;
 
     @Transactional
     public ProfessionalDTO.Resposta cadastrar(ProfessionalDTO.Registro dto) {
@@ -44,9 +44,15 @@ public class ProfessionalService {
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
+        profissional.setEmailConfirmado(false);
         Professional salvo = profissionalRepository.save(profissional);
         atualizarGradeAtividades(salvo, atividadesSolicitadas);
-        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), RegistrationType.PROFISSIONAL);
+        emailConfirmationService.criarEEnviarCodigo(
+                salvo.getId(),
+                salvo.getEmail(),
+                salvo.getNome(),
+                RegistrationType.PROFISSIONAL
+        );
         return mappedWithRating(salvo);
     }
 

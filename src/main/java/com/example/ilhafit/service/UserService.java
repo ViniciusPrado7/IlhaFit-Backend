@@ -31,7 +31,7 @@ public class UserService {
     private final RegistrationIdentityValidator cadastroIdentityValidator;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final EmailConfirmationService emailConfirmationService;
 
     public List<UserResponseDTO> listarTodos() {
         return usuarioRepository.findAll().stream()
@@ -46,10 +46,16 @@ public class UserService {
         User usuario = mapper.toEntity(dto);
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         usuario.setRole(Role.USUARIO);
+        usuario.setEmailConfirmado(false);
 
         usuario = usuarioRepository.save(usuario);
 
-        emailService.enviarEmailCadastro(usuario.getEmail(), usuario.getNome(), RegistrationType.USUARIO);
+        emailConfirmationService.criarEEnviarCodigo(
+                usuario.getId(),
+                usuario.getEmail(),
+                usuario.getNome(),
+                RegistrationType.USUARIO
+        );
 
         return mapper.toResponse(usuario);
     }
@@ -60,6 +66,9 @@ public class UserService {
 
         if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
             throw new IllegalArgumentException("Credenciais invÃƒÂ¡lidas");
+        }
+        if (Boolean.FALSE.equals(usuario.getEmailConfirmado())) {
+            throw new IllegalArgumentException("Email ainda nao confirmado. Verifique o codigo enviado para seu email.");
         }
 
         return mapper.toResponse(usuario);

@@ -46,6 +46,9 @@ public class Professional {
     @Column(nullable = false)
     private String senha;
 
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado;
+
     @NotBlank(message = "Telefone ÃƒÂ© obrigatÃƒÂ³rio")
     @Column(nullable = false)
     private String telefone;

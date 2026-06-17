@@ -34,6 +34,9 @@ public class Administrator {
     @Column(nullable = false)
     private String senha;
 
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private Role role = Role.ADMIN;

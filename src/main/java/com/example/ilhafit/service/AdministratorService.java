@@ -23,7 +23,7 @@ public class AdministratorService {
     private final RegistrationIdentityValidator cadastroIdentityValidator;
     private final AdministratorMapper administratorMapper;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final EmailConfirmationService emailConfirmationService;
 
     @Transactional
     public AdministratorDTO.Resposta cadastrar(AdministratorDTO.Registro dto) {
@@ -34,8 +34,14 @@ public class AdministratorService {
             admin.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         admin.setRole(Role.ADMIN);
+        admin.setEmailConfirmado(false);
         Administrator salvo = administradorRepository.save(admin);
-        emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), RegistrationType.ADMINISTRADOR);
+        emailConfirmationService.criarEEnviarCodigo(
+                salvo.getId(),
+                salvo.getEmail(),
+                salvo.getNome(),
+                RegistrationType.ADMINISTRADOR
+        );
         return administratorMapper.toDTO(salvo);
     }
 

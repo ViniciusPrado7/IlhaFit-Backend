@@ -78,6 +78,25 @@ public class EmailService {
         }
     }
 
+    public void enviarEmailConfirmacao(String destinatario, String nome, String codigo, int validadeMinutos) {
+        try {
+            validarConfiguracaoSmtp();
+
+            SimpleMailMessage mensagem = new SimpleMailMessage();
+            mensagem.setFrom(from);
+            mensagem.setTo(destinatario);
+            mensagem.setSubject("Codigo de confirmacao IlhaFit");
+            mensagem.setText(montarMensagemConfirmacaoEmail(nome, codigo, validadeMinutos));
+
+            mailSender.send(mensagem);
+        } catch (Exception e) {
+            log.warn("Nao foi possivel enviar email de confirmacao para {}. Motivo: {}",
+                    destinatario,
+                    detalheErro(e),
+                    e);
+        }
+    }
+
     public void enviarEmailBoasVindas(String destinatario, String nome, String tipoConta) {
         validarConfiguracaoSmtp();
 
@@ -94,6 +113,15 @@ public class EmailService {
         return "Ola, " + nome + "!\n\n"
                 + "Seu cadastro como " + tipoConta + " foi criado com sucesso no IlhaFit.\n\n"
                 + "Agora voce ja pode acessar a plataforma e aproveitar os recursos disponiveis.\n\n"
+                + "Equipe IlhaFit";
+    }
+
+    private String montarMensagemConfirmacaoEmail(String nome, String codigo, int validadeMinutos) {
+        return "Ola, " + nome + "!\n\n"
+                + "Use o codigo abaixo para confirmar seu email no IlhaFit:\n\n"
+                + codigo + "\n\n"
+                + "Este codigo expira em " + validadeMinutos + " minutos.\n\n"
+                + "Se voce nao criou uma conta, ignore este email.\n\n"
                 + "Equipe IlhaFit";
     }
 
