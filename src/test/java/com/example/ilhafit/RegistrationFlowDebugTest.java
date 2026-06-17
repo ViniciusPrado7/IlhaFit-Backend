@@ -1,6 +1,5 @@
 package com.example.ilhafit;
 
-import com.example.ilhafit.dto.ActivityScheduleDTO;
 import com.example.ilhafit.dto.AddressDTO;
 import com.example.ilhafit.dto.EstablishmentDTO;
 import com.example.ilhafit.dto.ProfessionalDTO;
@@ -27,12 +26,6 @@ class RegistrationFlowDebugTest {
     void shouldRegisterEstablishmentWithSingleActivity() {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
 
-        ActivityScheduleDTO.Registro activity = new ActivityScheduleDTO.Registro();
-        activity.setAtividade("Outros");
-        activity.setExclusivoMulheres(false);
-        activity.setDiasSemana(new ArrayList<>(List.of("SEGUNDA")));
-        activity.setPeriodos(new ArrayList<>(List.of("MANHA")));
-
         AddressDTO address = new AddressDTO();
         address.setRua("Rua Teste");
         address.setNumero("100");
@@ -51,7 +44,7 @@ class RegistrationFlowDebugTest {
         dto.setTelefone("48999999999");
         dto.setCnpj("99" + suffix.substring(0, 6) + "000199");
         dto.setEndereco(address);
-        dto.setGradeAtividades(new ArrayList<>(List.of(activity)));
+        dto.setGradeAtividades(new ArrayList<>());
         dto.setFotosUrl(new ArrayList<>(List.of("https://example.com/image.jpg")));
 
         establishmentService.cadastrar(dto);
@@ -60,12 +53,6 @@ class RegistrationFlowDebugTest {
     @Test
     void shouldRegisterProfessionalWithSingleActivity() {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
-
-        ActivityScheduleDTO.Registro activity = new ActivityScheduleDTO.Registro();
-        activity.setAtividade("Outros");
-        activity.setExclusivoMulheres(false);
-        activity.setDiasSemana(new ArrayList<>(List.of("TERCA")));
-        activity.setPeriodos(new ArrayList<>(List.of("TARDE")));
 
         ProfessionalDTO.Registro dto = new ProfessionalDTO.Registro();
         dto.setNome("Profissional " + suffix);
@@ -77,7 +64,7 @@ class RegistrationFlowDebugTest {
         dto.setRegistroCref(null);
         dto.setRegiao("Centro");
         dto.setExclusivoMulheres(false);
-        dto.setGradeAtividades(new ArrayList<>(List.of(activity)));
+        dto.setGradeAtividades(new ArrayList<>());
         dto.setFotoUrl("https://example.com/foto.jpg");
 
         professionalService.cadastrar(dto);

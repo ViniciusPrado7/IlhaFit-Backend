@@ -21,10 +21,10 @@ public class CategoryLinkService {
     @Transactional
     public void removerCategoryDoProfessional(Long profissionalId, String categoriaNome) {
         Professional profissional = profissionalRepository.findById(profissionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional nÃ£o encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Professional não encontrado"));
 
         if (profissional.getGradeAtividades() != null &&
-                profissional.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade.getAtividade(), categoriaNome))) {
+                profissional.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade, categoriaNome))) {
             profissionalRepository.save(profissional);
         }
     }
@@ -32,10 +32,10 @@ public class CategoryLinkService {
     @Transactional
     public void removerCategoryDoEstablishment(Long estabelecimentoId, String categoriaNome) {
         Establishment estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new IllegalArgumentException("Establishment nÃ£o encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Establishment não encontrado"));
 
         if (estabelecimento.getGradeAtividades() != null &&
-                estabelecimento.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade.getAtividade(), categoriaNome))) {
+                estabelecimento.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade, categoriaNome))) {
             estabelecimentoRepository.save(estabelecimento);
         }
     }
@@ -45,7 +45,7 @@ public class CategoryLinkService {
         List<Professional> profissionais = profissionalRepository.findAll();
         profissionais.forEach(profissional -> {
             if (profissional.getGradeAtividades() != null &&
-                    profissional.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade.getAtividade(), categoriaNome))) {
+                    profissional.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade, categoriaNome))) {
                 profissionalRepository.save(profissional);
             }
         });
@@ -53,14 +53,16 @@ public class CategoryLinkService {
         List<Establishment> estabelecimentos = estabelecimentoRepository.findAll();
         estabelecimentos.forEach(estabelecimento -> {
             if (estabelecimento.getGradeAtividades() != null &&
-                    estabelecimento.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade.getAtividade(), categoriaNome))) {
+                    estabelecimento.getGradeAtividades().removeIf(atividade -> nomeIgual(atividade, categoriaNome))) {
                 estabelecimentoRepository.save(estabelecimento);
             }
         });
     }
 
-    private boolean nomeIgual(String nomeAtividade, String categoriaNome) {
-        return nomeAtividade != null && categoriaNome != null && nomeAtividade.equalsIgnoreCase(categoriaNome);
+    private boolean nomeIgual(ActivitySchedule atividade, String categoriaNome) {
+        if (atividade == null || atividade.getCategoria() == null || categoriaNome == null) {
+            return false;
+        }
+        return atividade.getCategoria().getNome().equalsIgnoreCase(categoriaNome);
     }
 }
-

@@ -39,7 +39,7 @@ public class RegistrationIdentityValidator {
         profissionalRepository.findByCpf(cpf)
                 .filter(profissional -> deveBloquear(profissional.getId(), profissionalIdAtual, false))
                 .ifPresent(profissional -> {
-                    throw new IllegalArgumentException("CPF jÃ¡ estÃ¡ vinculado a outro profissional.");
+                    throw new IllegalArgumentException("CPF já está vinculado a outro profissional.");
                 });
     }
 
@@ -60,7 +60,7 @@ public class RegistrationIdentityValidator {
 
     private void lancarConflitoEmail(RegistrationType tipoExistente) {
         throw new IllegalArgumentException(
-                "Email jÃ¡ estÃ¡ vinculado a um cadastro de " + tipoExistente.getDescricao() + "."
+                "Email já está vinculado a um cadastro de " + tipoExistente.getDescricao() + "."
         );
     }
 }

@@ -1,7 +1,7 @@
 package com.example.ilhafit.enums;
 
 public enum RegistrationType {
-    USUARIO("usuÃ¡rio"),
+    USUARIO("usuário"),
     ADMINISTRADOR("administrador"),
     PROFISSIONAL("profissional"),
     ESTABELECIMENTO("estabelecimento");

@@ -1,14 +1,15 @@
 package com.example.ilhafit.service;
 
+import com.example.ilhafit.dto.ActivityScheduleDTO;
 import com.example.ilhafit.dto.ProfessionalDTO;
 import com.example.ilhafit.entity.Evaluation;
 import com.example.ilhafit.entity.ActivitySchedule;
 import com.example.ilhafit.entity.Professional;
+import com.example.ilhafit.enums.ReportStatus;
 import com.example.ilhafit.enums.RegistrationType;
-import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.mapper.ProfessionalMapper;
-import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.repository.EvaluationRepository;
+import com.example.ilhafit.repository.ReportRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
 import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.EntityManager;
@@ -34,11 +35,11 @@ public class ProfessionalService {
 
     private final ProfessionalRepository profissionalRepository;
     private final RegistrationIdentityValidator cadastroIdentityValidator;
-    private final PendingCategoryService categoriaPendenteService;
     private final ActivityScheduleDuplicateValidator gradeAtividadeDuplicidadeValidator;
+    private final ActivityScheduleService gradeAtividadeService;
     private final ProfessionalMapper profissionalMapper;
     private final EvaluationRepository avaliacaoRepository;
-    private final DenunciaRepository denunciaRepository;
+    private final ReportRepository denunciaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -48,15 +49,20 @@ public class ProfessionalService {
         cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
 
         Professional profissional = profissionalMapper.toEntity(dto);
-        List<ActivitySchedule> atividadesSolicitadas = copiarAtividades(profissional.getGradeAtividades());
-        profissional.setGradeAtividades(null);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
         Professional salvo = profissionalRepository.save(profissional);
-        atualizarGradeAtividades(salvo, atividadesSolicitadas);
+        atualizarGradeAtividades(salvo, dto.getGradeAtividades());
         emailService.enviarEmailCadastro(salvo.getEmail(), salvo.getNome(), RegistrationType.PROFISSIONAL);
-        return mappedWithRating(salvo);
+        Long profissionalId = salvo.getId();
+        try {
+            entityManager.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste profissional.", ex);
+        }
+        entityManager.clear();
+        return mappedWithRating(profissionalRepository.findById(profissionalId).orElseThrow());
     }
 
     public List<ProfessionalDTO.Resposta> listarTodos() {
@@ -68,24 +74,6 @@ public class ProfessionalService {
     public Optional<ProfessionalDTO.Resposta> buscarPorId(Long id) {
         return profissionalRepository.findById(id)
                 .map(this::mappedWithRating);
-    }
-
-    private ProfessionalDTO.Resposta mappedWithRating(Professional p) {
-        categoriaPendenteService.limparAtividadesLegadasCriadasAutomaticamente(p);
-        ProfessionalDTO.Resposta dto = profissionalMapper.toDTO(p);
-        List<Evaluation> avaliacoes = avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(p.getId());
-        if (avaliacoes.isEmpty()) {
-            dto.setAvaliacao(0.0);
-            dto.setTotalAvaliacoes(0);
-        } else {
-            double media = avaliacoes.stream()
-                    .mapToInt(Evaluation::getNota)
-                    .average()
-                    .orElse(0.0);
-            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
-            dto.setTotalAvaliacoes(avaliacoes.size());
-        }
-        return dto;
     }
 
     public Optional<ProfessionalDTO.Resposta> buscarPorEmail(String email) {
@@ -122,10 +110,7 @@ public class ProfessionalService {
         profissional.setFotoUrl(dto.getFotoUrl());
 
         if (dto.getGradeAtividades() != null) {
-            atualizarGradeAtividades(
-                    profissional,
-                    copiarAtividades(profissionalMapper.toEntity(dto).getGradeAtividades())
-            );
+            atualizarGradeAtividades(profissional, dto.getGradeAtividades());
         }
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
@@ -148,48 +133,44 @@ public class ProfessionalService {
             throw new IllegalArgumentException("Profissional não encontrado");
         }
         avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(id)
-                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), StatusDenuncia.EXCLUIDO));
+                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), ReportStatus.EXCLUIDO));
         avaliacaoRepository.deleteByProfissionalId(id, LocalDateTime.now());
         profissionalRepository.deleteById(id);
     }
 
-    private void atualizarGradeAtividades(Professional profissional, List<ActivitySchedule> atividades) {
-        List<ActivitySchedule> aprovadas = categoriaPendenteService.filtrarAtividadesAprovadasESolicitarPendentes(
-                atividades,
-                RegistrationType.PROFISSIONAL,
-                profissional.getId()
-        );
-        gradeAtividadeDuplicidadeValidator.validarListaProfissional(aprovadas);
-        profissional.setGradeAtividades(aprovadas);
-        try {
-            profissionalRepository.save(profissional);
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException(
-                    "Esta categoria ja esta cadastrada na grade de atividades deste profissional.",
-                    ex
-            );
+    private ProfessionalDTO.Resposta mappedWithRating(Professional p) {
+        ProfessionalDTO.Resposta dto = profissionalMapper.toDTO(p);
+        List<Evaluation> avaliacoes = avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(p.getId());
+        if (avaliacoes.isEmpty()) {
+            dto.setAvaliacao(0.0);
+            dto.setTotalAvaliacoes(0);
+        } else {
+            double media = avaliacoes.stream()
+                    .mapToInt(Evaluation::getNota)
+                    .average()
+                    .orElse(0.0);
+            dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
+            dto.setTotalAvaliacoes(avaliacoes.size());
+        }
+        return dto;
+    }
+
+    private void atualizarGradeAtividades(Professional profissional, List<ActivityScheduleDTO.Registro> dtos) {
+        if (dtos == null) {
+            return;
+        }
+
+        List<ActivitySchedule> grade = dtos.stream()
+                .map(gradeAtividadeService::toEntity)
+                .collect(Collectors.toList());
+
+        gradeAtividadeDuplicidadeValidator.validarListaProfissional(grade);
+        List<ActivitySchedule> listaAtual = profissional.getGradeAtividades();
+        if (listaAtual == null) {
+            profissional.setGradeAtividades(new ArrayList<>(grade));
+        } else {
+            listaAtual.clear();
+            listaAtual.addAll(grade);
         }
     }
-
-    private List<ActivitySchedule> copiarAtividades(List<ActivitySchedule> atividades) {
-        if (atividades == null || atividades.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return atividades.stream()
-                .filter(java.util.Objects::nonNull)
-                .map(this::copiarAtividade)
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private ActivitySchedule copiarAtividade(ActivitySchedule atividade) {
-        ActivitySchedule copia = new ActivitySchedule();
-        copia.setId(atividade.getId());
-        copia.setAtividade(atividade.getAtividade());
-        copia.setExclusivoMulheres(Boolean.TRUE.equals(atividade.getExclusivoMulheres()));
-        copia.setDiasSemana(atividade.getDiasSemana() != null ? new ArrayList<>(atividade.getDiasSemana()) : new ArrayList<>());
-        copia.setPeriodos(atividade.getPeriodos() != null ? new ArrayList<>(atividade.getPeriodos()) : new ArrayList<>());
-        return copia;
-    }
-
 }
