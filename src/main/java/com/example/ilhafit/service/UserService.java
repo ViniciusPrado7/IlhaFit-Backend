@@ -101,6 +101,7 @@ public class UserService {
         denunciaRepository.deleteByDenuncianteEmail(usuario.getEmail());
         avaliacoesDoUser.forEach(avaliacao -> denunciaRepository.deleteByAvaliacaoId(avaliacao.getId(), ReportStatus.EXCLUIDO));
         avaliacaoRepository.deleteByAutorTipoAndAutorId(RegistrationType.USUARIO.name(), id, LocalDateTime.now());
+        avaliacaoRepository.desvincularUsuarioAutor(id);
         usuarioRepository.delete(usuario);
     }
 

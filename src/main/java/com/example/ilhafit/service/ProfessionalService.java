@@ -137,6 +137,7 @@ public class ProfessionalService {
             throw new IllegalArgumentException("Professional nÃƒÂ£o encontrado");
         }
         avaliacaoRepository.deleteByProfissionalId(id, LocalDateTime.now());
+        avaliacaoRepository.desvincularProfissionalAvaliado(id);
         profissionalRepository.deleteById(id);
     }
 

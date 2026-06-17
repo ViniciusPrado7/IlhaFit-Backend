@@ -37,7 +37,15 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
     void deleteByProfissionalId(@Param("id") Long profissionalId, @Param("now") LocalDateTime now);
 
     @Modifying(clearAutomatically = true)
+    @Query("UPDATE Evaluation a SET a.profissional = NULL WHERE a.profissional.id = :id")
+    void desvincularProfissionalAvaliado(@Param("id") Long profissionalId);
+
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Evaluation a SET a.deletedAt = :now WHERE a.autorTipo = :autorTipo AND a.autorId = :autorId AND a.deletedAt IS NULL")
     void deleteByAutorTipoAndAutorId(@Param("autorTipo") String autorTipo, @Param("autorId") Long autorId, @Param("now") LocalDateTime now);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Evaluation a SET a.autor = NULL WHERE a.autor.id = :id")
+    void desvincularUsuarioAutor(@Param("id") Long usuarioId);
 }
 
