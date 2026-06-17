@@ -59,23 +59,16 @@ public class EmailService {
         }
     }
 
-    public void enviarEmailRecuperacaoSenha(String destinatario, String link, int validadeMinutos) {
-        try {
-            validarConfiguracaoSmtp();
+    public void enviarEmailRecuperacaoSenha(String destinatario, String codigo, int validadeMinutos) {
+        validarConfiguracaoSmtp();
 
-            SimpleMailMessage mensagem = new SimpleMailMessage();
-            mensagem.setFrom(from);
-            mensagem.setTo(destinatario);
-            mensagem.setSubject("Recuperacao de senha IlhaFit");
-            mensagem.setText(montarMensagemRecuperacaoSenha(link, validadeMinutos));
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setFrom(from);
+        mensagem.setTo(destinatario);
+        mensagem.setSubject("Codigo de recuperacao de senha IlhaFit");
+        mensagem.setText(montarMensagemRecuperacaoSenha(codigo, validadeMinutos));
 
-            mailSender.send(mensagem);
-        } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de recuperacao de senha para {}. Motivo: {}",
-                    destinatario,
-                    detalheErro(e),
-                    e);
-        }
+        mailSender.send(mensagem);
     }
 
     public void enviarEmailConfirmacao(String destinatario, String nome, String codigo, int validadeMinutos) {
@@ -118,12 +111,12 @@ public class EmailService {
                 + "Equipe IlhaFit";
     }
 
-    private String montarMensagemRecuperacaoSenha(String link, int validadeMinutos) {
+    private String montarMensagemRecuperacaoSenha(String codigo, int validadeMinutos) {
         return "Ola!\n\n"
                 + "Recebemos uma solicitacao para redefinir sua senha no IlhaFit.\n\n"
-                + "Acesse o link abaixo para criar uma nova senha:\n"
-                + link + "\n\n"
-                + "Este link expira em " + validadeMinutos + " minutos.\n\n"
+                + "Use este codigo na tela de recuperacao para criar uma nova senha:\n\n"
+                + codigo + "\n\n"
+                + "Este codigo expira em " + validadeMinutos + " minutos.\n\n"
                 + "Se voce nao solicitou essa alteracao, ignore este email.\n\n"
                 + "Equipe IlhaFit";
     }

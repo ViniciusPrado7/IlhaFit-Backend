@@ -35,7 +35,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequestDTO dto) {
         authService.solicitarRecuperacaoSenha(dto);
         return ResponseEntity.ok(Map.of(
-                "mensagem", "Se o email estiver cadastrado, enviaremos as instrucoes de recuperacao."
+                "mensagem", "Enviamos um codigo de 6 digitos para seu email."
         ));
     }
 

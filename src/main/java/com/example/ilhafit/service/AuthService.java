@@ -25,14 +25,13 @@ import com.example.ilhafit.repository.UserRepository;
 import com.example.ilhafit.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Optional;
 
 @Slf4j
@@ -56,9 +55,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final EmailConfirmationService emailConfirmationService;
-
-    @Value("${app.frontend.reset-password-url:http://localhost:5173/esqueci-senha}")
-    private String resetPasswordUrl;
 
     public AdministratorDTO.Resposta registerAdministrator(AdministratorDTO.Registro dto) {
         return administratorService.cadastrar(dto);
@@ -130,17 +126,21 @@ public class AuthService {
 
     @Transactional
     public void solicitarRecuperacaoSenha(ForgotPasswordRequestDTO dto) {
-        buscarContaPorEmail(dto.getEmail())
-                .ifPresent(this::criarTokenRecuperacao);
+        ContaRecuperacaoSenha conta = buscarContaPorEmail(dto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Email nao encontrado no sistema."));
+        criarTokenRecuperacao(conta);
     }
 
     @Transactional
     public void redefinirSenha(ResetPasswordRequestDTO dto) {
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.getToken())
-                .orElseThrow(() -> new IllegalArgumentException("Token invalido ou expirado"));
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findTopByEmailIgnoreCaseAndTokenAndUsedFalseOrderByCreatedAtDesc(dto.getEmail(), dto.getCodigo())
+                .orElseThrow(() -> new IllegalArgumentException("Codigo invalido ou expirado"));
 
         if (resetToken.isUsed() || resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Token invalido ou expirado");
+            resetToken.setUsed(true);
+            passwordResetTokenRepository.save(resetToken);
+            throw new IllegalArgumentException("Codigo invalido ou expirado");
         }
 
         String senhaCriptografada = passwordEncoder.encode(dto.getNovaSenha());
@@ -191,7 +191,7 @@ public class AuthService {
         invalidarTokensAnteriores(conta.email());
 
         PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(gerarTokenSeguro());
+        resetToken.setToken(gerarCodigoRecuperacao());
         resetToken.setCadastroId(conta.cadastroId());
         resetToken.setEmail(conta.email());
         resetToken.setRegistrationType(conta.tipoCadastro());
@@ -199,24 +199,26 @@ public class AuthService {
         resetToken.setUsed(false);
 
         passwordResetTokenRepository.save(resetToken);
-        emailService.enviarEmailRecuperacaoSenha(
-                conta.email(),
-                montarLinkRecuperacao(resetToken.getToken()),
-                RESET_TOKEN_EXPIRATION_MINUTES
-        );
-        log.info("[AuthService] Token de recuperacao de senha criado para tipo {} e email {}.",
+        try {
+            emailService.enviarEmailRecuperacaoSenha(
+                    conta.email(),
+                    resetToken.getToken(),
+                    RESET_TOKEN_EXPIRATION_MINUTES
+            );
+        } catch (MailException e) {
+            throw new IllegalStateException(
+                    "Nao foi possivel enviar o codigo de recuperacao. Verifique o email informado ou tente novamente.",
+                    e
+            );
+        }
+        log.info("[AuthService] Codigo de recuperacao de senha criado para tipo {} e email {}.",
                 conta.tipoCadastro(), conta.email());
     }
 
     private void invalidarTokensAnteriores(String email) {
-        var tokensAtivos = passwordResetTokenRepository.findByEmailAndUsedFalse(email);
+        var tokensAtivos = passwordResetTokenRepository.findByEmailIgnoreCaseAndUsedFalse(email);
         tokensAtivos.forEach(token -> token.setUsed(true));
         passwordResetTokenRepository.saveAll(tokensAtivos);
-    }
-
-    private String montarLinkRecuperacao(String token) {
-        String separador = resetPasswordUrl.contains("?") ? "&" : "?";
-        return resetPasswordUrl + separador + "token=" + token;
     }
 
     private void atualizarSenha(PasswordResetToken resetToken, String senhaCriptografada) {
@@ -248,10 +250,8 @@ public class AuthService {
         }
     }
 
-    private String gerarTokenSeguro() {
-        byte[] bytes = new byte[48];
-        SECURE_RANDOM.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    private String gerarCodigoRecuperacao() {
+        return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }
 
     private record ContaRecuperacaoSenha(Long cadastroId, String email, RegistrationType tipoCadastro) {
