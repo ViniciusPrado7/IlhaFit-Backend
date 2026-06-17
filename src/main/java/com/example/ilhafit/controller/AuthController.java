@@ -3,7 +3,7 @@ package com.example.ilhafit.controller;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
-import com.example.ilhafit.dto.usuario.UsuarioLoginDTO;
+import com.example.ilhafit.dto.user.UserLoginDTO;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AuthService;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid UsuarioLoginDTO dto) {
+    public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid UserLoginDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
     }
 
@@ -47,7 +47,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal JwtAuthenticatedUser user) {
         if (user == null) {
-            return ResponseEntity.status(401).body(Map.of("erro", "Sessão inválida ou expirada."));
+            return ResponseEntity.status(401).body(Map.of("erro", "SessÃ£o invÃ¡lida ou expirada."));
         }
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),
@@ -56,3 +56,4 @@ public class AuthController {
         ));
     }
 }
+

@@ -1,10 +1,10 @@
 package com.example.ilhafit.security;
 
-import com.example.ilhafit.entity.Administrador;
-import com.example.ilhafit.entity.Estabelecimento;
-import com.example.ilhafit.entity.Profissional;
-import com.example.ilhafit.entity.Usuario;
-import com.example.ilhafit.enums.TipoCadastro;
+import com.example.ilhafit.entity.Administrator;
+import com.example.ilhafit.entity.Establishment;
+import com.example.ilhafit.entity.Professional;
+import com.example.ilhafit.entity.User;
+import com.example.ilhafit.enums.RegistrationType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -31,35 +31,35 @@ public class JwtService {
         this.expirationMillis = expirationMillis;
     }
 
-    public String gerarTokenEstabelecimento(Estabelecimento estabelecimento) {
+    public String gerarTokenEstablishment(Establishment estabelecimento) {
         return gerarToken(
                 estabelecimento.getId(),
                 estabelecimento.getEmail(),
-                TipoCadastro.ESTABELECIMENTO.name(),
-                TipoCadastro.ESTABELECIMENTO.name());
+                RegistrationType.ESTABELECIMENTO.name(),
+                RegistrationType.ESTABELECIMENTO.name());
     }
 
-    public String gerarTokenProfissional(Profissional profissional) {
+    public String gerarTokenProfessional(Professional profissional) {
         return gerarToken(
                 profissional.getId(),
                 profissional.getEmail(),
-                TipoCadastro.PROFISSIONAL.name(),
-                TipoCadastro.PROFISSIONAL.name());
+                RegistrationType.PROFISSIONAL.name(),
+                RegistrationType.PROFISSIONAL.name());
     }
 
-    public String gerarTokenUsuario(Usuario usuario) {
+    public String gerarTokenUser(User usuario) {
         return gerarToken(
                 usuario.getId(),
                 usuario.getEmail(),
-                TipoCadastro.USUARIO.name(),
+                RegistrationType.USUARIO.name(),
                 usuario.getRole().name());
     }
 
-    public String gerarTokenAdministrador(Administrador administrador) {
+    public String gerarTokenAdministrator(Administrator administrador) {
         return gerarToken(
                 administrador.getId(),
                 administrador.getEmail(),
-                TipoCadastro.ADMINISTRADOR.name(),
+                RegistrationType.ADMINISTRADOR.name(),
                 administrador.getRole().name());
     }
 
@@ -93,3 +93,4 @@ public class JwtService {
         }
     }
 }
+

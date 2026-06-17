@@ -1,13 +1,13 @@
 package com.example.ilhafit.controller;
 
-import com.example.ilhafit.repository.AdministradorRepository;
-import com.example.ilhafit.repository.EstabelecimentoRepository;
-import com.example.ilhafit.repository.ProfissionalRepository;
-import com.example.ilhafit.repository.UsuarioRepository;
-import com.example.ilhafit.service.AdministradorService;
-import com.example.ilhafit.service.EstabelecimentoService;
-import com.example.ilhafit.service.ProfissionalService;
-import com.example.ilhafit.service.UsuarioService;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.EstablishmentRepository;
+import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.repository.UserRepository;
+import com.example.ilhafit.service.AdministratorService;
+import com.example.ilhafit.service.EstablishmentService;
+import com.example.ilhafit.service.ProfessionalService;
+import com.example.ilhafit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +25,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final UsuarioRepository usuarioRepository;
-    private final ProfissionalRepository profissionalRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
-    private final AdministradorRepository administradorRepository;
-    private final UsuarioService usuarioService;
-    private final ProfissionalService profissionalService;
-    private final EstabelecimentoService estabelecimentoService;
-    private final AdministradorService administradorService;
+    private final UserRepository usuarioRepository;
+    private final ProfessionalRepository profissionalRepository;
+    private final EstablishmentRepository estabelecimentoRepository;
+    private final AdministratorRepository administradorRepository;
+    private final UserService usuarioService;
+    private final ProfessionalService profissionalService;
+    private final EstablishmentService estabelecimentoService;
+    private final AdministratorService administradorService;
 
     private static final PageRequest LIMITE_SEGURANCA = PageRequest.of(0, 2000);
 

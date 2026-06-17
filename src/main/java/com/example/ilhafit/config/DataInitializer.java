@@ -1,10 +1,10 @@
 package com.example.ilhafit.config;
 
-import com.example.ilhafit.entity.Administrador;
-import com.example.ilhafit.entity.Categoria;
+import com.example.ilhafit.entity.Administrator;
+import com.example.ilhafit.entity.Category;
 import com.example.ilhafit.enums.Role;
-import com.example.ilhafit.repository.AdministradorRepository;
-import com.example.ilhafit.repository.CategoriaRepository;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,8 +19,8 @@ public class DataInitializer implements ApplicationRunner {
 
     private static final String CATEGORIA_PADRAO = "Outros";
 
-    private final AdministradorRepository administradorRepository;
-    private final CategoriaRepository categoriaRepository;
+    private final AdministratorRepository administradorRepository;
+    private final CategoryRepository categoriaRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminProperties adminProperties;
 
@@ -29,7 +29,7 @@ public class DataInitializer implements ApplicationRunner {
         if (administradorRepository.count() > 0) {
             log.info("[DataInitializer] Admin ja existe. Nenhuma acao necessaria.");
         } else {
-            Administrador admin = new Administrador();
+            Administrator admin = new Administrator();
             admin.setNome(adminProperties.getNome());
             admin.setEmail(adminProperties.getEmail());
             admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
@@ -41,10 +41,10 @@ public class DataInitializer implements ApplicationRunner {
         if (categoriaRepository.existsByNomeIgnoreCaseAndDeletedAtIsNull(CATEGORIA_PADRAO)) {
             log.info("[DataInitializer] Categoria padrao ja existe. Nenhuma acao necessaria.");
         } else {
-            Categoria categoria = new Categoria();
+            Category categoria = new Category();
             categoria.setNome(CATEGORIA_PADRAO);
             categoriaRepository.save(categoria);
-            log.info("[DataInitializer] Categoria padrao criada: {}", CATEGORIA_PADRAO);
+            log.info("[DataInitializer] Category padrao criada: {}", CATEGORIA_PADRAO);
         }
     }
 }
