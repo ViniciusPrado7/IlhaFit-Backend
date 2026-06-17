@@ -5,14 +5,19 @@ import com.example.ilhafit.entity.Evaluation;
 import com.example.ilhafit.entity.ActivitySchedule;
 import com.example.ilhafit.entity.Professional;
 import com.example.ilhafit.enums.RegistrationType;
+import com.example.ilhafit.enums.StatusDenuncia;
 import com.example.ilhafit.mapper.ProfessionalMapper;
+import com.example.ilhafit.repository.DenunciaRepository;
 import com.example.ilhafit.repository.EvaluationRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.util.StringNormalizer;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,12 +29,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProfessionalService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final ProfessionalRepository profissionalRepository;
     private final RegistrationIdentityValidator cadastroIdentityValidator;
     private final PendingCategoryService categoriaPendenteService;
     private final ActivityScheduleDuplicateValidator gradeAtividadeDuplicidadeValidator;
     private final ProfessionalMapper profissionalMapper;
     private final EvaluationRepository avaliacaoRepository;
+    private final DenunciaRepository denunciaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -92,10 +101,11 @@ public class ProfessionalService {
     @Transactional
     public ProfessionalDTO.Resposta atualizar(Long id, ProfessionalDTO.Registro dto) {
         Professional profissional = profissionalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Professional nÃƒÂ£o encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));
 
-        if (!profissional.getEmail().equals(dto.getEmail())) {
-            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.PROFISSIONAL, id);
+        String novoEmail = StringNormalizer.normalizeEmail(dto.getEmail());
+        if (!profissional.getEmail().equals(novoEmail)) {
+            cadastroIdentityValidator.validarEmailDisponivel(novoEmail, RegistrationType.PROFISSIONAL, id);
         }
         if (!profissional.getCpf().equals(dto.getCpf())) {
             cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), id);
@@ -122,14 +132,23 @@ public class ProfessionalService {
             profissional.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        return mappedWithRating(profissionalRepository.save(profissional));
+        try {
+            profissionalRepository.save(profissional);
+            entityManager.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste profissional.", ex);
+        }
+        entityManager.clear();
+        return mappedWithRating(profissionalRepository.findById(id).orElseThrow());
     }
 
     @Transactional
     public void deletar(Long id) {
         if (!profissionalRepository.existsById(id)) {
-            throw new IllegalArgumentException("Professional nÃƒÂ£o encontrado");
+            throw new IllegalArgumentException("Profissional não encontrado");
         }
+        avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(id)
+                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), StatusDenuncia.EXCLUIDO));
         avaliacaoRepository.deleteByProfissionalId(id, LocalDateTime.now());
         profissionalRepository.deleteById(id);
     }
@@ -174,4 +193,3 @@ public class ProfessionalService {
     }
 
 }
-

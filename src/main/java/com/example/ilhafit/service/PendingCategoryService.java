@@ -12,6 +12,7 @@ import com.example.ilhafit.repository.PendingCategoryRepository;
 import com.example.ilhafit.repository.CategoryRepository;
 import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class PendingCategoryService {
         try {
             solicitarCategory(nomeCategory, tipoSolicitante, solicitanteId);
         } catch (IllegalArgumentException ignored) {
-            // Fluxos antigos ainda podem chamar este mÃ©todo; ignoramos duplicidade/existÃªncia.
+            // Fluxos antigos ainda podem chamar este método; ignoramos duplicidade/existência.
         }
     }
 
@@ -50,15 +52,16 @@ public class PendingCategoryService {
         String nomeNormalizado = normalizarNome(nomeCategory);
 
         if (nomeNormalizado == null) {
-            throw new IllegalArgumentException("Nome da categoria Ã© obrigatÃ³rio");
+            throw new IllegalArgumentException("Nome da categoria é obrigatório");
         }
 
-        if (categoriaRepository.existsByNomeIgnoreCase(nomeNormalizado)) {
-            throw new IllegalArgumentException("Essa categoria jÃ¡ existe e pode ser usada no cadastro");
+        // verifica somente ativas — uma inativa pode ser solicitada novamente
+        if (categoriaRepository.existsByNomeIgnoreCaseAndDeletedAtIsNull(nomeNormalizado)) {
+            throw new IllegalArgumentException("Essa categoria já existe e pode ser usada no cadastro");
         }
 
         if (existePendenciaIgual(nomeNormalizado, tipoSolicitante, solicitanteId)) {
-            throw new IllegalArgumentException("VocÃª jÃ¡ possui uma solicitaÃ§Ã£o pendente para essa categoria");
+            throw new IllegalArgumentException("Você já possui uma solicitação pendente para essa categoria");
         }
 
         validarLimitePendencias(tipoSolicitante, solicitanteId, 1);
@@ -67,6 +70,7 @@ public class PendingCategoryService {
         categoriaPendente.setNome(nomeNormalizado);
         categoriaPendente.setTipoSolicitante(tipoSolicitante);
         categoriaPendente.setSolicitanteId(solicitanteId);
+        categoriaPendente.setEmailSnapshot(buscarEmailSolicitante(tipoSolicitante, solicitanteId));
         categoriaPendente.setStatus(PendingCategoryStatus.PENDENTE);
         return toDTO(categoriaPendenteRepository.save(categoriaPendente));
     }
@@ -142,19 +146,13 @@ public class PendingCategoryService {
 
         List<PendingCategory> lista = status != null
                 ? categoriaPendenteRepository.findByTipoSolicitanteAndSolicitanteIdAndStatusOrderByDataSolicitacaoDesc(
-                        tipoSolicitante,
-                        solicitanteId,
-                        status
-                )
+                        tipoSolicitante, solicitanteId, status)
                 : categoriaPendenteRepository.findByTipoSolicitanteAndSolicitanteIdOrderByDataSolicitacaoDesc(
-                        tipoSolicitante,
-                        solicitanteId
-                );
+                        tipoSolicitante, solicitanteId);
 
         return lista.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    @Transactional
     public void limparAtividadesLegadasCriadasAutomaticamente() {
         profissionalRepository.findAll().forEach(this::limparAtividadesLegadasCriadasAutomaticamente);
         estabelecimentoRepository.findAll().forEach(this::limparAtividadesLegadasCriadasAutomaticamente);
@@ -204,7 +202,15 @@ public class PendingCategoryService {
     public PendingCategoryDTO.Resposta aprovar(Long id, String observacaoAdmin) {
         PendingCategory categoriaPendente = buscarPendente(id);
 
-        if (!categoriaRepository.existsByNomeIgnoreCase(categoriaPendente.getNome())) {
+        // reativa se soft-deletada com mesmo nome; cria nova se nunca existiu
+        Optional<Category> existente = categoriaRepository.findByNomeIgnoreCase(categoriaPendente.getNome());
+        if (existente.isPresent()) {
+            Category categoria = existente.get();
+            if (!categoria.isAtiva()) {
+                categoria.setDeletedAt(null);
+                categoriaRepository.save(categoria);
+            }
+        } else {
             Category categoria = new Category();
             categoria.setNome(categoriaPendente.getNome());
             categoriaRepository.save(categoria);
@@ -280,10 +286,10 @@ public class PendingCategoryService {
 
     private PendingCategory buscarPendente(Long id) {
         PendingCategory categoriaPendente = categoriaPendenteRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Category pendente nÃ£o encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Categoria pendente não encontrada"));
 
         if (categoriaPendente.getStatus() != PendingCategoryStatus.PENDENTE) {
-            throw new IllegalArgumentException("Essa categoria pendente jÃ¡ foi analisada");
+            throw new IllegalArgumentException("Essa categoria pendente já foi analisada");
         }
 
         return categoriaPendente;
@@ -291,7 +297,7 @@ public class PendingCategoryService {
 
     private void validarTipoSolicitante(RegistrationType tipoSolicitante) {
         if (tipoSolicitante != RegistrationType.PROFISSIONAL && tipoSolicitante != RegistrationType.ESTABELECIMENTO) {
-            throw new IllegalArgumentException("Tipo de solicitante invÃ¡lido para categoria pendente");
+            throw new IllegalArgumentException("Tipo de solicitante inválido para categoria pendente");
         }
     }
 
@@ -307,17 +313,12 @@ public class PendingCategoryService {
         );
 
         if (pendenciasAtuais + novasPendencias > LIMITE_PENDENCIAS_POR_USUARIO) {
-            throw new IllegalArgumentException("Cada usuÃ¡rio pode ter no mÃ¡ximo 3 categorias pendentes");
+            throw new IllegalArgumentException("Cada usuário pode ter no máximo 3 categorias pendentes");
         }
     }
 
     private String normalizarNome(String nomeCategory) {
-        if (nomeCategory == null) {
-            return null;
-        }
-
-        String nomeNormalizado = nomeCategory.trim();
-        return nomeNormalizado.isBlank() ? null : nomeNormalizado;
+        return StringNormalizer.normalize(nomeCategory);
     }
 
     private PendingCategoryDTO.Resposta toDTO(PendingCategory entity) {
@@ -327,7 +328,9 @@ public class PendingCategoryService {
         dto.setTipoSolicitante(entity.getTipoSolicitante());
         dto.setSolicitanteId(entity.getSolicitanteId());
         dto.setNomeSolicitante(buscarNomeSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
-        dto.setSolicitanteEmail(buscarEmailSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
+        dto.setSolicitanteEmail(entity.getEmailSnapshot() != null
+                ? entity.getEmailSnapshot()
+                : buscarEmailSolicitante(entity.getTipoSolicitante(), entity.getSolicitanteId()));
         dto.setStatus(entity.getStatus());
         dto.setDataSolicitacao(entity.getDataSolicitacao());
         dto.setDataAnalise(entity.getDataAnalise());
@@ -355,4 +358,3 @@ public class PendingCategoryService {
         return null;
     }
 }
-

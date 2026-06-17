@@ -2,6 +2,7 @@ package com.example.ilhafit.entity;
 
 import com.example.ilhafit.enums.PendingCategoryStatus;
 import com.example.ilhafit.enums.RegistrationType;
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,12 +50,25 @@ public class PendingCategory {
     @Column(name = "data_analise")
     private LocalDateTime dataAnalise;
 
+    @Column(name = "email_solicitante_snapshot")
+    private String emailSnapshot;
+
     @Column(name = "observacao_admin")
     private String observacaoAdmin;
 
     @PrePersist
     protected void onCreate() {
         dataSolicitacao = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.nome = StringNormalizer.normalize(nome);
+        this.observacaoAdmin = StringNormalizer.normalize(observacaoAdmin);
     }
 }
-

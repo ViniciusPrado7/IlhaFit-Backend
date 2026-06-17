@@ -6,6 +6,7 @@ import com.example.ilhafit.enums.Role;
 import com.example.ilhafit.enums.RegistrationType;
 import com.example.ilhafit.mapper.AdministratorMapper;
 import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,10 +59,11 @@ public class AdministratorService {
     @Transactional
     public AdministratorDTO.Resposta atualizar(Long id, AdministratorDTO.Registro dto) {
         Administrator admin = administradorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Administrator nÃƒÆ’Ã‚Â£o encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Administrator não encontrado"));
 
-        if (!admin.getEmail().equals(dto.getEmail())) {
-            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.ADMINISTRADOR, id);
+        String novoEmail = StringNormalizer.normalizeEmail(dto.getEmail());
+        if (!admin.getEmail().equals(novoEmail)) {
+            cadastroIdentityValidator.validarEmailDisponivel(novoEmail, RegistrationType.ADMINISTRADOR, id);
         }
 
         Administrator atualizado = administratorMapper.toEntity(dto);
@@ -80,9 +82,8 @@ public class AdministratorService {
     @Transactional
     public void deletar(Long id) {
         if (!administradorRepository.existsById(id)) {
-            throw new IllegalArgumentException("Administrator nÃƒÆ’Ã‚Â£o encontrado");
+            throw new IllegalArgumentException("Administrator não encontrado");
         }
         administradorRepository.deleteById(id);
     }
 }
-

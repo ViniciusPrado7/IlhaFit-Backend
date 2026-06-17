@@ -1,6 +1,7 @@
 package com.example.ilhafit.entity;
 
 import com.example.ilhafit.enums.RegistrationType;
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -15,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -83,10 +85,26 @@ public class Establishment {
     @PrePersist
     protected void onCreate() {
         dataCadastro = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.nomeFantasia = StringNormalizer.normalize(nomeFantasia);
+        this.razaoSocial = StringNormalizer.normalize(razaoSocial);
+        this.email = StringNormalizer.normalizeEmail(email);
+        if (this.endereco != null) {
+            this.endereco.setRua(StringNormalizer.normalize(this.endereco.getRua()));
+            this.endereco.setBairro(StringNormalizer.normalize(this.endereco.getBairro()));
+            this.endereco.setCidade(StringNormalizer.normalize(this.endereco.getCidade()));
+        }
     }
 
     public LocalDateTime getDataCadastro() {
         return dataCadastro != null ? dataCadastro : LocalDateTime.now();
     }
 }
-

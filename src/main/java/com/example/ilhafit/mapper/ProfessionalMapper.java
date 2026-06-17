@@ -22,16 +22,6 @@ public class ProfessionalMapper {
         pro.setRegistroCref(dto.getRegistroCref());
         pro.setRegiao(dto.getRegiao());
         pro.setExclusivoMulheres(dto.getExclusivoMulheres());
-        if (dto.getGradeAtividades() != null) {
-            pro.setGradeAtividades(dto.getGradeAtividades().stream().map(g -> {
-                ActivitySchedule entity = new ActivitySchedule();
-                entity.setAtividade(g.getAtividade());
-                entity.setExclusivoMulheres(g.getExclusivoMulheres());
-                entity.setDiasSemana(g.getDiasSemana());
-                entity.setPeriodos(g.getPeriodos());
-                return entity;
-            }).toList());
-        }
         pro.setFotoUrl(dto.getFotoUrl());
         return pro;
     }
@@ -47,19 +37,24 @@ public class ProfessionalMapper {
         dto.setRegistroCref(pro.getRegistroCref());
         dto.setRegiao(pro.getRegiao());
         dto.setExclusivoMulheres(pro.getExclusivoMulheres());
-        if (pro.getGradeAtividades() != null) {
-            dto.setGradeAtividades(pro.getGradeAtividades().stream().map(g -> {
-                ActivityScheduleDTO.Resposta d = new ActivityScheduleDTO.Resposta();
-                d.setId(g.getId());
-                d.setAtividade(g.getAtividade());
-                d.setExclusivoMulheres(g.getExclusivoMulheres());
-                d.setDiasSemana(g.getDiasSemana());
-                d.setPeriodos(g.getPeriodos());
-                return d;
-            }).toList());
-        }
         dto.setFotoUrl(pro.getFotoUrl());
+        if (pro.getGradeAtividades() != null) {
+            dto.setGradeAtividades(pro.getGradeAtividades().stream()
+                    .filter(g -> g.getCategoria() != null && g.getCategoria().isAtiva())
+                    .map(this::gradeToDTO)
+                    .toList());
+        }
         return dto;
     }
-}
 
+    private ActivityScheduleDTO.Resposta gradeToDTO(ActivitySchedule g) {
+        ActivityScheduleDTO.Resposta d = new ActivityScheduleDTO.Resposta();
+        d.setId(g.getId());
+        d.setCategoriaId(g.getCategoria().getId());
+        d.setCategoriaNome(g.getCategoria().getNome());
+        d.setExclusivoMulheres(g.getExclusivoMulheres());
+        d.setDiasSemana(g.getDiasSemana());
+        d.setPeriodos(g.getPeriodos());
+        return d;
+    }
+}

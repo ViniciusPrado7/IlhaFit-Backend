@@ -48,30 +48,26 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                        // Auth pÃºblico
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Email â€” restrito a administradores
                         .requestMatchers("/api/email/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
-                        // UsuÃ¡rios
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
                         .requestMatchers("/api/usuarios/**").authenticated()
-                        // Establishments
                         .requestMatchers(HttpMethod.POST, "/api/estabelecimentos/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/estabelecimentos/estabelecimentos/**").permitAll()
                         .requestMatchers("/api/estabelecimentos/atualizar/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
                         .requestMatchers("/api/estabelecimentos/deletar/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
-                        // Profissionais â€” cadastro e listagem pÃºblica; ediÃ§Ã£o/deleÃ§Ã£o/dados pessoais exigem auth
                         .requestMatchers(HttpMethod.POST, "/api/profissionais/cadastrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/profissionais/profissionais/**").permitAll()
+                        .requestMatchers("/api/profissionais/atualizar/**")
+                        .hasAnyAuthority(RegistrationType.PROFISSIONAL.name(), RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers("/api/profissionais/deletar/**")
+                        .hasAnyAuthority(RegistrationType.PROFISSIONAL.name(), RegistrationType.ADMINISTRADOR.name())
                         .requestMatchers("/api/profissionais/**").authenticated()
-                        // Administratores â€” apenas login Ã© pÃºblico
                         .requestMatchers(HttpMethod.POST, "/api/administradores/login").permitAll()
                         .requestMatchers("/api/administradores/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
-                        // Painel admin â€” exclusivo para administradores
                         .requestMatchers("/api/admin/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
-                        // Categorys
                         .requestMatchers(HttpMethod.POST, "/api/categorias/pendentes/solicitar")
                         .hasAnyAuthority(RegistrationType.PROFISSIONAL.name(), RegistrationType.ESTABELECIMENTO.name())
                         .requestMatchers(HttpMethod.GET, "/api/categorias/pendentes/minhas")
@@ -80,15 +76,18 @@ public class SecurityConfig {
                         .hasAuthority(RegistrationType.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/pendentes/**")
                         .hasAuthority(RegistrationType.ADMINISTRADOR.name())
-                        .requestMatchers("/api/categorias/**").permitAll()
-                        // Grade de atividades
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
+                        .requestMatchers(HttpMethod.GET, "/api/grade-atividades/**").permitAll()
+                        .requestMatchers("/api/grade-atividades/cadastrar/profissional/**").hasAuthority(RegistrationType.PROFISSIONAL.name())
                         .requestMatchers("/api/grade-atividades/cadastrar/estabelecimento/**").hasAuthority(RegistrationType.ESTABELECIMENTO.name())
-                        .requestMatchers("/api/grade-atividades/**").permitAll()
-                        // AvaliaÃ§Ãµes
+                        .requestMatchers("/api/grade-atividades/atualizar/**").authenticated()
+                        .requestMatchers("/api/grade-atividades/deletar/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/avaliacoes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/avaliacoes").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/avaliacoes/**").authenticated()
-                        // DenÃºncias
                         .requestMatchers(HttpMethod.POST, "/api/denuncias").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/denuncias").hasAuthority(RegistrationType.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.PUT, "/api/denuncias/**").hasAuthority(RegistrationType.ADMINISTRADOR.name())
@@ -129,4 +128,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

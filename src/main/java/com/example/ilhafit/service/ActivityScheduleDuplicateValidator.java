@@ -26,18 +26,22 @@ public class ActivityScheduleDuplicateValidator {
         validarLista(atividades, MENSAGEM_PROFISSIONAL);
     }
 
-    public void validarEstablishment(Establishment estabelecimento, String nomeCategory, Long atividadeAtualId) {
-        validarExistente(estabelecimento != null ? estabelecimento.getGradeAtividades() : null,
-                nomeCategory,
+    public void validarEstablishment(Establishment estabelecimento, Long categoriaId, Long atividadeAtualId) {
+        validarExistente(
+                estabelecimento != null ? estabelecimento.getGradeAtividades() : null,
+                categoriaId,
                 atividadeAtualId,
-                MENSAGEM_ESTABELECIMENTO);
+                MENSAGEM_ESTABELECIMENTO
+        );
     }
 
-    public void validarProfessional(Professional profissional, String nomeCategory, Long atividadeAtualId) {
-        validarExistente(profissional != null ? profissional.getGradeAtividades() : null,
-                nomeCategory,
+    public void validarProfessional(Professional profissional, Long categoriaId, Long atividadeAtualId) {
+        validarExistente(
+                profissional != null ? profissional.getGradeAtividades() : null,
+                categoriaId,
                 atividadeAtualId,
-                MENSAGEM_PROFISSIONAL);
+                MENSAGEM_PROFISSIONAL
+        );
     }
 
     private void validarLista(List<ActivitySchedule> atividades, String mensagem) {
@@ -45,18 +49,12 @@ public class ActivityScheduleDuplicateValidator {
             return;
         }
 
-        Set<String> categorias = new HashSet<>();
+        Set<Long> categoriaIds = new HashSet<>();
         for (ActivitySchedule atividade : atividades) {
-            if (atividade == null) {
+            if (atividade == null || atividade.getCategoria() == null) {
                 continue;
             }
-
-            String normalizada = ActivitySchedule.normalizarAtividade(atividade.getAtividade());
-            if (normalizada == null) {
-                continue;
-            }
-
-            if (!categorias.add(normalizada)) {
+            if (!categoriaIds.add(atividade.getCategoria().getId())) {
                 throw new IllegalStateException(mensagem);
             }
         }
@@ -64,24 +62,23 @@ public class ActivityScheduleDuplicateValidator {
 
     private void validarExistente(
             List<ActivitySchedule> atividades,
-            String nomeCategory,
+            Long categoriaId,
             Long atividadeAtualId,
             String mensagem
     ) {
-        String categoriaNormalizada = ActivitySchedule.normalizarAtividade(nomeCategory);
-        if (categoriaNormalizada == null || atividades == null || atividades.isEmpty()) {
+        if (categoriaId == null || atividades == null || atividades.isEmpty()) {
             return;
         }
 
         boolean duplicada = atividades.stream()
                 .filter(Objects::nonNull)
-                .filter(atividade -> atividadeAtualId == null || !atividadeAtualId.equals(atividade.getId()))
-                .map(atividade -> ActivitySchedule.normalizarAtividade(atividade.getAtividade()))
-                .anyMatch(categoriaNormalizada::equals);
+                .filter(a -> a.getCategoria() != null)
+                .filter(a -> atividadeAtualId == null || !atividadeAtualId.equals(a.getId()))
+                .map(a -> a.getCategoria().getId())
+                .anyMatch(categoriaId::equals);
 
         if (duplicada) {
             throw new IllegalStateException(mensagem);
         }
     }
 }
-

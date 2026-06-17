@@ -1,6 +1,7 @@
 package com.example.ilhafit.service;
 
 import com.example.ilhafit.dto.ActivityScheduleDTO;
+import com.example.ilhafit.entity.Category;
 import com.example.ilhafit.entity.Establishment;
 import com.example.ilhafit.entity.ActivitySchedule;
 import com.example.ilhafit.entity.Professional;
@@ -38,8 +39,7 @@ public class ActivityScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado"));
 
         ActivitySchedule atividade = toEntity(dto);
-        validarCategoryAprovada(atividade.getAtividade());
-        gradeAtividadeDuplicidadeValidator.validarProfessional(profissional, atividade.getAtividade(), null);
+        gradeAtividadeDuplicidadeValidator.validarProfessional(profissional, dto.getCategoriaId(), null);
 
         salvarAtividade(atividade, MENSAGEM_DUPLICIDADE_PROFISSIONAL);
         profissional.setGradeAtividades(garantirListaInicializada(profissional.getGradeAtividades()));
@@ -53,6 +53,7 @@ public class ActivityScheduleService {
         Professional profissional = profissionalRepository.findById(profissionalId)
                 .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado"));
         return profissional.getGradeAtividades().stream()
+                .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -63,8 +64,7 @@ public class ActivityScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado"));
 
         ActivitySchedule atividade = toEntity(dto);
-        validarCategoryAprovada(atividade.getAtividade());
-        gradeAtividadeDuplicidadeValidator.validarEstablishment(estabelecimento, atividade.getAtividade(), null);
+        gradeAtividadeDuplicidadeValidator.validarEstablishment(estabelecimento, dto.getCategoriaId(), null);
 
         salvarAtividade(atividade, MENSAGEM_DUPLICIDADE_ESTABELECIMENTO);
         estabelecimento.setGradeAtividades(garantirListaInicializada(estabelecimento.getGradeAtividades()));
@@ -78,6 +78,7 @@ public class ActivityScheduleService {
         Establishment estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado"));
         return estabelecimento.getGradeAtividades().stream()
+                .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -91,17 +92,17 @@ public class ActivityScheduleService {
         Establishment estabelecimento = estabelecimentoRepository.findByGradeAtividadesId(id).orElse(null);
 
         if (profissional != null) {
-            gradeAtividadeDuplicidadeValidator.validarProfessional(profissional, dto.getAtividade(), id);
+            gradeAtividadeDuplicidadeValidator.validarProfessional(profissional, dto.getCategoriaId(), id);
         }
         if (estabelecimento != null) {
-            gradeAtividadeDuplicidadeValidator.validarEstablishment(estabelecimento, dto.getAtividade(), id);
+            gradeAtividadeDuplicidadeValidator.validarEstablishment(estabelecimento, dto.getCategoriaId(), id);
         }
 
-        atividade.setAtividade(dto.getAtividade());
+        Category categoria = validarCategoriaAtiva(dto.getCategoriaId());
+        atividade.setCategoria(categoria);
         atividade.setExclusivoMulheres(dto.getExclusivoMulheres());
         atividade.setDiasSemana(dto.getDiasSemana());
         atividade.setPeriodos(dto.getPeriodos());
-        validarCategoryAprovada(atividade.getAtividade());
 
         String mensagemDuplicidade = profissional != null
                 ? MENSAGEM_DUPLICIDADE_PROFISSIONAL
@@ -117,35 +118,38 @@ public class ActivityScheduleService {
         gradeAtividadeRepository.deleteById(id);
     }
 
-    private ActivitySchedule toEntity(ActivityScheduleDTO.Registro dto) {
+    public ActivitySchedule toEntity(ActivityScheduleDTO.Registro dto) {
+        Category categoria = validarCategoriaAtiva(dto.getCategoriaId());
         ActivitySchedule entity = new ActivitySchedule();
-        entity.setAtividade(dto.getAtividade());
+        entity.setCategoria(categoria);
         entity.setExclusivoMulheres(dto.getExclusivoMulheres() != null ? dto.getExclusivoMulheres() : false);
         entity.setDiasSemana(dto.getDiasSemana());
         entity.setPeriodos(dto.getPeriodos());
         return entity;
     }
 
-    private ActivityScheduleDTO.Resposta toDTO(ActivitySchedule entity) {
+    public ActivityScheduleDTO.Resposta toDTO(ActivitySchedule entity) {
         ActivityScheduleDTO.Resposta dto = new ActivityScheduleDTO.Resposta();
         dto.setId(entity.getId());
-        dto.setAtividade(entity.getAtividade());
+        if (entity.getCategoria() != null) {
+            dto.setCategoriaId(entity.getCategoria().getId());
+            dto.setCategoriaNome(entity.getCategoria().getNome());
+        }
         dto.setExclusivoMulheres(entity.getExclusivoMulheres());
         dto.setDiasSemana(entity.getDiasSemana());
         dto.setPeriodos(entity.getPeriodos());
         return dto;
     }
 
-    private void validarCategoryAprovada(String nomeCategory) {
-        if (nomeCategory == null || nomeCategory.isBlank()) {
-            throw new IllegalArgumentException("Category invalida");
+    private Category validarCategoriaAtiva(Long categoriaId) {
+        if (categoriaId == null) {
+            throw new IllegalArgumentException("Categoria invalida");
         }
-
-        if (!categoriaRepository.existsByNomeIgnoreCase(nomeCategory.trim())) {
-            throw new IllegalArgumentException(
-                    "Category ainda nao aprovada. Solicite uma nova categoria em /api/categorias/pendentes/solicitar"
-            );
-        }
+        return categoriaRepository.findById(categoriaId)
+                .filter(Category::isAtiva)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Categoria nao encontrada ou inativa. Verifique as categorias disponíveis em /api/categorias"
+                ));
     }
 
     private ActivitySchedule salvarAtividade(ActivitySchedule atividade, String mensagemDuplicidade) {
@@ -176,4 +180,3 @@ public class ActivityScheduleService {
         return atividades != null ? atividades : new ArrayList<>();
     }
 }
-

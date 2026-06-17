@@ -1,5 +1,6 @@
 package com.example.ilhafit.entity;
 
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -63,6 +64,18 @@ public class Evaluation {
     @PrePersist
     protected void onCreate() {
         dataAvaliacao = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.comentario = StringNormalizer.normalize(comentario);
+        this.autorEmail = StringNormalizer.normalizeEmail(autorEmail);
+        this.autorNome = StringNormalizer.normalize(autorNome);
     }
 }
 

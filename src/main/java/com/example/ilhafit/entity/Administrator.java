@@ -1,6 +1,7 @@
 package com.example.ilhafit.entity;
 
 import com.example.ilhafit.enums.Role;
+import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +45,17 @@ public class Administrator {
     @PrePersist
     protected void onCreate() {
         this.dataCadastro = LocalDateTime.now();
+        normalizeFields();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        normalizeFields();
+    }
+
+    private void normalizeFields() {
+        this.nome = StringNormalizer.normalize(nome);
+        this.email = StringNormalizer.normalizeEmail(email);
     }
 
     public LocalDateTime getDataCadastro() {

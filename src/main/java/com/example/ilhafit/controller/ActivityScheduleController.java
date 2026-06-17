@@ -25,10 +25,14 @@ public class ActivityScheduleController {
     @PostMapping("/cadastrar/profissional/{profissionalId}")
     public ResponseEntity<?> adicionarAoProfessional(
             @PathVariable Long profissionalId,
-            @Valid @RequestBody ActivityScheduleDTO.Registro dto) {
+            @Valid @RequestBody ActivityScheduleDTO.Registro dto,
+            @AuthenticationPrincipal JwtAuthenticatedUser userDetails) {
         try {
+            validarProfissionalAutenticado(profissionalId, userDetails);
             ActivityScheduleDTO.Resposta resposta = gradeAtividadeService.adicionarAoProfessional(profissionalId, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
         } catch (IllegalArgumentException e) {
@@ -66,7 +70,7 @@ public class ActivityScheduleController {
         return ResponseEntity.ok(gradeAtividadeService.listarPorEstablishment(estabelecimentoId));
     }
 
-    // ---- OperaÃ§Ãµes gerais ----
+    // ---- Operações gerais ----
 
     @PutMapping("/atualizar/{id}")
     public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody ActivityScheduleDTO.Registro dto) {
@@ -90,10 +94,15 @@ public class ActivityScheduleController {
         }
     }
 
+    private void validarProfissionalAutenticado(Long profissionalId, JwtAuthenticatedUser userDetails) {
+        if (userDetails == null || !profissionalId.equals(userDetails.getId())) {
+            throw new SecurityException("Sem permissao para alterar este profissional");
+        }
+    }
+
     private void validarEstablishmentAutenticado(Long estabelecimentoId, JwtAuthenticatedUser userDetails) {
         if (userDetails == null || !estabelecimentoId.equals(userDetails.getId())) {
             throw new SecurityException("Sem permissao para alterar este estabelecimento");
         }
     }
 }
-
