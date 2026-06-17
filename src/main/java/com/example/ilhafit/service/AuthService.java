@@ -129,6 +129,11 @@ public class AuthService {
     }
 
     @Transactional
+    public void confirmarEmail(String email, String codigo) {
+        emailConfirmationService.confirmarEmail(email, codigo);
+    }
+
+    @Transactional
     public void solicitarRecuperacaoSenha(ForgotPasswordRequestDTO dto) {
         buscarContaPorEmail(dto.getEmail())
                 .ifPresent(this::criarTokenRecuperacao);

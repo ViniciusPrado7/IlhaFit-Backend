@@ -118,7 +118,7 @@ public class EmailService {
 
     private String montarMensagemConfirmacaoEmail(String nome, String codigo, int validadeMinutos) {
         return "Ola, " + nome + "!\n\n"
-                + "Use o codigo abaixo para confirmar seu email no IlhaFit:\n\n"
+                + "Use este codigo na tela de confirmacao para confirmar seu email no IlhaFit:\n\n"
                 + codigo + "\n\n"
                 + "Este codigo expira em " + validadeMinutos + " minutos.\n\n"
                 + "Se voce nao criou uma conta, ignore este email.\n\n"

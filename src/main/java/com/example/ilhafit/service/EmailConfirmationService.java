@@ -47,13 +47,23 @@ public class EmailConfirmationService {
         confirmationCode.setUsed(false);
 
         emailConfirmationCodeRepository.save(confirmationCode);
-        emailService.enviarEmailConfirmacao(email, nome, codigo, CONFIRMATION_CODE_EXPIRATION_MINUTES);
+        emailService.enviarEmailConfirmacao(
+                email,
+                nome,
+                codigo,
+                CONFIRMATION_CODE_EXPIRATION_MINUTES
+        );
     }
 
     @Transactional
     public void confirmarEmail(ConfirmEmailRequestDTO dto) {
+        confirmarEmail(dto.getEmail(), dto.getCodigo());
+    }
+
+    @Transactional
+    public void confirmarEmail(String email, String codigo) {
         EmailConfirmationCode confirmationCode = emailConfirmationCodeRepository
-                .findTopByEmailIgnoreCaseAndCodeAndUsedFalseOrderByCreatedAtDesc(dto.getEmail(), dto.getCodigo())
+                .findTopByEmailIgnoreCaseAndCodeAndUsedFalseOrderByCreatedAtDesc(email, codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Codigo invalido ou expirado"));
 
         if (confirmationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
