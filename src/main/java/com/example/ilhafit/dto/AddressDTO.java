@@ -1,6 +1,7 @@
 package com.example.ilhafit.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -21,6 +22,7 @@ public class AddressDTO {
     private String cidade;
 
     @NotBlank(message = "Estado e obrigatorio")
+    @Size(max = 2, message = "Estado deve ter no maximo 2 caracteres")
     private String estado;
 
     @NotBlank(message = "CEP e obrigatorio")
