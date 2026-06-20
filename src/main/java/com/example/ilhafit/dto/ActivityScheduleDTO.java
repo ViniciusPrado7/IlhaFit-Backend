@@ -1,5 +1,6 @@
 package com.example.ilhafit.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -12,7 +13,11 @@ public class ActivityScheduleDTO {
         @NotNull(message = "Categoria é obrigatória")
         private Long categoriaId;
         private Boolean exclusivoMulheres = false;
+
+        @NotEmpty(message = "Informe pelo menos um dia da semana")
         private List<String> diasSemana;
+
+        @NotEmpty(message = "Informe pelo menos um periodo")
         private List<String> periodos;
     }
 

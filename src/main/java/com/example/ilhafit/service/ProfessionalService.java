@@ -47,6 +47,7 @@ public class ProfessionalService {
     public ProfessionalDTO.Resposta cadastrar(ProfessionalDTO.Registro dto) {
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.PROFISSIONAL, null);
         cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
+        validarExclusivoMulheres(dto.getSexo(), dto.getExclusivoMulheres(), dto.getGradeAtividades());
 
         Professional profissional = profissionalMapper.toEntity(dto);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
@@ -98,6 +99,7 @@ public class ProfessionalService {
         if (!profissional.getCpf().equals(dto.getCpf())) {
             cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), id);
         }
+        validarExclusivoMulheres(dto.getSexo(), dto.getExclusivoMulheres(), dto.getGradeAtividades());
 
         profissional.setNome(dto.getNome());
         profissional.setEmail(dto.getEmail());
@@ -153,6 +155,20 @@ public class ProfessionalService {
             dto.setTotalAvaliacoes(avaliacoes.size());
         }
         return dto;
+    }
+
+    private void validarExclusivoMulheres(String sexo, Boolean exclusivoMulheres, List<ActivityScheduleDTO.Registro> gradeAtividades) {
+        boolean isFeminino = "FEMININO".equalsIgnoreCase(sexo);
+        if (Boolean.TRUE.equals(exclusivoMulheres) && !isFeminino) {
+            throw new IllegalArgumentException("Atividade exclusiva para mulheres so pode ser definida por profissionais do sexo feminino");
+        }
+        if (gradeAtividades != null) {
+            for (ActivityScheduleDTO.Registro atividade : gradeAtividades) {
+                if (Boolean.TRUE.equals(atividade.getExclusivoMulheres()) && !isFeminino) {
+                    throw new IllegalArgumentException("Atividade exclusiva para mulheres so pode ser definida por profissionais do sexo feminino");
+                }
+            }
+        }
     }
 
     private void atualizarGradeAtividades(Professional profissional, List<ActivityScheduleDTO.Registro> dtos) {
