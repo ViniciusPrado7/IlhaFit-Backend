@@ -69,8 +69,11 @@ public class UserService {
     public UserResponseDTO atualizar(Long id, UserUpdateDTO dto) {
         User usuario = buscarUserOuErro(id);
 
-        if (dto.getEmail() != null && !dto.getEmail().equals(usuario.getEmail())) {
-            cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.USUARIO, id);
+        if (dto.getEmail() != null) {
+            String emailNormalizado = com.example.ilhafit.util.StringNormalizer.normalizeEmail(dto.getEmail());
+            if (!emailNormalizado.equals(usuario.getEmail())) {
+                cadastroIdentityValidator.validarEmailDisponivel(emailNormalizado, RegistrationType.USUARIO, id);
+            }
         }
 
         mapper.updateEntityFromDTO(usuario, dto);
@@ -79,7 +82,7 @@ public class UserService {
             usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        usuario = usuarioRepository.save(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
 
         return mapper.toResponse(usuario);
     }

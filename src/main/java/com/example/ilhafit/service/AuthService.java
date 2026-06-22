@@ -133,6 +133,9 @@ public class AuthService {
     }
 
     private boolean senhaCorreta(String senhaInformada, String senhaCriptografada) {
+        if (senhaInformada == null) {
+            return false;
+        }
         return passwordEncoder.matches(senhaInformada, senhaCriptografada);
     }
 

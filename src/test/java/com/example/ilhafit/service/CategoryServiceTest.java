@@ -154,7 +154,7 @@ class CategoryServiceTest {
 
         when(categoriaRepository.findById(1L)).thenReturn(Optional.of(ativa));
         when(categoriaRepository.findByNomeIgnoreCase("Yoga Avançado")).thenReturn(Optional.empty());
-        when(categoriaRepository.save(ativa)).thenReturn(ativa);
+        when(categoriaRepository.saveAndFlush(ativa)).thenReturn(ativa);
 
         CategoryDTO.Resposta resposta = categoryService.atualizar(1L, dto);
 

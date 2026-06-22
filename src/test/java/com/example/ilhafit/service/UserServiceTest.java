@@ -95,7 +95,7 @@ class UserServiceTest {
         dto.setEmail("aluno@ilhafit.com"); // mesmo email
 
         when(usuarioRepository.findById(USER_ID)).thenReturn(Optional.of(usuario));
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
         when(mapper.toResponse(usuario)).thenReturn(responseDto);
 
         UserResponseDTO resposta = userService.atualizar(USER_ID, dto);
@@ -110,7 +110,7 @@ class UserServiceTest {
         dto.setEmail("novo@ilhafit.com");
 
         when(usuarioRepository.findById(USER_ID)).thenReturn(Optional.of(usuario));
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
         when(mapper.toResponse(usuario)).thenReturn(responseDto);
 
         userService.atualizar(USER_ID, dto);
@@ -126,7 +126,7 @@ class UserServiceTest {
 
         when(usuarioRepository.findById(USER_ID)).thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("NovaSenh@1")).thenReturn("novo_hash");
-        when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
         when(mapper.toResponse(usuario)).thenReturn(responseDto);
 
         userService.atualizar(USER_ID, dto);
