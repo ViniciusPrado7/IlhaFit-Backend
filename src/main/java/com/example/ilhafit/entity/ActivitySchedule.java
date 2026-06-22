@@ -8,7 +8,13 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "grade_atividades")
+@Table(
+    name = "grade_atividades",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_grade_prof_cat", columnNames = {"profissional_id", "categoria_id"}),
+        @UniqueConstraint(name = "uq_grade_estab_cat", columnNames = {"estabelecimento_id", "categoria_id"})
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +25,7 @@ public class ActivitySchedule {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(name = "categoria_id")
+    @JoinColumn(name = "categoria_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_categoria"))
     private Category categoria;
 
     @Column(name = "exclusivo_mulheres")
