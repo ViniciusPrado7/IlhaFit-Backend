@@ -63,7 +63,7 @@ class AuthAndCategoryIntegrationTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.categoria.nome").value(updateDto.getNome()));
+                .andExpect(jsonPath("$.categoria.nome").value(updateDto.getNome().toLowerCase()));
 
         String detailsResponse = mockMvc.perform(get("/api/categorias/categorias/{id}", categoryId))
                 .andExpect(status().isOk())

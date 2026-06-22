@@ -87,7 +87,7 @@ public class CategoryService {
         });
 
         categoria.setNome(dto.getNome());
-        return toDTO(categoriaRepository.save(categoria));
+        return toDTO(categoriaRepository.saveAndFlush(categoria));
     }
 
     @Transactional
