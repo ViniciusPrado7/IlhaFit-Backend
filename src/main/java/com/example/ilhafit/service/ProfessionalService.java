@@ -11,6 +11,7 @@ import com.example.ilhafit.mapper.ProfessionalMapper;
 import com.example.ilhafit.repository.EvaluationRepository;
 import com.example.ilhafit.repository.ReportRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.util.DocumentoValidator;
 import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +46,7 @@ public class ProfessionalService {
 
     @Transactional
     public ProfessionalDTO.Resposta cadastrar(ProfessionalDTO.Registro dto) {
+        DocumentoValidator.validarCpf(dto.getCpf());
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.PROFISSIONAL, null);
         cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
         validarExclusivoMulheres(dto.getSexo(), dto.getExclusivoMulheres(), dto.getGradeAtividades());
@@ -96,6 +98,7 @@ public class ProfessionalService {
         if (!profissional.getEmail().equals(novoEmail)) {
             cadastroIdentityValidator.validarEmailDisponivel(novoEmail, RegistrationType.PROFISSIONAL, id);
         }
+        DocumentoValidator.validarCpf(dto.getCpf());
         if (!profissional.getCpf().equals(dto.getCpf())) {
             cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), id);
         }

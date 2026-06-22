@@ -11,6 +11,7 @@ import com.example.ilhafit.mapper.EstablishmentMapper;
 import com.example.ilhafit.repository.EvaluationRepository;
 import com.example.ilhafit.repository.ReportRepository;
 import com.example.ilhafit.repository.EstablishmentRepository;
+import com.example.ilhafit.util.DocumentoValidator;
 import com.example.ilhafit.util.StringNormalizer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +46,7 @@ public class EstablishmentService {
 
     @Transactional
     public EstablishmentDTO.Resposta cadastrar(EstablishmentDTO.Registro dto) {
+        DocumentoValidator.validarCnpj(dto.getCnpj());
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.ESTABELECIMENTO, null);
         cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
 
@@ -88,6 +90,7 @@ public class EstablishmentService {
         if (!estabelecimento.getEmail().equals(novoEmail)) {
             cadastroIdentityValidator.validarEmailDisponivel(novoEmail, RegistrationType.ESTABELECIMENTO, id);
         }
+        DocumentoValidator.validarCnpj(dto.getCnpj());
         if (!estabelecimento.getCnpj().equals(dto.getCnpj())) {
             cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), id);
         }
