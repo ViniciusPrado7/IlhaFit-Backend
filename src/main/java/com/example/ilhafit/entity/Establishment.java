@@ -39,11 +39,11 @@ public class Establishment {
     private Long id;
 
     @NotBlank(message = "Nome fantasia e obrigatorio")
-    @Column(name = "nome_fantasia")
+    @Column(name = "nome_fantasia", nullable = false)
     private String nomeFantasia;
 
     @NotBlank(message = "Razao social e obrigatoria")
-    @Column(name = "razao_social")
+    @Column(name = "razao_social", nullable = false)
     private String razaoSocial;
 
     @NotBlank(message = "Email e obrigatorio")
@@ -79,7 +79,7 @@ public class Establishment {
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private List<String> fotosUrl;
 
-    @Column(name = "data_cadastro", nullable = true, updatable = false)
+    @Column(name = "data_cadastro", nullable = false, updatable = false)
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @PrePersist

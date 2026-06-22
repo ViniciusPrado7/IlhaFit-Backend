@@ -79,7 +79,7 @@ public class Professional {
     @Column(name = "foto_url", columnDefinition = "TEXT")
     private String fotoUrl;
 
-    @Column(name = "data_cadastro", nullable = true, updatable = false)
+    @Column(name = "data_cadastro", nullable = false, updatable = false)
     private LocalDateTime dataCadastro = LocalDateTime.now();
 
     @PrePersist
