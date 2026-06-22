@@ -1,0 +1,167 @@
+{
+    "metrics": {
+        "http_req_sending": {
+            "p(95)": 0,
+            "avg": 0.10258239101101127,
+            "min": 0,
+            "med": 0,
+            "max": 222.8763,
+            "p(90)": 0
+        },
+        "vus": {
+            "value": 2,
+            "min": 1,
+            "max": 1000
+        },
+        "http_req_connecting": {
+            "avg": 0.2871137058754923,
+            "min": 0,
+            "med": 0,
+            "max": 347.1256,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(90)": 4086.1034799999993,
+            "p(95)": 5175.411199999995,
+            "avg": 1727.7998357287136,
+            "min": 0.5043,
+            "med": 1246.032,
+            "max": 10053.2483
+        },
+        "http_req_waiting": {
+            "med": 1296.34505,
+            "max": 10870.9278,
+            "p(90)": 4401.55791,
+            "p(95)": 6189.475054999998,
+            "avg": 1907.5368852579488,
+            "min": 0.5043
+        },
+        "data_received": {
+            "rate": 4213375.934154072,
+            "count": 3171567587
+        },
+        "http_req_duration": {
+            "avg": 1912.8051937621904,
+            "min": 0.5043,
+            "med": 1302.53255,
+            "max": 10870.9278,
+            "p(90)": 4408.75107,
+            "p(95)": 6194.858104999997,
+            "thresholds": {
+                "p(95)<10000": false,
+                "p(99)<12000": false
+            }
+        },
+        "iterations": {
+            "count": 120057,
+            "rate": 159.49377102987
+        },
+        "vus_max": {
+            "min": 1000,
+            "max": 1000,
+            "value": 1000
+        },
+        "iteration_duration": {
+            "avg": 3921.0593055049244,
+            "min": 1002.131,
+            "med": 3349.9928,
+            "max": 13752.7602,
+            "p(90)": 6558.28532,
+            "p(95)": 8318.074239999994
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0
+        },
+        "checks": {
+            "passes": 117380,
+            "fails": 2679,
+            "value": 0.9776859710642267
+        },
+        "http_req_receiving": {
+            "min": 0,
+            "med": 0,
+            "max": 756.1834,
+            "p(90)": 17.389840000000003,
+            "p(95)": 26.262929999999997,
+            "avg": 5.165726113211965
+        },
+        "http_req_failed": {
+            "passes": 2679,
+            "fails": 117379,
+            "thresholds": {
+                "rate<0.25": false
+            },
+            "value": 0.022314214796181845
+        },
+        "http_reqs": {
+            "count": 120058,
+            "rate": 159.49509951359883
+        },
+        "data_sent": {
+            "count": 18052798,
+            "rate": 23982.848402512933
+        },
+        "http_req_blocked": {
+            "med": 0,
+            "max": 359.0326,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.32850889736627137,
+            "min": 0
+        }
+    },
+    "setup_data": {
+        "adminToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBpbGhhZml0LmNvbSIsImlkIjoxLCJ0aXBvIjoiQURNSU5JU1RSQURPUiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjA4NjcwOCwiZXhwIjoxNzgyMTczMTA4fQ.oMkiXK4Zx_NIxkop7MrH83F5DsnWRUDq8HH-vSQEJkI"
+    },
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "setup login status 200": {
+                            "id": "ff4ef22313637ce7d86b89a3881b1e4e",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "setup login status 200",
+                            "path": "::setup::setup login status 200"
+                        },
+                        "setup login token presente": {
+                            "fails": 0,
+                            "name": "setup login token presente",
+                            "path": "::setup::setup login token presente",
+                            "id": "dc779372382beff6a789d2004393b3f4",
+                            "passes": 1
+                        }
+                    },
+                "name": "setup",
+                "path": "::setup"
+            }
+        },
+        "checks": {
+            "admin status aceitavel": {
+                "name": "admin status aceitavel",
+                "path": "::admin status aceitavel",
+                "id": "4de1da741b2284e172d5ca9bba570092",
+                "passes": 23350,
+                "fails": 652
+            },
+            "public status aceitavel": {
+                "name": "public status aceitavel",
+                "path": "::public status aceitavel",
+                "id": "575eae0c3a9e89aa6ff8e433f86915f6",
+                "passes": 94028,
+                "fails": 2027
+            }
+        },
+        "name": ""
+    }
+}

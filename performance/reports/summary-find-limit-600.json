@@ -1,0 +1,207 @@
+{
+    "metrics": {
+        "vus_max": {
+            "max": 600,
+            "value": 600,
+            "min": 600
+        },
+        "data_received": {
+            "count": 4394979359,
+            "rate": 4300587.822457218
+        },
+        "http_req_receiving": {
+            "avg": 2.286345927201157,
+            "min": 0,
+            "med": 0.3083,
+            "max": 414.1038,
+            "p(90)": 5.037340000000005,
+            "p(95)": 9.29628
+        },
+        "public_duration": {
+            "avg": 67.81808487323235,
+            "min": 0,
+            "med": 11.98505,
+            "max": 6342.8765,
+            "p(90)": 120.22962,
+            "p(95)": 298.8969449999992
+        },
+        "iterations": {
+            "count": 162062,
+            "rate": 158.5813735975413
+        },
+        "http_req_waiting": {
+            "med": 10.4519,
+            "max": 7240.3628,
+            "p(90)": 115.06874000000042,
+            "p(95)": 305.7806799999996,
+            "avg": 68.90522288986254,
+            "min": 0
+        },
+        "http_req_duration": {
+            "avg": 71.24641917772601,
+            "min": 0,
+            "med": 11.8649,
+            "max": 7245.7242,
+            "p(90)": 121.85808000000024,
+            "p(95)": 315.38800999999984
+        },
+        "public_error_rate": {
+            "passes": 0,
+            "fails": 129922,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0
+        },
+        "http_req_connecting": {
+            "med": 0,
+            "max": 217.8857,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.02718575183724849,
+            "min": 0
+        },
+        "http_reqs": {
+            "count": 162063,
+            "rate": 158.5823521204128
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_sending": {
+            "max": 616.7655,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.05485036066221164,
+            "min": 0,
+            "med": 0
+        },
+        "http_status_2xx": {
+            "count": 162062,
+            "rate": 158.5813735975413
+        },
+        "admin_duration": {
+            "p(90)": 130.45235000000025,
+            "p(95)": 391.5109649999995,
+            "avg": 85.10187765712581,
+            "min": 3.5139,
+            "med": 11.57885,
+            "max": 7245.7242
+        },
+        "iteration_duration": {
+            "avg": 2074.6663018017903,
+            "min": 1001.6741,
+            "med": 2065.6746000000003,
+            "max": 9124.7811,
+            "p(90)": 2871.36145,
+            "p(95)": 2971.25345
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 71.24641917772601,
+            "min": 0,
+            "med": 11.8649,
+            "max": 7245.7242,
+            "p(90)": 121.85808000000024,
+            "p(95)": 315.38800999999984
+        },
+        "app_success_rate": {
+            "fails": 0,
+            "passes": 162062,
+            "thresholds": {
+                "rate>0.95": false
+            },
+            "value": 1
+        },
+        "http_req_blocked": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.047997841580126314,
+            "min": 0,
+            "med": 0,
+            "max": 588.3599
+        },
+        "data_sent": {
+            "count": 24307669,
+            "rate": 23785.610068827813
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 600
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 162063,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0
+        },
+        "checks": {
+            "passes": 162064,
+            "fails": 0,
+            "value": 1
+        },
+        "admin_error_rate": {
+            "passes": 0,
+            "fails": 32140,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0
+        }
+    },
+    "setup_data": {
+        "adminToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBpbGhhZml0LmNvbSIsImlkIjoxLCJ0aXBvIjoiQURNSU5JU1RSQURPUiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MjA4ODY2MiwiZXhwIjoxNzgyMTc1MDYyfQ.0xPYfpFJ3VJrsohIk0RdA2N6RaRoPgSGBAtQIaiAAXM"
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "setup login status 200": {
+                            "fails": 0,
+                            "name": "setup login status 200",
+                            "path": "::setup::setup login status 200",
+                            "id": "ff4ef22313637ce7d86b89a3881b1e4e",
+                            "passes": 1
+                        },
+                        "setup login token presente": {
+                            "name": "setup login token presente",
+                            "path": "::setup::setup login token presente",
+                            "id": "dc779372382beff6a789d2004393b3f4",
+                            "passes": 1,
+                            "fails": 0
+                        }
+                    }
+            }
+        },
+        "checks": {
+            "public status aceitavel": {
+                "id": "575eae0c3a9e89aa6ff8e433f86915f6",
+                "passes": 129922,
+                "fails": 0,
+                "name": "public status aceitavel",
+                "path": "::public status aceitavel"
+            },
+            "admin status aceitavel": {
+                "name": "admin status aceitavel",
+                "path": "::admin status aceitavel",
+                "id": "4de1da741b2284e172d5ca9bba570092",
+                "passes": 32140,
+                "fails": 0
+            }
+        }
+    }
+}
