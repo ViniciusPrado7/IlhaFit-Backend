@@ -12,6 +12,9 @@ public class AuthLoginResponseDTO {
     private String email;
     private String tipo;
     private String role;
+    private Boolean emailConfirmado;
+    private Boolean requerConfirmacaoEmail;
+    private String mensagem;
     private String token;
     private String tokenType;
 }

@@ -1,5 +1,6 @@
 package com.example.ilhafit.dto;
 
+import com.example.ilhafit.validation.OnCreate;
 import com.example.ilhafit.validation.StrongPassword;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -15,30 +16,33 @@ public class ProfessionalDTO {
 
     @Data
     public static class Registro {
-        @NotBlank(message = "Nome ÃƒÂ© obrigatÃƒÂ³rio")
+        @NotBlank(message = "Nome e obrigatorio")
         private String nome;
 
-        @NotBlank(message = "Email ÃƒÂ© obrigatÃƒÂ³rio")
-        @Email(message = "Email deve ser vÃƒÂ¡lido")
+        @NotBlank(message = "Email e obrigatorio")
+        @Email(message = "Email deve ser valido")
         private String email;
 
-        @NotBlank(message = "Senha e obrigatoria")
+        @NotBlank(message = "Senha e obrigatoria", groups = OnCreate.class)
         @StrongPassword
         private String senha;
 
-        @NotBlank(message = "Telefone ÃƒÂ© obrigatÃƒÂ³rio")
-        @Pattern(regexp = "\\d*", message = "Telefone deve conter apenas nÃƒÂºmeros")
+        @NotBlank(message = "Telefone e obrigatorio")
+        @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 numeros com DDD")
         private String telefone;
 
-        @NotBlank(message = "CPF ÃƒÂ© obrigatÃƒÂ³rio")
+        @NotBlank(message = "CPF e obrigatorio")
         private String cpf;
 
         @NotBlank(message = "Genero e obrigatorio")
         private String sexo;
+
+        @Pattern(regexp = "^$|^\\d{6}-[A-Z]/[A-Z]{2}$", message = "CREF deve estar no formato 123456-G/SP")
         private String registroCref;
 
         @NotBlank(message = "Regiao e obrigatoria")
         private String regiao;
+
         private Boolean exclusivoMulheres;
 
         @Valid
@@ -67,4 +71,3 @@ public class ProfessionalDTO {
         private Integer totalAvaliacoes;
     }
 }
-

@@ -3,6 +3,7 @@ package com.example.ilhafit.dto;
 import com.example.ilhafit.enums.PendingCategoryStatus;
 import com.example.ilhafit.enums.RegistrationType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -30,8 +31,8 @@ public class PendingCategoryDTO {
 
     @Data
     public static class Solicitacao {
-        @NotBlank(message = "Nome da categoria Ã© obrigatÃ³rio")
+        @NotBlank(message = "Nome da categoria e obrigatorio")
+        @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "Nome da categoria deve conter apenas letras")
         private String nome;
     }
 }
-

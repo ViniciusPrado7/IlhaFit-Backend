@@ -5,13 +5,17 @@ import com.example.ilhafit.enums.RegistrationType;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
 import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.ProfessionalService;
+import com.example.ilhafit.validation.OnCreate;
 import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,13 +28,13 @@ public class ProfessionalController {
     private final AuthService authService;
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<?> cadastrar(@Valid @RequestBody ProfessionalDTO.Registro dto) {
+    public ResponseEntity<?> cadastrar(@Validated({Default.class, OnCreate.class}) @RequestBody ProfessionalDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerProfessional(dto));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapearErroValidacao(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.badRequest().body(mapearErroValidacao(e.getMessage()));
         }
     }
 
@@ -75,9 +79,9 @@ public class ProfessionalController {
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapearErroValidacao(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.badRequest().body(mapearErroValidacao(e.getMessage()));
         }
     }
 
@@ -102,5 +106,37 @@ public class ProfessionalController {
         if (!isAdmin && !profissionalId.equals(userDetails.getId())) {
             throw new SecurityException("Sem permissao para alterar este profissional");
         }
+    }
+
+    private Map<String, String> mapearErroValidacao(String mensagem) {
+        Map<String, String> erro = new LinkedHashMap<>();
+        if (mensagem == null || mensagem.isBlank()) {
+            erro.put("erro", "Nao foi possivel concluir o cadastro do profissional.");
+            return erro;
+        }
+
+        if (mensagem.contains("Email")) {
+            erro.put("email", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("CPF")) {
+            erro.put("cpf", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("Telefone")) {
+            erro.put("telefone", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("CREF")) {
+            erro.put("registroCref", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("categoria") || mensagem.contains("mulheres")) {
+            erro.put("gradeAtividades", mensagem);
+            return erro;
+        }
+
+        erro.put("erro", mensagem);
+        return erro;
     }
 }

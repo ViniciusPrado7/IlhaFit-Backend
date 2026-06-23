@@ -35,6 +35,7 @@ public class EstablishmentDTO {
         private String telefone;
 
         @NotBlank(message = "CNPJ e obrigatorio")
+        @Pattern(regexp = "\\d{14}", message = "CNPJ deve conter 14 numeros")
         private String cnpj;
 
         @Valid
@@ -71,6 +72,7 @@ public class EstablishmentDTO {
         private String telefone;
 
         @NotBlank(message = "CNPJ e obrigatorio")
+        @Pattern(regexp = "\\d{14}", message = "CNPJ deve conter 14 numeros")
         private String cnpj;
 
         @Valid

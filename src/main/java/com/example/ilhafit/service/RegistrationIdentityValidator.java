@@ -5,6 +5,7 @@ import com.example.ilhafit.repository.AdministratorRepository;
 import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.ProfessionalRepository;
 import com.example.ilhafit.repository.UserRepository;
+import com.example.ilhafit.util.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,11 +44,48 @@ public class RegistrationIdentityValidator {
                 });
     }
 
+    public void validarTelefoneProfissionalDisponivel(String telefone, Long profissionalIdAtual) {
+        profissionalRepository.findByTelefone(telefone)
+                .filter(profissional -> deveBloquear(profissional.getId(), profissionalIdAtual, false))
+                .ifPresent(profissional -> {
+                    throw new IllegalArgumentException("Telefone já está vinculado a outro profissional.");
+                });
+    }
+
+    public void validarRegistroCrefDisponivel(String registroCref, Long profissionalIdAtual) {
+        if (registroCref == null || registroCref.isBlank()) {
+            return;
+        }
+
+        profissionalRepository.findByRegistroCref(registroCref)
+                .filter(profissional -> deveBloquear(profissional.getId(), profissionalIdAtual, false))
+                .ifPresent(profissional -> {
+                    throw new IllegalArgumentException("CREF já está vinculado a outro profissional.");
+                });
+    }
+
+    public void validarRazaoSocialDisponivel(String razaoSocial, String estado, Long estabelecimentoIdAtual) {
+        String razaoNormalizada = StringNormalizer.normalize(razaoSocial);
+        if (razaoNormalizada == null || estado == null || estado.isBlank()) {
+            return;
+        }
+
+        // A razao social so precisa ser unica dentro do mesmo estado (UF).
+        // A unicidade global do estabelecimento e garantida pelo CNPJ.
+        long quantidade = estabelecimentoIdAtual == null
+                ? estabelecimentoRepository.countByRazaoSocialAndEnderecoEstadoIgnoreCase(razaoNormalizada, estado)
+                : estabelecimentoRepository.countByRazaoSocialAndEnderecoEstadoIgnoreCaseAndIdNot(razaoNormalizada, estado, estabelecimentoIdAtual);
+
+        if (quantidade > 0) {
+            throw new IllegalArgumentException("Razao social ja esta cadastrada para outro estabelecimento neste estado.");
+        }
+    }
+
     public void validarCnpjDisponivel(String cnpj, Long estabelecimentoIdAtual) {
         estabelecimentoRepository.findByCnpj(cnpj)
                 .filter(estabelecimento -> deveBloquear(estabelecimento.getId(), estabelecimentoIdAtual, false))
                 .ifPresent(estabelecimento -> {
-                    throw new IllegalArgumentException("CNPJ jÃ¡ estÃ¡ vinculado a outro estabelecimento.");
+                    throw new IllegalArgumentException("CNPJ já está vinculado a outro estabelecimento.");
                 });
     }
 
@@ -64,4 +102,3 @@ public class RegistrationIdentityValidator {
         );
     }
 }
-

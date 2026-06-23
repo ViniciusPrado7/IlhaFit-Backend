@@ -29,6 +29,9 @@ public class User {
     @Column(nullable = false)
     private String senha;
 
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

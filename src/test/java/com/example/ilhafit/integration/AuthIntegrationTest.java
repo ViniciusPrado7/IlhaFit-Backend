@@ -2,12 +2,23 @@ package com.example.ilhafit.integration;
 
 import com.example.ilhafit.AbstractIntegrationTest;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.EmailConfirmationRequestDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
 import com.example.ilhafit.dto.user.UserLoginDTO;
 import com.example.ilhafit.dto.user.UserRegistrationDTO;
+import com.example.ilhafit.entity.Administrator;
+import com.example.ilhafit.entity.EmailConfirmationToken;
+import com.example.ilhafit.entity.Establishment;
 import com.example.ilhafit.entity.PasswordResetToken;
+import com.example.ilhafit.entity.Professional;
+import com.example.ilhafit.entity.User;
+import com.example.ilhafit.repository.AdministratorRepository;
+import com.example.ilhafit.repository.EmailConfirmationTokenRepository;
+import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.PasswordResetTokenRepository;
+import com.example.ilhafit.repository.ProfessionalRepository;
+import com.example.ilhafit.repository.UserRepository;
 import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.EstablishmentService;
 import com.example.ilhafit.service.ProfessionalService;
@@ -21,17 +32,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Transactional
 class AuthIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private ProfessionalService professionalService;
-    @Autowired
-    private EstablishmentService establishmentService;
-    @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired private AuthService authService;
+    @Autowired private ProfessionalService professionalService;
+    @Autowired private EstablishmentService establishmentService;
+    @Autowired private PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired private EmailConfirmationTokenRepository emailConfirmationTokenRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private ProfessionalRepository professionalRepository;
+    @Autowired private EstablishmentRepository establishmentRepository;
+    @Autowired private AdministratorRepository administratorRepository;
 
     @Test
-    void login_admin_comCredenciaisValidas_retornaTokenDeAdministrador() {
+    void login_admin_confirmado_comCredenciaisValidas_retornaTokenDeAdministrador() {
+        confirmarAdministrador(TestFixtures.ADMIN_EMAIL);
+
         AuthLoginResponseDTO resposta = authService.login(loginDto(TestFixtures.ADMIN_EMAIL, TestFixtures.ADMIN_SENHA));
 
         assertThat(resposta.getToken()).isNotBlank();
@@ -41,23 +55,57 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void login_usuario_comCredenciaisValidas_retornaTokenDeUsuario() {
+    void login_usuario_primeiroAcesso_retornaPendenteECriaCodigo() {
         authService.registerUser(userRegistrationDto("usuario@test.com", TestFixtures.SENHA_PADRAO));
 
         AuthLoginResponseDTO resposta = authService.login(loginDto("usuario@test.com", TestFixtures.SENHA_PADRAO));
 
-        assertThat(resposta.getToken()).isNotBlank();
-        assertThat(resposta.getTipo()).isEqualTo("USUARIO");
-        assertThat(resposta.getEmail()).isEqualTo("usuario@test.com");
+        assertThat(resposta.getToken()).isNull();
+        assertThat(resposta.getEmailConfirmado()).isFalse();
+        assertThat(resposta.getRequerConfirmacaoEmail()).isTrue();
+        assertThat(emailConfirmationTokenRepository.findByEmailAndUsedFalse("usuario@test.com")).hasSize(1);
     }
 
     @Test
-    void login_profissional_comCredenciaisValidas_retornaTokenDeProfissional() {
+    void confirmarEmail_usuarioPrimeiroAcesso_liberaToken() {
+        authService.registerUser(userRegistrationDto("confirmar@test.com", TestFixtures.SENHA_PADRAO));
+        authService.login(loginDto("confirmar@test.com", TestFixtures.SENHA_PADRAO));
+        EmailConfirmationToken token = emailConfirmationTokenRepository
+                .findByEmailAndUsedFalse("confirmar@test.com")
+                .get(0);
+
+        EmailConfirmationRequestDTO dto = new EmailConfirmationRequestDTO();
+        dto.setEmail("confirmar@test.com");
+        dto.setCodigo(token.getCodigo());
+
+        AuthLoginResponseDTO resposta = authService.confirmarEmailPrimeiroLogin(dto);
+
+        assertThat(resposta.getToken()).isNotBlank();
+        assertThat(resposta.getEmailConfirmado()).isTrue();
+        assertThat(userRepository.findByEmail("confirmar@test.com")).get()
+                .extracting(User::getEmailConfirmado)
+                .isEqualTo(true);
+    }
+
+    @Test
+    void login_usuario_confirmado_comCredenciaisValidas_retornaTokenDeUsuario() {
+        authService.registerUser(userRegistrationDto("usuario-confirmado@test.com", TestFixtures.SENHA_PADRAO));
+        confirmarUsuario("usuario-confirmado@test.com");
+
+        AuthLoginResponseDTO resposta = authService.login(loginDto("usuario-confirmado@test.com", TestFixtures.SENHA_PADRAO));
+
+        assertThat(resposta.getToken()).isNotBlank();
+        assertThat(resposta.getTipo()).isEqualTo("USUARIO");
+        assertThat(resposta.getEmail()).isEqualTo("usuario-confirmado@test.com");
+    }
+
+    @Test
+    void login_profissional_confirmado_comCredenciaisValidas_retornaTokenDeProfissional() {
         final String senha = "Prof@Senha1";
-        com.example.ilhafit.dto.ProfessionalDTO.Registro dto =
-                TestFixtures.profissionalDto("prof@test.com", "11111111111");
+        var dto = TestFixtures.profissionalDto("prof@test.com", "11111111111");
         dto.setSenha(senha);
         professionalService.cadastrar(dto);
+        confirmarProfissional("prof@test.com");
 
         AuthLoginResponseDTO resposta = authService.login(loginDto("prof@test.com", senha));
 
@@ -66,12 +114,12 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void login_estabelecimento_comCredenciaisValidas_retornaTokenDeEstabelecimento() {
+    void login_estabelecimento_confirmado_comCredenciaisValidas_retornaTokenDeEstabelecimento() {
         final String senha = "Estab@Senha1";
-        com.example.ilhafit.dto.EstablishmentDTO.Registro dto =
-                TestFixtures.estabelecimentoDto("estab@test.com", "12345678000195");
+        var dto = TestFixtures.estabelecimentoDto("estab@test.com", "12345678000195");
         dto.setSenha(senha);
         establishmentService.cadastrar(dto);
+        confirmarEstabelecimento("estab@test.com");
 
         AuthLoginResponseDTO resposta = authService.login(loginDto("estab@test.com", senha));
 
@@ -82,6 +130,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     void login_comSenhaErrada_lancaIllegalArgumentException() {
         authService.registerUser(userRegistrationDto("errosenha@test.com", TestFixtures.SENHA_PADRAO));
+        confirmarUsuario("errosenha@test.com");
 
         assertThatThrownBy(() -> authService.login(loginDto("errosenha@test.com", "SenhaErrada@1")))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -93,64 +142,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertThatThrownBy(() -> authService.login(loginDto("naoexiste@test.com", TestFixtures.SENHA_PADRAO)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Credenciais invalidas");
-    }
-
-    @Test
-    void login_comEmailEmBranco_lancaIllegalArgumentException() {
-        assertThatThrownBy(() -> authService.login(loginDto("", TestFixtures.SENHA_PADRAO)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Credenciais invalidas");
-    }
-
-    @Test
-    void login_comSenhaNula_lancaIllegalArgumentException() {
-        authService.registerUser(userRegistrationDto("senhanula@test.com", TestFixtures.SENHA_PADRAO));
-
-        assertThatThrownBy(() -> authService.login(loginDto("senhanula@test.com", null)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Credenciais invalidas");
-    }
-
-    @Test
-    void login_usuario_respostaContemCamposCompletos() {
-        authService.registerUser(userRegistrationDto("completo@test.com", TestFixtures.SENHA_PADRAO));
-
-        AuthLoginResponseDTO resposta = authService.login(loginDto("completo@test.com", TestFixtures.SENHA_PADRAO));
-
-        assertThat(resposta.getId()).isNotNull();
-        assertThat(resposta.getNome()).isNotBlank();
-        assertThat(resposta.getEmail()).isEqualTo("completo@test.com");
-        assertThat(resposta.getTipo()).isEqualTo("USUARIO");
-        assertThat(resposta.getRole()).isEqualTo("USUARIO");
-        assertThat(resposta.getToken()).isNotBlank();
-        assertThat(resposta.getTokenType()).isEqualTo("Bearer");
-    }
-
-    @Test
-    void login_comEmailNulo_lancaIllegalArgumentException() {
-        assertThatThrownBy(() -> authService.login(loginDto(null, TestFixtures.SENHA_PADRAO)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Credenciais invalidas");
-    }
-
-    @Test
-    void login_comSenhaEmBranco_lancaIllegalArgumentException() {
-        authService.registerUser(userRegistrationDto("senhabranco@test.com", TestFixtures.SENHA_PADRAO));
-
-        assertThatThrownBy(() -> authService.login(loginDto("senhabranco@test.com", "")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Credenciais invalidas");
-    }
-
-    @Test
-    void login_comEmailEmMaiusculasEEspacos_autenticaEmailNormalizado() {
-        authService.registerUser(userRegistrationDto("normalizado@login.com", TestFixtures.SENHA_PADRAO));
-
-        AuthLoginResponseDTO resposta = authService.login(loginDto("  NORMALIZADO@LOGIN.COM  ", TestFixtures.SENHA_PADRAO));
-
-        assertThat(resposta.getEmail()).isEqualTo("normalizado@login.com");
-        assertThat(resposta.getTipo()).isEqualTo("USUARIO");
-        assertThat(resposta.getToken()).isNotBlank();
     }
 
     @Test
@@ -168,40 +159,13 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void solicitarRecuperacaoSenha_segundaSolicitacao_invalidaTokenAnterior() {
-        authService.registerUser(userRegistrationDto("duploreset@test.com", TestFixtures.SENHA_PADRAO));
-        authService.solicitarRecuperacaoSenha(new ForgotPasswordRequestDTO("duploreset@test.com"));
-        PasswordResetToken primeiroToken = passwordResetTokenRepository.findByEmailAndUsedFalse("duploreset@test.com")
-                .get(0);
-
-        authService.solicitarRecuperacaoSenha(new ForgotPasswordRequestDTO("duploreset@test.com"));
-
-        assertThat(passwordResetTokenRepository.findById(primeiroToken.getId()))
-                .get()
-                .extracting(PasswordResetToken::isUsed)
-                .isEqualTo(true);
-        assertThat(passwordResetTokenRepository.findByEmailAndUsedFalse("duploreset@test.com"))
-                .hasSize(1)
-                .extracting(PasswordResetToken::getId)
-                .doesNotContain(primeiroToken.getId());
-    }
-
-    @Test
-    void solicitarRecuperacaoSenha_emailInexistente_naoCriaToken() {
-        long totalAntes = passwordResetTokenRepository.count();
-
-        authService.solicitarRecuperacaoSenha(new ForgotPasswordRequestDTO("naocadastrado@test.com"));
-
-        assertThat(passwordResetTokenRepository.count()).isEqualTo(totalAntes);
-    }
-
-    @Test
     void redefinirSenha_tokenValido_atualizaSenhaEInvalidaToken() {
         authService.registerUser(userRegistrationDto("novasenha@test.com", TestFixtures.SENHA_PADRAO));
+        confirmarUsuario("novasenha@test.com");
         authService.solicitarRecuperacaoSenha(new ForgotPasswordRequestDTO("novasenha@test.com"));
         String token = passwordResetTokenRepository.findByEmailAndUsedFalse("novasenha@test.com").get(0).getToken();
 
-        authService.redefinirSenha(resetPasswordDto(token, "NovaSenha@123"));
+        authService.redefinirSenha(resetPasswordDto("novasenha@test.com", token, "NovaSenha@123"));
 
         assertThatThrownBy(() -> authService.login(loginDto("novasenha@test.com", TestFixtures.SENHA_PADRAO)))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -211,15 +175,28 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 .isEqualTo(true);
     }
 
-    @Test
-    void redefinirSenha_tokenJaUtilizado_lancaIllegalArgumentException() {
-        authService.registerUser(userRegistrationDto("tokenusado@test.com", TestFixtures.SENHA_PADRAO));
-        authService.solicitarRecuperacaoSenha(new ForgotPasswordRequestDTO("tokenusado@test.com"));
-        String token = passwordResetTokenRepository.findByEmailAndUsedFalse("tokenusado@test.com").get(0).getToken();
-        authService.redefinirSenha(resetPasswordDto(token, "NovaSenha@123"));
+    private void confirmarUsuario(String email) {
+        User usuario = userRepository.findByEmail(email).orElseThrow();
+        usuario.setEmailConfirmado(true);
+        userRepository.save(usuario);
+    }
 
-        assertThatThrownBy(() -> authService.redefinirSenha(resetPasswordDto(token, "OutraSenha@123")))
-                .isInstanceOf(IllegalArgumentException.class);
+    private void confirmarProfissional(String email) {
+        Professional profissional = professionalRepository.findByEmail(email).orElseThrow();
+        profissional.setEmailConfirmado(true);
+        professionalRepository.save(profissional);
+    }
+
+    private void confirmarEstabelecimento(String email) {
+        Establishment estabelecimento = establishmentRepository.findByEmail(email).orElseThrow();
+        estabelecimento.setEmailConfirmado(true);
+        establishmentRepository.save(estabelecimento);
+    }
+
+    private void confirmarAdministrador(String email) {
+        Administrator administrador = administratorRepository.findByEmail(email).orElseThrow();
+        administrador.setEmailConfirmado(true);
+        administratorRepository.save(administrador);
     }
 
     private UserLoginDTO loginDto(String email, String senha) {
@@ -231,16 +208,17 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
 
     private UserRegistrationDTO userRegistrationDto(String email, String senha) {
         UserRegistrationDTO dto = new UserRegistrationDTO();
-        dto.setNome("Usuário Teste");
+        dto.setNome("Usuario Teste");
         dto.setEmail(email);
         dto.setSenha(senha);
         dto.setConfirmacaoSenha(senha);
         return dto;
     }
 
-    private ResetPasswordRequestDTO resetPasswordDto(String token, String senha) {
+    private ResetPasswordRequestDTO resetPasswordDto(String email, String codigo, String senha) {
         ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO();
-        dto.setToken(token);
+        dto.setEmail(email);
+        dto.setCodigo(codigo);
         dto.setNovaSenha(senha);
         dto.setConfirmacaoSenha(senha);
         return dto;

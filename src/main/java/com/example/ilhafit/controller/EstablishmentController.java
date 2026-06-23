@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +29,9 @@ public class EstablishmentController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerEstablishment(dto));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapearErroValidacao(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.badRequest().body(mapearErroValidacao(e.getMessage()));
         }
     }
 
@@ -57,9 +58,9 @@ public class EstablishmentController {
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", e.getMessage()));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapearErroValidacao(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+            return ResponseEntity.badRequest().body(mapearErroValidacao(e.getMessage()));
         }
     }
 
@@ -82,6 +83,38 @@ public class EstablishmentController {
         if (userDetails == null || !estabelecimentoId.equals(userDetails.getId())) {
             throw new SecurityException("Sem permissao para alterar este estabelecimento");
         }
+    }
+
+    private Map<String, String> mapearErroValidacao(String mensagem) {
+        Map<String, String> erro = new LinkedHashMap<>();
+        if (mensagem == null || mensagem.isBlank()) {
+            erro.put("erro", "Nao foi possivel concluir a operacao do estabelecimento.");
+            return erro;
+        }
+
+        if (mensagem.contains("Razao social")) {
+            erro.put("razaoSocial", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("Email")) {
+            erro.put("email", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("CNPJ")) {
+            erro.put("cnpj", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("Telefone")) {
+            erro.put("telefone", mensagem);
+            return erro;
+        }
+        if (mensagem.contains("categoria")) {
+            erro.put("gradeAtividades", mensagem);
+            return erro;
+        }
+
+        erro.put("erro", mensagem);
+        return erro;
     }
 }
 

@@ -35,24 +35,27 @@ public class Professional {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome e obrigatorio")
     @Column(nullable = false)
     private String nome;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email deve ser válido")
+    @NotBlank(message = "Email e obrigatorio")
+    @Email(message = "Email deve ser valido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
+    @NotBlank(message = "Senha e obrigatoria")
     @Column(nullable = false)
     private String senha;
 
-    @NotBlank(message = "Telefone é obrigatório")
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado = false;
+
+    @NotBlank(message = "Telefone e obrigatorio")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CPF é obrigatório")
+    @NotBlank(message = "CPF e obrigatorio")
     @Column(name = "cpf", nullable = false, unique = true)
     private String cpf;
 
