@@ -4,6 +4,7 @@ import com.example.ilhafit.validation.StrongPassword;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import lombok.Setter;
 public class UserRegistrationDTO {
 
     @NotBlank(message = "Nome ÃƒÂ© obrigatÃƒÂ³rio")
+    @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "Nome deve conter apenas letras")
     private String nome;
 
     @NotBlank(message = "Email ÃƒÂ© obrigatÃƒÂ³rio")
