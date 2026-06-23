@@ -22,8 +22,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -93,6 +95,33 @@ class AdministratorServiceTest {
         administratorService.cadastrar(registroDto);
 
         verify(passwordEncoder, org.mockito.Mockito.never()).encode(anyString());
+    }
+
+    @Test
+    void cadastrar_sucesso_persisteRoleEPerfilAdmin() {
+        Administrator entidade = new Administrator(); // role e perfil têm default = Role.ADMIN
+        when(administratorMapper.toEntity(registroDto)).thenReturn(entidade);
+        when(passwordEncoder.encode(anyString())).thenReturn("hash");
+        when(administradorRepository.save(any())).thenReturn(entidade);
+        when(administratorMapper.toDTO(any())).thenReturn(respostaDto);
+
+        administratorService.cadastrar(registroDto);
+
+        ArgumentCaptor<Administrator> captor = ArgumentCaptor.forClass(Administrator.class);
+        verify(administradorRepository).save(captor.capture());
+        assertThat(captor.getValue().getRole()).isEqualTo(Role.ADMIN);
+        assertThat(captor.getValue().getPerfil()).isEqualTo(Role.ADMIN);
+    }
+
+    @Test
+    void cadastrar_emailDuplicado_propagaExcecao() {
+        doThrow(new IllegalArgumentException("Email já está vinculado a um cadastro de ADMINISTRADOR."))
+                .when(cadastroIdentityValidator)
+                .validarEmailDisponivel(registroDto.getEmail(), RegistrationType.ADMINISTRADOR, null);
+
+        assertThatThrownBy(() -> administratorService.cadastrar(registroDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Email");
     }
 
     // ─── listarTodos ─────────────────────────────────────────────────────────

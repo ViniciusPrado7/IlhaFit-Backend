@@ -1,6 +1,7 @@
 package com.example.ilhafit.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -34,6 +35,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        Throwable rootCause = ex.getRootCause();
+        String rootMsg = rootCause != null ? rootCause.getMessage() : ex.getMessage();
+        if (rootMsg != null && rootMsg.contains("email")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("erro", "Já existe uma conta com este e-mail."));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("erro", "Os dados fornecidos violam restrições do sistema."));
     }
 
     @ExceptionHandler(Exception.class)

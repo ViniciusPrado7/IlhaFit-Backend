@@ -39,6 +39,10 @@ public class Administrator {
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private Role role = Role.ADMIN;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "perfil", nullable = false, columnDefinition = "VARCHAR(50)")
+    private Role perfil = Role.ADMIN;
+
     @Column(name = "data_cadastro", nullable = true, updatable = false)
     private LocalDateTime dataCadastro;
 
