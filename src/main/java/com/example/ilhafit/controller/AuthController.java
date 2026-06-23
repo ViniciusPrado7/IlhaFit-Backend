@@ -1,7 +1,10 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.EmailConfirmationRequestDTO;
+import com.example.ilhafit.dto.EmailConfirmationResendRequestDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
+import com.example.ilhafit.dto.PasswordResetCodeResendRequestDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
 import com.example.ilhafit.dto.user.UserLoginDTO;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
@@ -30,11 +33,36 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
+    @PostMapping("/confirm-email")
+    public ResponseEntity<AuthLoginResponseDTO> confirmEmail(@RequestBody @Valid EmailConfirmationRequestDTO dto) {
+        return ResponseEntity.ok(authService.confirmarEmailPrimeiroLogin(dto));
+    }
+
+    @PostMapping("/resend-email-confirmation")
+    public ResponseEntity<Map<String, String>> resendEmailConfirmation(
+            @RequestBody @Valid EmailConfirmationResendRequestDTO dto
+    ) {
+        authService.reenviarCodigoPrimeiroLogin(dto.getEmail());
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Enviamos um novo codigo de confirmacao para o seu email."
+        ));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequestDTO dto) {
         authService.solicitarRecuperacaoSenha(dto);
         return ResponseEntity.ok(Map.of(
-                "mensagem", "Se o email estiver cadastrado, enviaremos as instrucoes de recuperacao."
+                "mensagem", "Se o email estiver cadastrado, enviaremos um codigo de recuperacao."
+        ));
+    }
+
+    @PostMapping("/resend-password-code")
+    public ResponseEntity<Map<String, String>> resendPasswordCode(
+            @RequestBody @Valid PasswordResetCodeResendRequestDTO dto
+    ) {
+        authService.reenviarCodigoRecuperacaoSenha(dto.getEmail());
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Enviamos um novo codigo de recuperacao para o seu email."
         ));
     }
 

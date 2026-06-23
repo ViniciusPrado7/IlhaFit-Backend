@@ -4,6 +4,8 @@ import com.example.ilhafit.AbstractIntegrationTest;
 import com.example.ilhafit.dto.user.UserRegistrationDTO;
 import com.example.ilhafit.dto.user.UserResponseDTO;
 import com.example.ilhafit.dto.user.UserUpdateDTO;
+import com.example.ilhafit.entity.User;
+import com.example.ilhafit.repository.UserRepository;
 import com.example.ilhafit.service.AuthService;
 import com.example.ilhafit.service.ProfessionalService;
 import com.example.ilhafit.service.UserService;
@@ -28,6 +30,8 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     private ProfessionalService professionalService;
     @Autowired
     private Validator validator;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void cadastrar_comDadosValidos_retornaUserComId() {
@@ -151,6 +155,10 @@ class UserIntegrationTest extends AbstractIntegrationTest {
         updateDto.setSenha("   ");
 
         authService.atualizarUser(id, updateDto);
+
+        User usuario = userRepository.findByEmail("senhamantida@test.com").orElseThrow();
+        usuario.setEmailConfirmado(true);
+        userRepository.save(usuario);
 
         assertThat(authService.login(loginDto("senhamantida@test.com", TestFixtures.SENHA_PADRAO)).getToken())
                 .isNotBlank();

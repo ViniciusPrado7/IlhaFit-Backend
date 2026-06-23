@@ -1,6 +1,8 @@
 package com.example.ilhafit.integration;
 
 import com.example.ilhafit.dto.user.UserLoginDTO;
+import com.example.ilhafit.entity.Administrator;
+import com.example.ilhafit.repository.AdministratorRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,9 @@ public abstract class BaseIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    private AdministratorRepository administratorRepository;
+
     @Value("${admin.default.email}")
     private String adminEmail;
 
@@ -40,6 +45,9 @@ public abstract class BaseIntegrationTest {
 
     @BeforeEach
     void authenticateAdmin() throws Exception {
+        Administrator administrador = administratorRepository.findByEmail(adminEmail).orElseThrow();
+        administrador.setEmailConfirmado(true);
+        administratorRepository.save(administrador);
         adminToken = login(adminEmail, adminPassword);
     }
 

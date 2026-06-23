@@ -55,6 +55,9 @@ public class Establishment {
     @Column(nullable = false)
     private String senha;
 
+    @Column(name = "email_confirmado")
+    private Boolean emailConfirmado = false;
+
     @NotBlank(message = "Telefone e obrigatorio")
     @Column(nullable = false)
     private String telefone;

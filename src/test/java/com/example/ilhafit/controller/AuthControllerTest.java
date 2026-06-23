@@ -1,11 +1,14 @@
 package com.example.ilhafit.controller;
 
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
+import com.example.ilhafit.dto.EmailConfirmationRequestDTO;
+import com.example.ilhafit.dto.EmailConfirmationResendRequestDTO;
 import com.example.ilhafit.dto.ForgotPasswordRequestDTO;
+import com.example.ilhafit.dto.PasswordResetCodeResendRequestDTO;
 import com.example.ilhafit.dto.ResetPasswordRequestDTO;
 import com.example.ilhafit.dto.user.UserLoginDTO;
-import com.example.ilhafit.security.JwtAuthenticationFilter;
 import com.example.ilhafit.security.JwtAuthenticatedUser;
+import com.example.ilhafit.security.JwtAuthenticationFilter;
 import com.example.ilhafit.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -27,9 +30,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -74,6 +77,39 @@ class AuthControllerTest {
     }
 
     @Test
+    void confirmEmail_codigoValido_retorna200() throws Exception {
+        AuthLoginResponseDTO resposta = AuthLoginResponseDTO.builder()
+                .token("jwt-token").emailConfirmado(true).build();
+        when(authService.confirmarEmailPrimeiroLogin(any())).thenReturn(resposta);
+
+        EmailConfirmationRequestDTO dto = new EmailConfirmationRequestDTO();
+        dto.setEmail("user@ilhafit.com");
+        dto.setCodigo("123456");
+
+        mockMvc.perform(post("/api/auth/confirm-email")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.emailConfirmado").value(true));
+    }
+
+    @Test
+    void resendEmailConfirmation_retorna200() throws Exception {
+        doNothing().when(authService).reenviarCodigoPrimeiroLogin(any());
+
+        EmailConfirmationResendRequestDTO dto = new EmailConfirmationResendRequestDTO();
+        dto.setEmail("user@ilhafit.com");
+
+        mockMvc.perform(post("/api/auth/resend-email-confirmation")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").exists());
+    }
+
+    @Test
     void forgotPassword_emailEnviado_retorna200() throws Exception {
         doNothing().when(authService).solicitarRecuperacaoSenha(any());
 
@@ -89,11 +125,27 @@ class AuthControllerTest {
     }
 
     @Test
+    void resendPasswordCode_retorna200() throws Exception {
+        doNothing().when(authService).reenviarCodigoRecuperacaoSenha(any());
+
+        PasswordResetCodeResendRequestDTO dto = new PasswordResetCodeResendRequestDTO();
+        dto.setEmail("user@ilhafit.com");
+
+        mockMvc.perform(post("/api/auth/resend-password-code")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").exists());
+    }
+
+    @Test
     void resetPassword_tokenValido_retorna200() throws Exception {
         doNothing().when(authService).redefinirSenha(any());
 
         ResetPasswordRequestDTO dto = new ResetPasswordRequestDTO();
-        dto.setToken("tok123");
+        dto.setEmail("user@ilhafit.com");
+        dto.setCodigo("123456");
         dto.setNovaSenha("NovaSenh@1");
         dto.setConfirmacaoSenha("NovaSenh@1");
 
@@ -107,8 +159,6 @@ class AuthControllerTest {
 
     @Test
     void me_semAutenticacao_retorna401() throws Exception {
-        // @WithMockUser injeta Spring Security User, não JwtAuthenticatedUser →
-        // @AuthenticationPrincipal JwtAuthenticatedUser é null → controller retorna HTTP 401
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.erro").exists());
