@@ -34,6 +34,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setEmail(adminProperties.getEmail());
             admin.setSenha(passwordEncoder.encode(adminProperties.getSenha()));
             admin.setRole(Role.ADMIN);
+            admin.setEmailConfirmado(true);
             administradorRepository.save(admin);
             log.info("[DataInitializer] Admin padrao criado: {}", adminProperties.getEmail());
         }
