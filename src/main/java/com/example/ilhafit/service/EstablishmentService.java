@@ -47,6 +47,10 @@ public class EstablishmentService {
     public EstablishmentDTO.Resposta cadastrar(EstablishmentDTO.Registro dto) {
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.ESTABELECIMENTO, null);
         cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), null);
+        cadastroIdentityValidator.validarRazaoSocialDisponivel(
+                dto.getRazaoSocial(),
+                dto.getEndereco() != null ? dto.getEndereco().getEstado() : null,
+                null);
 
         Establishment estabelecimento = estabelecimentoMapper.toEntity(dto);
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
@@ -91,6 +95,10 @@ public class EstablishmentService {
         if (!estabelecimento.getCnpj().equals(dto.getCnpj())) {
             cadastroIdentityValidator.validarCnpjDisponivel(dto.getCnpj(), id);
         }
+        cadastroIdentityValidator.validarRazaoSocialDisponivel(
+                dto.getRazaoSocial(),
+                dto.getEndereco() != null ? dto.getEndereco().getEstado() : null,
+                id);
 
         estabelecimento.setEmail(dto.getEmail());
         estabelecimento.setTelefone(dto.getTelefone());

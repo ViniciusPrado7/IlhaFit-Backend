@@ -47,6 +47,8 @@ public class ProfessionalService {
     public ProfessionalDTO.Resposta cadastrar(ProfessionalDTO.Registro dto) {
         cadastroIdentityValidator.validarEmailDisponivel(dto.getEmail(), RegistrationType.PROFISSIONAL, null);
         cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), null);
+        cadastroIdentityValidator.validarTelefoneProfissionalDisponivel(dto.getTelefone(), null);
+        cadastroIdentityValidator.validarRegistroCrefDisponivel(dto.getRegistroCref(), null);
         validarExclusivoMulheres(dto.getSexo(), dto.getExclusivoMulheres(), dto.getGradeAtividades());
 
         Professional profissional = profissionalMapper.toEntity(dto);
@@ -98,6 +100,14 @@ public class ProfessionalService {
         }
         if (!profissional.getCpf().equals(dto.getCpf())) {
             cadastroIdentityValidator.validarCpfDisponivel(dto.getCpf(), id);
+        }
+        if (!profissional.getTelefone().equals(dto.getTelefone())) {
+            cadastroIdentityValidator.validarTelefoneProfissionalDisponivel(dto.getTelefone(), id);
+        }
+        String crefAtual = profissional.getRegistroCref();
+        String novoCref = dto.getRegistroCref();
+        if (crefAtual == null ? novoCref != null && !novoCref.isBlank() : !crefAtual.equals(novoCref)) {
+            cadastroIdentityValidator.validarRegistroCrefDisponivel(novoCref, id);
         }
         validarExclusivoMulheres(dto.getSexo(), dto.getExclusivoMulheres(), dto.getGradeAtividades());
 

@@ -13,6 +13,10 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 
     Optional<Professional> findByCpf(String cpf);
 
+    Optional<Professional> findByTelefone(String telefone);
+
+    Optional<Professional> findByRegistroCref(String registroCref);
+
     Optional<Professional> findByGradeAtividadesId(Long gradeAtividadeId);
 
     boolean existsByEmail(String email);

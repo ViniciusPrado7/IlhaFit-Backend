@@ -17,5 +17,9 @@ public interface EstablishmentRepository extends JpaRepository<Establishment, Lo
     boolean existsByEmail(String email);
 
     boolean existsByCnpj(String cnpj);
+
+    long countByRazaoSocialAndEnderecoEstadoIgnoreCase(String razaoSocial, String estado);
+
+    long countByRazaoSocialAndEnderecoEstadoIgnoreCaseAndIdNot(String razaoSocial, String estado, Long id);
 }
 
