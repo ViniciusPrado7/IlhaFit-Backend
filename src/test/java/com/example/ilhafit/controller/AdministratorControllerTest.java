@@ -1,5 +1,6 @@
 package com.example.ilhafit.controller;
 
+import com.example.ilhafit.config.SecurityConfig;
 import com.example.ilhafit.dto.AdministratorDTO;
 import com.example.ilhafit.dto.AuthLoginResponseDTO;
 import com.example.ilhafit.security.JwtAuthenticationFilter;
@@ -8,6 +9,7 @@ import com.example.ilhafit.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.springframework.context.annotation.Import;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 @WebMvcTest(AdministratorController.class)
+@Import(SecurityConfig.class)
 @WithMockUser(authorities = "ADMINISTRADOR")
 class AdministratorControllerTest {
 
@@ -161,5 +169,84 @@ class AdministratorControllerTest {
 
         mockMvc.perform(delete("/api/administradores/deletar/99").with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    // ─── segurança ────────────────────────────────────────────────────────────
+
+    @Test
+    @WithAnonymousUser
+    void cadastrar_semAutenticacao_retorna401() throws Exception {
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.erro").value("Token ausente ou expirado"));
+    }
+
+    @Test
+    @WithMockUser(authorities = "USUARIO")
+    void cadastrar_comoUsuarioComum_retorna403() throws Exception {
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("Acesso negado"));
+    }
+
+    // ─── email duplicado ──────────────────────────────────────────────────────
+
+    @Test
+    void cadastrar_emailDuplicado_retorna400ComMensagemAmigavel() throws Exception {
+        when(authService.registerAdministrator(any()))
+                .thenThrow(new IllegalArgumentException("Email já está vinculado a um cadastro de ADMINISTRADOR."));
+
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").exists())
+                .andExpect(jsonPath("$.erro", not(containsString("could not execute"))))
+                .andExpect(jsonPath("$.erro", not(containsString("null value"))));
+    }
+
+    // ─── validação ────────────────────────────────────────────────────────────
+
+    @Test
+    void cadastrar_camposObrigatoriosAusentes_retorna400() throws Exception {
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"\",\"email\":\"\",\"senha\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void cadastrar_emailMalFormatado_retorna400() throws Exception {
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Admin\",\"email\":\"nao-e-email\",\"senha\":\"Senh@1234\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest(name = "senha fraca: [{0}]")
+    @ValueSource(strings = {
+        "semmaius1!",    // sem maiúscula
+        "SEMMINUSC1!",   // sem minúscula
+        "SemDigito!",    // sem dígito
+        "SemEspecial1",  // sem caractere especial
+        "Ab@1"           // menos de 8 caracteres
+    })
+    void cadastrar_senhaFraca_retorna400(String senha) throws Exception {
+        String payload = "{\"nome\":\"Admin\",\"email\":\"admin@test.com\",\"senha\":\"" + senha + "\"}";
+
+        mockMvc.perform(post("/api/administradores/cadastrar")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest());
     }
 }

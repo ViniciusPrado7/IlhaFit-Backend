@@ -45,7 +45,7 @@ public class AdministratorController {
     public ResponseEntity<?> cadastrar(@Valid @RequestBody AdministratorDTO.Registro dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerAdministrator(dto));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
