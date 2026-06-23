@@ -89,7 +89,9 @@ public class AuthService {
         ContaAutenticavel conta = autenticarConta(email, dto.getSenha())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas"));
 
-        if (!Boolean.TRUE.equals(conta.emailConfirmado())) {
+        // O administrador nao passa por confirmacao de e-mail (2FA).
+        if (conta.tipoCadastro() != RegistrationType.ADMINISTRADOR
+                && !Boolean.TRUE.equals(conta.emailConfirmado())) {
             enviarCodigoPrimeiroLogin(conta);
             return AuthLoginResponseDTO.builder()
                     .id(conta.cadastroId())
