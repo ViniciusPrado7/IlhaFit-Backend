@@ -147,8 +147,11 @@ public class EvaluationService {
     }
 
     private void validarPermissaoParaAvaliar(JwtAuthenticatedUser autor) {
-        if (RegistrationType.ESTABELECIMENTO.name().equals(autor.getTipo())) {
-            throw new SecurityException("Users do tipo estabelecimento nao podem realizar avaliacoes.");
+        // RN12: apenas aluno (usuario) e profissional podem avaliar.
+        boolean permitido = RegistrationType.USUARIO.name().equals(autor.getTipo())
+                || RegistrationType.PROFISSIONAL.name().equals(autor.getTipo());
+        if (!permitido) {
+            throw new SecurityException("Apenas alunos e profissionais podem avaliar.");
         }
     }
 

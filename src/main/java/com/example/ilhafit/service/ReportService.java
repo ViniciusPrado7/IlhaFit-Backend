@@ -3,6 +3,7 @@ package com.example.ilhafit.service;
 import com.example.ilhafit.dto.ReportDTO;
 import com.example.ilhafit.entity.Evaluation;
 import com.example.ilhafit.entity.Report;
+import com.example.ilhafit.enums.RegistrationType;
 import com.example.ilhafit.enums.ReportStatus;
 import com.example.ilhafit.repository.EvaluationRepository;
 import com.example.ilhafit.repository.ReportRepository;
@@ -28,6 +29,7 @@ public class ReportService {
         if (denunciante == null) {
             throw new SecurityException("E necessario estar logado para realizar esta operacao.");
         }
+        validarPermissaoParaDenunciar(denunciante);
         moderacaoService.validarTextoPermitido(requisicao.getDescricaoAdicional());
 
         Evaluation avaliacao = avaliacaoRepository.findById(requisicao.getAvaliacaoId())
@@ -49,6 +51,15 @@ public class ReportService {
         denuncia.setStatus(ReportStatus.PENDENTE);
 
         return toResposta(denunciaRepository.save(denuncia));
+    }
+
+    private void validarPermissaoParaDenunciar(JwtAuthenticatedUser denunciante) {
+        // RN12: apenas aluno (usuario) e profissional podem denunciar avaliacoes.
+        boolean permitido = RegistrationType.USUARIO.name().equals(denunciante.getTipo())
+                || RegistrationType.PROFISSIONAL.name().equals(denunciante.getTipo());
+        if (!permitido) {
+            throw new SecurityException("Apenas alunos e profissionais podem denúnciar avaliações.");
+        }
     }
 
     public List<ReportDTO.Resposta> listarTodas() {
