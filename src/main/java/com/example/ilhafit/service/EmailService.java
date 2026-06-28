@@ -90,7 +90,7 @@ public class EmailService {
             SimpleMailMessage mensagem = new SimpleMailMessage();
             mensagem.setFrom(from);
             mensagem.setTo(destinatario);
-            mensagem.setSubject("Recuperacao de senha IlhaFit");
+            mensagem.setSubject("Recuperação de senha IlhaFit");
             mensagem.setText(montarMensagemRecuperacaoSenha(link, validadeMinutos));
 
             mailSender.send(mensagem);
@@ -110,7 +110,7 @@ public class EmailService {
             SimpleMailMessage mensagem = new SimpleMailMessage();
             mensagem.setFrom(from);
             mensagem.setTo(destinatario);
-            mensagem.setSubject("Codigo de recuperacao de senha IlhaFit");
+            mensagem.setSubject("Código de recuperação de senha IlhaFit");
             mensagem.setText(montarMensagemCodigoRecuperacaoSenha(codigo, validadeMinutos));
 
             mailSender.send(mensagem);
@@ -120,7 +120,7 @@ public class EmailService {
                     detalheErro(e),
                     e);
             throw new MailSendException(
-                    "Nao foi possivel enviar o codigo de recuperacao por email. Verifique a configuracao do Gmail e tente novamente.",
+                    "Não foi possível enviar o código de recuperação por e-mail. Tente novamente em alguns instantes.",
                     e
             );
         }
@@ -139,7 +139,7 @@ public class EmailService {
             SimpleMailMessage mensagem = new SimpleMailMessage();
             mensagem.setFrom(from);
             mensagem.setTo(destinatario);
-            mensagem.setSubject("Codigo de confirmacao IlhaFit");
+            mensagem.setSubject("Código de confirmação IlhaFit");
             mensagem.setText(montarMensagemConfirmacaoPrimeiroLogin(nome, codigo, validadeMinutos));
 
             mailSender.send(mensagem);
@@ -164,45 +164,45 @@ public class EmailService {
     }
 
     private String montarMensagemBoasVindas(String nome, String tipoConta) {
-        return "Ola, " + nome + "!\n\n"
+        return "Olá, " + nome + "!\n\n"
                 + "Seu cadastro como " + tipoConta + " foi criado com sucesso no IlhaFit.\n\n"
-                + "Agora voce ja pode acessar a plataforma e aproveitar os recursos disponiveis.\n\n"
+                + "Agora você já pode acessar a plataforma e aproveitar os recursos disponíveis.\n\n"
                 + "Equipe IlhaFit";
     }
 
     private String montarMensagemRecuperacaoSenha(String link, int validadeMinutos) {
-        return "Ola!\n\n"
-                + "Recebemos uma solicitacao para redefinir sua senha no IlhaFit.\n\n"
+        return "Olá!\n\n"
+                + "Recebemos uma solicitação para redefinir sua senha no IlhaFit.\n\n"
                 + "Acesse o link abaixo para criar uma nova senha:\n"
                 + link + "\n\n"
                 + "Este link expira em " + validadeMinutos + " minutos.\n\n"
-                + "Se voce nao solicitou essa alteracao, ignore este email.\n\n"
+                + "Se você não solicitou essa alteração, ignore este e-mail.\n\n"
                 + "Equipe IlhaFit";
     }
 
     private String montarMensagemCodigoRecuperacaoSenha(String codigo, int validadeMinutos) {
-        return "Ola!\n\n"
-                + "Recebemos uma solicitacao para redefinir sua senha no IlhaFit.\n\n"
-                + "Use o codigo abaixo para continuar:\n\n"
+        return "Olá!\n\n"
+                + "Recebemos uma solicitação para redefinir sua senha no IlhaFit.\n\n"
+                + "Use o código abaixo para continuar:\n\n"
                 + codigo + "\n\n"
-                + "Este codigo expira em " + validadeMinutos + " minutos.\n\n"
-                + "Se voce nao solicitou essa alteracao, ignore este email.\n\n"
+                + "Este código expira em " + validadeMinutos + " minutos.\n\n"
+                + "Se você não solicitou essa alteração, ignore este e-mail.\n\n"
                 + "Equipe IlhaFit";
     }
 
     private String montarMensagemConfirmacaoPrimeiroLogin(String nome, String codigo, int validadeMinutos) {
-        String saudacao = (nome == null || nome.isBlank()) ? "Ola!" : "Ola, " + nome + "!";
+        String saudacao = (nome == null || nome.isBlank()) ? "Olá!" : "Olá, " + nome + "!";
         return saudacao + "\n\n"
-                + "Para concluir o seu primeiro login no IlhaFit, use o codigo abaixo:\n\n"
+                + "Para concluir o seu primeiro login no IlhaFit, use o código abaixo:\n\n"
                 + codigo + "\n\n"
-                + "Este codigo expira em " + validadeMinutos + " minutos.\n\n"
-                + "Se voce nao tentou entrar na plataforma, ignore este email.\n\n"
+                + "Este código expira em " + validadeMinutos + " minutos.\n\n"
+                + "Se você não tentou entrar na plataforma, ignore este e-mail.\n\n"
                 + "Equipe IlhaFit";
     }
 
     private String descricaoRegistrationType(RegistrationType tipoCadastro) {
         return switch (tipoCadastro) {
-            case USUARIO -> "usuario";
+            case USUARIO -> "usuário";
             case ESTABELECIMENTO -> "estabelecimento";
             case PROFISSIONAL -> "profissional";
             case ADMINISTRADOR -> "administrador";
