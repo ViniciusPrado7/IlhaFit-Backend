@@ -40,7 +40,7 @@ valor padrão para desenvolvimento, exceto as marcadas como obrigatórias em pro
 | `JWT_EXPIRATION_MILLIS` | Validade do token em milissegundos | `86400000` (24h) |
 | `APP_CORS_ALLOWED_ORIGIN_PATTERNS` | Origens liberadas no CORS (separadas por vírgula) | `http://localhost:*,...` |
 | `FRONTEND_RESET_PASSWORD_URL` | URL do front para redefinição de senha | `http://localhost:5173/esqueci-senha` |
-| `ADMIN_NOME` / `ADMIN_EMAIL` / `ADMIN_SENHA` | Admin padrão criado no primeiro boot | `Admin` / `admin@ilhafit.com` / `Adm@1234` |
+| `ADMIN_NOME` / `ADMIN_EMAIL` / `ADMIN_SENHA` | Admin padrão criado no primeiro boot | `Admin` / `Email Admin` / `Senha Admin` |
 | `MAIL_HOST` / `MAIL_PORT` | Servidor SMTP | `smtp.gmail.com` / `587` |
 | `MAIL_USER` / `MAIL_PASSWORD` | Credenciais SMTP | — |
 | `MAIL_FROM` | Remetente dos e‑mails | = `MAIL_USER` |
