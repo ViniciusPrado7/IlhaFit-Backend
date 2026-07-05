@@ -4,7 +4,6 @@ import com.example.ilhafit.dto.EstablishmentDTO;
 import com.example.ilhafit.entity.Establishment;
 import com.example.ilhafit.entity.Evaluation;
 import com.example.ilhafit.enums.RegistrationType;
-import com.example.ilhafit.enums.ReportStatus;
 import com.example.ilhafit.mapper.EstablishmentMapper;
 import com.example.ilhafit.repository.EstablishmentRepository;
 import com.example.ilhafit.repository.EvaluationRepository;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -128,17 +129,14 @@ class EstablishmentServiceTest {
 
     @Test
     void deletar_existente_removeCascata() {
-        Evaluation avaliacao = new Evaluation();
-        avaliacao.setId(7L);
-
         when(estabelecimentoRepository.existsById(ESTAB_ID)).thenReturn(true);
-        when(avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(ESTAB_ID))
-                .thenReturn(List.of(avaliacao));
 
         establishmentService.deletar(ESTAB_ID);
 
-        verify(denunciaRepository).deleteByAvaliacaoId(7L, ReportStatus.EXCLUIDO);
-        verify(estabelecimentoRepository).deleteById(ESTAB_ID);
+        InOrder inOrder = inOrder(denunciaRepository, avaliacaoRepository, estabelecimentoRepository);
+        inOrder.verify(denunciaRepository).hardDeleteByEstabelecimentoId(ESTAB_ID);
+        inOrder.verify(avaliacaoRepository).hardDeleteByEstabelecimentoId(ESTAB_ID);
+        inOrder.verify(estabelecimentoRepository).deleteById(ESTAB_ID);
     }
 
     @Test

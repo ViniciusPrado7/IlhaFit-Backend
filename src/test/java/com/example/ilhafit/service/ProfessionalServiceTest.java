@@ -164,18 +164,15 @@ class ProfessionalServiceTest {
     /** deletar — existente remove avaliações e profissional */
     @Test
     void deletar_existente_removeAvaliacoesEProfissional() {
-        com.example.ilhafit.entity.Evaluation av = new com.example.ilhafit.entity.Evaluation();
-        av.setId(7L);
-
         when(profissionalRepository.existsById(1L)).thenReturn(true);
-        when(avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(1L))
-                .thenReturn(Collections.singletonList(av));
 
         professionalService.deletar(1L);
 
-        org.mockito.Mockito.verify(denunciaRepository)
-                .deleteByAvaliacaoId(7L, com.example.ilhafit.enums.ReportStatus.EXCLUIDO);
-        org.mockito.Mockito.verify(profissionalRepository).deleteById(1L);
+        org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(
+                denunciaRepository, avaliacaoRepository, profissionalRepository);
+        inOrder.verify(denunciaRepository).hardDeleteByProfissionalId(1L);
+        inOrder.verify(avaliacaoRepository).hardDeleteByProfissionalId(1L);
+        inOrder.verify(profissionalRepository).deleteById(1L);
     }
 
     /** deletar — inexistente lança IllegalArgumentException */
