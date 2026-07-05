@@ -5,7 +5,6 @@ import com.example.ilhafit.dto.ProfessionalDTO;
 import com.example.ilhafit.entity.Evaluation;
 import com.example.ilhafit.entity.ActivitySchedule;
 import com.example.ilhafit.entity.Professional;
-import com.example.ilhafit.enums.ReportStatus;
 import com.example.ilhafit.enums.RegistrationType;
 import com.example.ilhafit.mapper.ProfessionalMapper;
 import com.example.ilhafit.repository.EvaluationRepository;
@@ -20,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -144,9 +142,8 @@ public class ProfessionalService {
         if (!profissionalRepository.existsById(id)) {
             throw new IllegalArgumentException("Profissional não encontrado");
         }
-        avaliacaoRepository.findByProfissionalIdOrderByDataAvaliacaoDesc(id)
-                .forEach(a -> denunciaRepository.deleteByAvaliacaoId(a.getId(), ReportStatus.EXCLUIDO));
-        avaliacaoRepository.deleteByProfissionalId(id, LocalDateTime.now());
+        denunciaRepository.hardDeleteByProfissionalId(id);
+        avaliacaoRepository.hardDeleteByProfissionalId(id);
         profissionalRepository.deleteById(id);
     }
 

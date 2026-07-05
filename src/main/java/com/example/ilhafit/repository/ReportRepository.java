@@ -33,5 +33,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Report d SET d.status = :excluido WHERE d.avaliacao.id = :avaliacaoId AND d.status <> :excluido")
     void deleteByAvaliacaoId(@Param("avaliacaoId") Long avaliacaoId, @Param("excluido") ReportStatus excluido);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Report d WHERE d.avaliacao.id IN (SELECT a.id FROM Evaluation a WHERE a.estabelecimento.id = :id)")
+    void hardDeleteByEstabelecimentoId(@Param("id") Long estabelecimentoId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Report d WHERE d.avaliacao.id IN (SELECT a.id FROM Evaluation a WHERE a.profissional.id = :id)")
+    void hardDeleteByProfissionalId(@Param("id") Long profissionalId);
 }
 
