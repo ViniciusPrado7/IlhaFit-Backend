@@ -15,6 +15,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProfessionalService {
+
+
+    private static final int TAMANHO_PADRAO = 200;
+    private static final int TAMANHO_MAXIMO = 500;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -67,10 +74,23 @@ public class ProfessionalService {
         return mappedWithRating(profissionalRepository.findById(profissionalId).orElseThrow());
     }
 
-    public List<ProfessionalDTO.Resposta> listarTodos() {
-        List<Professional> profissionais = profissionalRepository.findAllComGradeAtividades();
-        Map<Long, RatingSummary> ratings = buscarRatings(profissionais.stream().map(Professional::getId).toList());
-        return profissionais.stream()
+    public List<ProfessionalDTO.Resposta> listarTodos(Integer page, Integer size) {
+        int paginaSolicitada = page != null && page >= 0 ? page : 0;
+        int tamanhoSolicitado = size != null && size > 0 ? Math.min(size, TAMANHO_MAXIMO) : TAMANHO_PADRAO;
+
+        Page<Professional> pagina = profissionalRepository.findAll(PageRequest.of(paginaSolicitada, tamanhoSolicitado));
+        List<Long> ids = pagina.getContent().stream().map(Professional::getId).toList();
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Professional> comGradePorId = profissionalRepository.findComGradeAtividadesByIdIn(ids).stream()
+                .collect(Collectors.toMap(Professional::getId, p -> p));
+        Map<Long, RatingSummary> ratings = buscarRatings(ids);
+
+        return ids.stream()
+                .map(comGradePorId::get)
+                .filter(Objects::nonNull)
                 .map(p -> aplicarRating(profissionalMapper.toDTO(p), ratings.get(p.getId())))
                 .collect(Collectors.toList());
     }
