@@ -94,7 +94,7 @@ class EstablishmentControllerTest {
 
     @Test
     void listarTodos_retorna200() throws Exception {
-        when(estabelecimentoService.listarTodos()).thenReturn(List.of());
+        when(estabelecimentoService.listarTodos(any(), any())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/estabelecimentos/estabelecimentos"))
                 .andExpect(status().isOk());
