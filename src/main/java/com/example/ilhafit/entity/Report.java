@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "denuncias", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"avaliacao_id", "denunciante_email"})
+}, indexes = {
+        @Index(name = "idx_denuncias_status", columnList = "status")
 })
 @Data
 @NoArgsConstructor

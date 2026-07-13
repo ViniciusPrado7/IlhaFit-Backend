@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -68,8 +69,10 @@ public class EstablishmentService {
     }
 
     public List<EstablishmentDTO.Resposta> listarTodos() {
-        return estabelecimentoRepository.findAll().stream()
-                .map(this::mappedWithRating)
+        List<Establishment> estabelecimentos = estabelecimentoRepository.findAllComGradeAtividades();
+        Map<Long, RatingSummary> ratings = buscarRatings(estabelecimentos.stream().map(Establishment::getId).toList());
+        return estabelecimentos.stream()
+                .map(e -> aplicarRating(estabelecimentoMapper.toResumoDTO(e), ratings.get(e.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -148,6 +151,25 @@ public class EstablishmentService {
             dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
             dto.setTotalAvaliacoes(avaliacoes.size());
         }
+        return dto;
+    }
+
+    // Uma unica query agregada para todos os ids da listagem, no lugar de 1 query por item.
+    private Map<Long, RatingSummary> buscarRatings(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return avaliacaoRepository.mediaPorEstabelecimentoIds(ids).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> new RatingSummary(
+                                Math.round(((Number) row[1]).doubleValue() * 10.0) / 10.0,
+                                ((Number) row[2]).intValue())));
+    }
+
+    private EstablishmentDTO.Resposta aplicarRating(EstablishmentDTO.Resposta dto, RatingSummary rating) {
+        dto.setAvaliacao(rating != null ? rating.media() : 0.0);
+        dto.setTotalAvaliacoes(rating != null ? rating.total() : 0);
         return dto;
     }
 

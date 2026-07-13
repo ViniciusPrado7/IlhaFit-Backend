@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,7 +21,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "categorias_pendentes")
+@Table(name = "categorias_pendentes", indexes = {
+        @Index(name = "idx_categorias_pendentes_status", columnList = "status"),
+        @Index(name = "idx_categorias_pendentes_solicitante", columnList = "tipo_solicitante, solicitante_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
