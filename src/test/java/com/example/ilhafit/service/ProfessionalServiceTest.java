@@ -246,6 +246,7 @@ class ProfessionalServiceTest {
         p.setId(id);
         p.setEmail(email);
         p.setCpf("12345678900");
+        p.setTelefone("48912345678");
         p.setGradeAtividades(new java.util.ArrayList<>());
         return p;
     }

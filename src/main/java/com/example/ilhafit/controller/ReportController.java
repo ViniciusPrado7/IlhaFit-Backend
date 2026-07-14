@@ -86,8 +86,8 @@ public class ReportController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
         } catch (Exception e) {
-            log.error("Erro ao excluir avaliaÃ§Ã£o ID {}", id, e);
-            return ResponseEntity.status(500).body(Map.of("erro", "Erro interno ao excluir avaliaÃ§Ã£o."));
+            log.error("Erro ao excluir avaliação ID {}", id, e);
+            return ResponseEntity.status(500).body(Map.of("erro", "Erro interno ao excluir avaliação."));
         }
     }
 }

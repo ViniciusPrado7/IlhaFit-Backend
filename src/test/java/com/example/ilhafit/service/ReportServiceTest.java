@@ -129,7 +129,7 @@ class ReportServiceTest {
 
         assertThatThrownBy(() -> reportService.criar(requisicao, denunciante))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("ja denunciou");
+                .hasMessageContaining("já denunciou");
     }
 
     // ─── atualizarStatus ─────────────────────────────────────────────────────

@@ -140,7 +140,7 @@ class EvaluationServiceTest {
 
         assertThatThrownBy(() -> evaluationService.avaliar(req, alunoAutor))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("ja avaliou este profissional");
+                .hasMessageContaining("já avaliou este profissional");
     }
 
     /** RN05-CT03 — segunda avaliação ao mesmo estabelecimento → IllegalStateException */
@@ -155,7 +155,7 @@ class EvaluationServiceTest {
 
         assertThatThrownBy(() -> evaluationService.avaliar(req, alunoAutor))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("ja avaliou este estabelecimento");
+                .hasMessageContaining("já avaliou este estabelecimento");
     }
 
     // ─── RN12 ───────────────────────────────────────────────────────────────
@@ -318,7 +318,7 @@ class EvaluationServiceTest {
 
         assertThatThrownBy(() -> evaluationService.avaliar(req, tipoInvalido))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Tipo de usuario invalido");
+                .hasMessageContaining("Tipo de usuário inválido");
     }
 
     // ─── helper ──────────────────────────────────────────────────────────────

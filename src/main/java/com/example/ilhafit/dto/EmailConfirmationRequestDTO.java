@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Pattern;
 
 public class EmailConfirmationRequestDTO {
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     private String email;
 
-    @NotBlank(message = "Codigo e obrigatorio")
-    @Pattern(regexp = "\\d{6}", message = "Codigo deve conter 6 digitos")
+    @NotBlank(message = "Código é obrigatório")
+    @Pattern(regexp = "\\d{6}", message = "Código deve conter 6 dígitos")
     private String codigo;
 
     public String getEmail() {

@@ -56,27 +56,27 @@ public class EvaluationService {
 
         if (requisicao.getEstabelecimentoId() != null) {
             Establishment estabelecimento = estabelecimentoRepository.findById(requisicao.getEstabelecimentoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Establishment não encontrado."));
 
             if (RegistrationType.ESTABELECIMENTO.name().equals(autor.getTipo()) && estabelecimento.getId().equals(autor.getId())) {
-                throw new IllegalStateException("Voce nao pode avaliar seu proprio estabelecimento.");
+                throw new IllegalStateException("Você não pode avaliar seu proprio estabelecimento.");
             }
 
             if (avaliacaoRepository.existsByAutorTipoAndAutorIdAndEstabelecimentoId(autor.getTipo(), autor.getId(), estabelecimento.getId())) {
-                throw new IllegalStateException("Voce ja avaliou este estabelecimento.");
+                throw new IllegalStateException("Você já avaliou este estabelecimento.");
             }
 
             avaliacao.setEstabelecimento(estabelecimento);
         } else {
             Professional profissional = profissionalRepository.findById(requisicao.getProfissionalId())
-                    .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Professional não encontrado."));
 
             if (RegistrationType.PROFISSIONAL.name().equals(autor.getTipo()) && profissional.getId().equals(autor.getId())) {
-                throw new IllegalStateException("Voce nao pode avaliar seu proprio perfil profissional.");
+                throw new IllegalStateException("Você não pode avaliar seu proprio perfil profissional.");
             }
 
             if (avaliacaoRepository.existsByAutorTipoAndAutorIdAndProfissionalId(autor.getTipo(), autor.getId(), profissional.getId())) {
-                throw new IllegalStateException("Voce ja avaliou este profissional.");
+                throw new IllegalStateException("Você já avaliou este profissional.");
             }
 
             avaliacao.setProfissional(profissional);
@@ -90,7 +90,7 @@ public class EvaluationService {
         validarAutorAutenticado(usuarioAutenticado);
 
         Evaluation avaliacao = avaliacaoRepository.findById(avaliacaoId)
-                .orElseThrow(() -> new IllegalArgumentException("Evaluation nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluation não encontrada"));
 
         boolean isAdmin = RegistrationType.ADMINISTRADOR.name().equals(usuarioAutenticado.getTipo());
         boolean isAutor = avaliacao.getAutorTipo().equals(usuarioAutenticado.getTipo())
@@ -158,25 +158,25 @@ public class EvaluationService {
     private String buscarNomeAutor(JwtAuthenticatedUser autor) {
         if (RegistrationType.USUARIO.name().equals(autor.getTipo())) {
             return usuarioRepository.findById(autor.getId()).map(User::getNome)
-                    .orElseThrow(() -> new IllegalArgumentException("User nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("User não encontrado."));
         }
 
         if (RegistrationType.ESTABELECIMENTO.name().equals(autor.getTipo())) {
             return estabelecimentoRepository.findById(autor.getId()).map(Establishment::getNomeFantasia)
-                    .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Establishment não encontrado."));
         }
 
         if (RegistrationType.PROFISSIONAL.name().equals(autor.getTipo())) {
             return profissionalRepository.findById(autor.getId()).map(Professional::getNome)
-                    .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Professional não encontrado."));
         }
 
         if (RegistrationType.ADMINISTRADOR.name().equals(autor.getTipo())) {
             return administradorRepository.findById(autor.getId()).map(Administrator::getNome)
-                    .orElseThrow(() -> new IllegalArgumentException("Administrator nao encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Administrator não encontrado."));
         }
 
-        throw new IllegalArgumentException("Tipo de usuario invalido.");
+        throw new IllegalArgumentException("Tipo de usuário inválido.");
     }
 }
 

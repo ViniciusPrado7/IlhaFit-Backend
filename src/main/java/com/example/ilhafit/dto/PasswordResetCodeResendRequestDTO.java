@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 
 public class PasswordResetCodeResendRequestDTO {
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     private String email;
 
     public String getEmail() {

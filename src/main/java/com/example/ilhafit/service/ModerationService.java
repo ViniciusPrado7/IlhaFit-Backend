@@ -47,7 +47,7 @@ public class ModerationService {
 
         Optional<String> apiKey = buscarGroqApiKey();
         if (apiKey.isEmpty()) {
-            log.warn("GROQ_API_KEY nao configurada. Moderacao automatica ignorada.");
+            log.warn("GROQ_API_KEY não configurada. Moderacao automatica ignorada.");
             return;
         }
 
@@ -86,10 +86,10 @@ public class ModerationService {
 
     private String promptModeracao(String texto) {
         return """
-                Voce e um classificador de moderacao para uma plataforma fitness.
+                Você e um classificador de moderacao para uma plataforma fitness.
                 Analise se o texto contem xingamento, ofensa direta, ameaca, discurso de odio,
                 assedio, humilhacao, linguagem sexual explicita ou conteudo inadequado para avaliacao/denuncia.
-                Responda somente JSON valido, sem markdown, neste formato:
+                Responda somente JSON válido, sem markdown, neste formato:
                 {"bloquear":true,"motivo":"descricao curta"}
                 ou
                 {"bloquear":false,"motivo":"permitido"}
@@ -120,7 +120,7 @@ public class ModerationService {
                     node.path("bloquear").asBoolean(false),
                     node.path("motivo").asText("permitido"));
         } catch (JsonProcessingException e) {
-            throw new ModerationUnavailableException("A IA retornou uma resposta invalida.", e);
+            throw new ModerationUnavailableException("A IA retornou uma resposta inválida.", e);
         }
     }
 
@@ -137,16 +137,16 @@ public class ModerationService {
     private String mensagemErroGroq(RestClientResponseException e) {
         int status = e.getStatusCode().value();
         if (status == 400) {
-            return "Requisicao invalida para a Groq API.";
+            return "Requisicao inválida para a Groq API.";
         }
         if (status == 401 || status == 403) {
-            return "Chave da Groq invalida, revogada ou sem permissao.";
+            return "Chave da Groq inválida, revogada ou sem permissao.";
         }
         if (status == 429) {
             return "Limite gratuito da Groq API atingido. Tente novamente mais tarde.";
         }
         if (status == 404) {
-            return "Modelo da Groq nao encontrado ou indisponivel para esta chave.";
+            return "Modelo da Groq não encontrado ou indisponivel para esta chave.";
         }
         return MENSAGEM_INDISPONIVEL;
     }
@@ -210,7 +210,7 @@ public class ModerationService {
     ) {
         private static GroqChatRequest fromPrompt(String model, String prompt) {
             return new GroqChatRequest(model, List.of(
-                    new GroqChatMessage("system", "Responda somente JSON valido, sem markdown."),
+                    new GroqChatMessage("system", "Responda somente JSON válido, sem markdown."),
                     new GroqChatMessage("user", prompt)
             ), 0.0, 120);
         }

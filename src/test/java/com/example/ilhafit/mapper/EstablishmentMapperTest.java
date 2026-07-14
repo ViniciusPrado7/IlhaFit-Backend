@@ -45,7 +45,7 @@ class EstablishmentMapperTest {
         assertThat(entity.getCnpj()).isEqualTo("12345678000195");
         assertThat(entity.getNomeFantasia()).isEqualTo("Academia Ilha");
         assertThat(entity.getEndereco()).isNotNull();
-        assertThat(entity.getEndereco().getCidade()).isEqualTo("florianópolis"); // normalize() lowercases
+        assertThat(entity.getEndereco().getCidade()).isEqualTo("Florianópolis"); // normalizeName() aplica Title Case
     }
 
     @Test

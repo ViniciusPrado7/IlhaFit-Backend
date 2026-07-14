@@ -1,6 +1,7 @@
 package com.example.ilhafit.integration;
 
 import com.example.ilhafit.dto.CategoryDTO;
+import com.example.ilhafit.util.StringNormalizer;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -47,7 +48,7 @@ class AuthAndCategoryIntegrationTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nome").value(createDto.getNome().toLowerCase()))
+                .andExpect(jsonPath("$.nome").value(StringNormalizer.normalizeName(createDto.getNome())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
@@ -63,7 +64,7 @@ class AuthAndCategoryIntegrationTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.categoria.nome").value(updateDto.getNome().toLowerCase()));
+                .andExpect(jsonPath("$.categoria.nome").value(StringNormalizer.normalizeName(updateDto.getNome())));
 
         String detailsResponse = mockMvc.perform(get("/api/categorias/categorias/{id}", categoryId))
                 .andExpect(status().isOk())

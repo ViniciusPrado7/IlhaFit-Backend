@@ -51,7 +51,7 @@ public class PendingCategoryController {
                     : null;
             return ResponseEntity.ok(categoriaPendenteService.listar(statusEnum));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Status invalido: " + status));
+            return ResponseEntity.badRequest().body(Map.of("erro", "Status inválido: " + status));
         }
     }
 
@@ -100,7 +100,7 @@ public class PendingCategoryController {
 
     private RegistrationType extrairTipoSolicitante(JwtAuthenticatedUser userDetails) {
         if (userDetails == null) {
-            throw new IllegalArgumentException("Usuario autenticado não encontrado");
+            throw new IllegalArgumentException("Usuário autenticado não encontrado");
         }
 
         RegistrationType tipoSolicitante = RegistrationType.valueOf(userDetails.getTipo());

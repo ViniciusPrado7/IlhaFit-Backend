@@ -13,7 +13,7 @@ public class UserUpdateDTO {
     @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "Nome deve conter apenas letras")
     private String nome;
 
-    @Email(message = "Email invÃ¡lido")
+    @Email(message = "Email inválido")
     private String email;
 
     @StrongPassword

@@ -86,7 +86,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.toEntity(registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Categoria invalida");
+                .hasMessageContaining("Categoria inválida");
     }
 
     @Test
@@ -95,7 +95,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.toEntity(registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Categoria nao encontrada ou inativa");
+                .hasMessageContaining("Categoria não encontrada ou inativa");
     }
 
     @Test
@@ -105,7 +105,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.toEntity(registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Categoria nao encontrada ou inativa");
+                .hasMessageContaining("Categoria não encontrada ou inativa");
     }
 
     // ─── adicionarAoProfessional ──────────────────────────────────────────────
@@ -134,7 +134,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.adicionarAoProfessional(99L, registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Professional nao encontrado");
+                .hasMessageContaining("Professional não encontrado");
     }
 
     // ─── listarPorProfessional ───────────────────────────────────────────────
@@ -187,7 +187,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.adicionarAoEstablishment(99L, registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Establishment nao encontrado");
+                .hasMessageContaining("Establishment não encontrado");
     }
 
     // ─── atualizar ────────────────────────────────────────────────────────────
@@ -231,7 +231,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.atualizar(999L, registroDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Atividade nao encontrada");
+                .hasMessageContaining("Atividade não encontrada");
     }
 
     // ─── listarPorEstablishment ───────────────────────────────────────────────
@@ -264,7 +264,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.listarPorEstablishment(99L))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Establishment nao encontrado");
+                .hasMessageContaining("Establishment não encontrado");
     }
 
     // ─── toDTO sem categoria ──────────────────────────────────────────────────
@@ -301,7 +301,7 @@ class ActivityScheduleServiceTest {
 
         assertThatThrownBy(() -> activityScheduleService.deletar(99L))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Atividade nao encontrada");
+                .hasMessageContaining("Atividade não encontrada");
     }
 
     // ─── helper ──────────────────────────────────────────────────────────────

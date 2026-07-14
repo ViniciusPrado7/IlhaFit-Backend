@@ -187,7 +187,7 @@ public class PendingCategoryService {
     }
 
     private String normalizarNome(String nomeCategory) {
-        return StringNormalizer.normalize(nomeCategory);
+        return StringNormalizer.normalizeName(nomeCategory);
     }
 
     private PendingCategoryDTO.Resposta toDTO(PendingCategory entity) {

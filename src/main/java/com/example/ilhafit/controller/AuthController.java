@@ -44,7 +44,7 @@ public class AuthController {
     ) {
         authService.reenviarCodigoPrimeiroLogin(dto.getEmail());
         return ResponseEntity.ok(Map.of(
-                "mensagem", "Enviamos um novo codigo de confirmacao para o seu email."
+                "mensagem", "Enviamos um novo código de confirmação para o seu email."
         ));
     }
 
@@ -52,7 +52,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequestDTO dto) {
         authService.solicitarRecuperacaoSenha(dto);
         return ResponseEntity.ok(Map.of(
-                "mensagem", "Se o email estiver cadastrado, enviaremos um codigo de recuperacao."
+                "mensagem", "Se o email estiver cadastrado, enviaremos um código de recuperacao."
         ));
     }
 
@@ -62,7 +62,7 @@ public class AuthController {
     ) {
         authService.reenviarCodigoRecuperacaoSenha(dto.getEmail());
         return ResponseEntity.ok(Map.of(
-                "mensagem", "Enviamos um novo codigo de recuperacao para o seu email."
+                "mensagem", "Enviamos um novo código de recuperacao para o seu email."
         ));
     }
 
@@ -75,7 +75,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal JwtAuthenticatedUser user) {
         if (user == null) {
-            return ResponseEntity.status(401).body(Map.of("erro", "SessÃ£o invÃ¡lida ou expirada."));
+            return ResponseEntity.status(401).body(Map.of("erro", "Sessão inválida ou expirada."));
         }
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),

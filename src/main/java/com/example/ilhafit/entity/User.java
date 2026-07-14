@@ -51,7 +51,7 @@ public class User {
     }
 
     private void normalizeFields() {
-        this.nome = StringNormalizer.normalize(nome);
+        this.nome = StringNormalizer.normalizeName(nome);
         this.email = StringNormalizer.normalizeEmail(email);
     }
 

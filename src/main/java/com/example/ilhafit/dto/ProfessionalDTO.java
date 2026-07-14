@@ -1,5 +1,6 @@
 package com.example.ilhafit.dto;
 
+import com.example.ilhafit.validation.Cpf;
 import com.example.ilhafit.validation.OnCreate;
 import com.example.ilhafit.validation.StrongPassword;
 import jakarta.validation.Valid;
@@ -16,41 +17,42 @@ public class ProfessionalDTO {
 
     @Data
     public static class Registro {
-        @NotBlank(message = "Nome e obrigatorio")
+        @NotBlank(message = "Nome é obrigatório")
         private String nome;
 
-        @NotBlank(message = "Email e obrigatorio")
-        @Email(message = "Email deve ser valido")
+        @NotBlank(message = "Email é obrigatório")
+        @Email(message = "Email deve ser válido")
         private String email;
 
-        @NotBlank(message = "Senha e obrigatoria", groups = OnCreate.class)
+        @NotBlank(message = "Senha é obrigatória", groups = OnCreate.class)
         @StrongPassword
         private String senha;
 
-        @NotBlank(message = "Telefone e obrigatorio")
-        @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 numeros com DDD")
+        @NotBlank(message = "Telefone é obrigatório")
+        @Pattern(regexp = "\\d{11}", message = "Telefone deve conter 11 números com DDD")
         private String telefone;
 
-        @NotBlank(message = "CPF e obrigatorio")
+        @NotBlank(message = "CPF é obrigatório")
+        @Cpf(message = "CPF inválido")
         private String cpf;
 
-        @NotBlank(message = "Genero e obrigatorio")
+        @NotBlank(message = "Gênero é obrigatório")
         private String sexo;
 
         @Pattern(regexp = "^$|^\\d{6}-[A-Z]/[A-Z]{2}$", message = "CREF deve estar no formato 123456-G/SP")
         private String registroCref;
 
-        @NotBlank(message = "Regiao e obrigatoria")
+        @NotBlank(message = "Região é obrigatória")
         private String regiao;
 
         private Boolean exclusivoMulheres;
 
         @Valid
-        @NotNull(message = "Grade de atividades e obrigatoria")
+        @NotNull(message = "Grade de atividades é obrigatória")
         @Size(min = 1, message = "Informe pelo menos uma atividade")
         private List<ActivityScheduleDTO.Registro> gradeAtividades;
 
-        @NotBlank(message = "Foto e obrigatoria")
+        @NotBlank(message = "Foto é obrigatória")
         private String fotoUrl;
     }
 

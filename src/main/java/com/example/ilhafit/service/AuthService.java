@@ -101,7 +101,7 @@ public class AuthService {
                     .role(conta.role())
                     .emailConfirmado(false)
                     .requerConfirmacaoEmail(true)
-                    .mensagem("Enviamos um codigo de 6 digitos para o seu email.")
+                    .mensagem("Enviamos um código de 6 dígitos para o seu email.")
                     .build();
         }
 
@@ -112,16 +112,16 @@ public class AuthService {
     public AuthLoginResponseDTO confirmarEmailPrimeiroLogin(EmailConfirmationRequestDTO dto) {
         String email = StringNormalizer.normalizeEmail(dto.getEmail());
         ContaAutenticavel conta = buscarContaPorEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
 
         EmailConfirmationToken token = emailConfirmationTokenRepository
                 .findByEmailAndCodigoAndUsedFalse(email, dto.getCodigo())
-                .orElseThrow(() -> new IllegalArgumentException("Codigo invalido ou expirado"));
+                .orElseThrow(() -> new IllegalArgumentException("Código inválido ou expirado"));
 
         if (token.getExpiresAt().isBefore(LocalDateTime.now())
                 || !token.getCadastroId().equals(conta.cadastroId())
                 || token.getRegistrationType() != conta.tipoCadastro()) {
-            throw new IllegalArgumentException("Codigo invalido ou expirado");
+            throw new IllegalArgumentException("Código inválido ou expirado");
         }
 
         token.setUsed(true);
@@ -136,10 +136,10 @@ public class AuthService {
     public void reenviarCodigoPrimeiroLogin(String emailInformado) {
         String email = StringNormalizer.normalizeEmail(emailInformado);
         ContaAutenticavel conta = buscarContaPorEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
 
         if (Boolean.TRUE.equals(conta.emailConfirmado())) {
-            throw new IllegalArgumentException("Este email ja foi confirmado.");
+            throw new IllegalArgumentException("Este email já foi confirmado.");
         }
 
         enviarCodigoPrimeiroLogin(conta);
@@ -162,10 +162,10 @@ public class AuthService {
         String email = StringNormalizer.normalizeEmail(dto.getEmail());
         PasswordResetToken resetToken = passwordResetTokenRepository
                 .findByEmailAndTokenAndUsedFalse(email, dto.getCodigo())
-                .orElseThrow(() -> new IllegalArgumentException("Codigo invalido ou expirado"));
+                .orElseThrow(() -> new IllegalArgumentException("Código inválido ou expirado"));
 
         if (resetToken.isUsed() || resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Codigo invalido ou expirado");
+            throw new IllegalArgumentException("Código inválido ou expirado");
         }
 
         String senhaCriptografada = passwordEncoder.encode(dto.getNovaSenha());
@@ -236,30 +236,30 @@ public class AuthService {
         switch (conta.tipoCadastro()) {
             case USUARIO -> {
                 User usuario = usuarioRepository.findById(conta.cadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 usuario.setEmailConfirmado(true);
                 return toContaAutenticavel(usuarioRepository.save(usuario));
             }
             case ESTABELECIMENTO -> {
                 Establishment estabelecimento = estabelecimentoRepository.findById(conta.cadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 estabelecimento.setEmailConfirmado(true);
                 return toContaAutenticavel(estabelecimentoRepository.save(estabelecimento));
             }
             case PROFISSIONAL -> {
                 Professional profissional = profissionalRepository.findById(conta.cadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 profissional.setEmailConfirmado(true);
                 return toContaAutenticavel(profissionalRepository.save(profissional));
             }
             case ADMINISTRADOR -> {
                 Administrator administrador = administradorRepository.findById(conta.cadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 administrador.setEmailConfirmado(true);
                 return toContaAutenticavel(administradorRepository.save(administrador));
             }
         }
-        throw new IllegalArgumentException("Conta nao encontrada");
+        throw new IllegalArgumentException("Conta não encontrada");
     }
 
     private void criarTokenRecuperacao(ContaAutenticavel conta) {
@@ -293,25 +293,25 @@ public class AuthService {
         switch (resetToken.getRegistrationType()) {
             case USUARIO -> {
                 User usuario = usuarioRepository.findById(resetToken.getCadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 usuario.setSenha(senhaCriptografada);
                 usuarioRepository.save(usuario);
             }
             case ESTABELECIMENTO -> {
                 Establishment estabelecimento = estabelecimentoRepository.findById(resetToken.getCadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 estabelecimento.setSenha(senhaCriptografada);
                 estabelecimentoRepository.save(estabelecimento);
             }
             case PROFISSIONAL -> {
                 Professional profissional = profissionalRepository.findById(resetToken.getCadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 profissional.setSenha(senhaCriptografada);
                 profissionalRepository.save(profissional);
             }
             case ADMINISTRADOR -> {
                 Administrator administrador = administradorRepository.findById(resetToken.getCadastroId())
-                        .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                        .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
                 administrador.setSenha(senhaCriptografada);
                 administradorRepository.save(administrador);
             }
@@ -373,22 +373,22 @@ public class AuthService {
 
     private User buscarUsuario(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
     }
 
     private Establishment buscarEstabelecimento(Long id) {
         return estabelecimentoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
     }
 
     private Professional buscarProfissional(Long id) {
         return profissionalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
     }
 
     private Administrator buscarAdministrador(Long id) {
         return administradorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Conta nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
     }
 
     private ContaAutenticavel toContaAutenticavel(User usuario) {

@@ -33,14 +33,14 @@ public class ReportService {
         moderacaoService.validarTextoPermitido(requisicao.getDescricaoAdicional());
 
         Evaluation avaliacao = avaliacaoRepository.findById(requisicao.getAvaliacaoId())
-                .orElseThrow(() -> new IllegalArgumentException("Evaluation nao encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluation não encontrada."));
 
         if (avaliacao.getAutorTipo().equals(denunciante.getTipo()) && avaliacao.getAutorId().equals(denunciante.getId())) {
-            throw new IllegalStateException("Voce nao pode denunciar sua propria avaliacao.");
+            throw new IllegalStateException("Você não pode denunciar sua propria avaliacao.");
         }
 
         if (denunciaRepository.existsByAvaliacaoIdAndDenuncianteEmail(requisicao.getAvaliacaoId(), denunciante.getUsername(), ReportStatus.EXCLUIDO)) {
-            throw new IllegalStateException("Voce ja denunciou esta avaliacao.");
+            throw new IllegalStateException("Você já denunciou esta avaliacao.");
         }
 
         Report denuncia = new Report();
@@ -79,14 +79,14 @@ public class ReportService {
     @Transactional
     public ReportDTO.Resposta atualizarStatus(Long denunciaId, ReportStatus novoStatus, Long adminId) {
         Report denuncia = denunciaRepository.findById(denunciaId)
-                .orElseThrow(() -> new IllegalArgumentException("Report nao encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Report não encontrada."));
 
         if (denuncia.getStatus() != ReportStatus.PENDENTE) {
-            throw new IllegalStateException("Esta denÃºncia jÃ¡ foi julgada.");
+            throw new IllegalStateException("Esta denúncia já foi julgada.");
         }
 
         if (denuncia.getAvaliacao().getDeletedAt() != null) {
-            throw new IllegalStateException("ComentÃ¡rio jÃ¡ foi excluÃ­do. NÃ£o Ã© possÃ­vel julgar esta denÃºncia.");
+            throw new IllegalStateException("Comentário já foi excluído. Não é possível julgar esta denúncia.");
         }
 
         denuncia.setStatus(novoStatus);
@@ -98,14 +98,14 @@ public class ReportService {
     @Transactional
     public void excluirEvaluationReportda(Long denunciaId) {
         Report denuncia = denunciaRepository.findById(denunciaId)
-                .orElseThrow(() -> new IllegalArgumentException("Report nao encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Report não encontrada."));
 
         Long avaliacaoId = denuncia.getAvaliacao().getId();
         Evaluation avaliacao = avaliacaoRepository.findById(avaliacaoId)
-                .orElseThrow(() -> new IllegalArgumentException("Evaluation nao encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluation não encontrada."));
 
         if (avaliacao.getDeletedAt() != null) {
-            throw new IllegalStateException("ComentÃ¡rio jÃ¡ foi excluÃ­do.");
+            throw new IllegalStateException("Comentário já foi excluído.");
         }
 
         denunciaRepository.deleteByAvaliacaoId(avaliacaoId, ReportStatus.EXCLUIDO);

@@ -60,7 +60,7 @@ class EstablishmentAndProfessionalDTOValidationTest {
                 validator.validateProperty(dto, "fotosUrl");
 
         assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("Maximo 6 fotos permitidas"));
+        assertThat(violations).anyMatch(v -> v.getMessage().contains("Máximo 6 fotos permitidas"));
     }
 
     /** RN14-CT04 — lista vazia (0 fotos) → violação @NotEmpty */
@@ -100,6 +100,6 @@ class EstablishmentAndProfessionalDTOValidationTest {
                 validator.validateProperty(dto, "fotoUrl");
 
         assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("Foto e obrigatoria"));
+        assertThat(violations).anyMatch(v -> v.getMessage().contains("Foto é obrigatória"));
     }
 }

@@ -20,7 +20,7 @@ public class StrongPasswordValidator implements ConstraintValidator<StrongPasswo
         } else if (!senha.matches(".*[a-z].*")) {
             mensagem = "Senha precisa de pelo menos 1 letra minuscula";
         } else if (!senha.matches(".*\\d.*")) {
-            mensagem = "Senha precisa de pelo menos 1 numero";
+            mensagem = "Senha precisa de pelo menos 1 número";
         } else if (!senha.matches(".*[^A-Za-z0-9].*")) {
             mensagem = "Senha precisa de pelo menos 1 caractere especial";
         }

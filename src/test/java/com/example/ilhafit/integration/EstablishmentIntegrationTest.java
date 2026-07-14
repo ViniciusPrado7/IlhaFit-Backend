@@ -28,7 +28,7 @@ class EstablishmentIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(resposta.getId()).isNotNull();
         assertThat(resposta.getEmail()).isEqualTo("est1@test.com");
-        assertThat(resposta.getNomeFantasia()).isEqualTo("academia teste");
+        assertThat(resposta.getNomeFantasia()).isEqualTo("Academia Teste");
         assertThat(establishmentService.buscarPorId(resposta.getId())).isPresent();
     }
 
@@ -43,7 +43,7 @@ class EstablishmentIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(resposta.getGradeAtividades()).hasSize(1);
         assertThat(resposta.getGradeAtividades().get(0).getCategoriaId()).isEqualTo(catId);
-        assertThat(resposta.getGradeAtividades().get(0).getCategoriaNome()).isEqualTo("pilates");
+        assertThat(resposta.getGradeAtividades().get(0).getCategoriaNome()).isEqualTo("Pilates");
     }
 
     @Test
@@ -94,7 +94,7 @@ class EstablishmentIntegrationTest extends AbstractIntegrationTest {
                 TestFixtures.estabelecimentoAtualizacaoDto("atualizado@test.com", "88999000000118");
         EstablishmentDTO.Resposta atualizado = establishmentService.atualizar(id, update);
 
-        assertThat(atualizado.getNomeFantasia()).isEqualTo("academia atualizada");
+        assertThat(atualizado.getNomeFantasia()).isEqualTo("Academia Atualizada");
         assertThat(atualizado.getEmail()).isEqualTo("atualizado@test.com");
         assertThat(establishmentService.buscarPorId(id))
                 .hasValueSatisfying(e -> assertThat(e.getEmail()).isEqualTo("atualizado@test.com"));
@@ -190,6 +190,6 @@ class EstablishmentIntegrationTest extends AbstractIntegrationTest {
         EstablishmentDTO.Resposta resposta = establishmentService.atualizar(id, update);
 
         assertThat(resposta.getEndereco()).isNotNull();
-        assertThat(resposta.getEndereco().getCidade()).isEqualTo("florianopolis");
+        assertThat(resposta.getEndereco().getCidade()).isEqualTo("Florianopolis");
     }
 }

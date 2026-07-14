@@ -47,10 +47,10 @@ public class EmailService {
                 buscarNoEnvFile("MAIL_PASSWORD")
         );
 
-        log.info("Email configurado com remetente {} e usuario SMTP {}. Senha SMTP configurada: {}",
+        log.info("Email configurado com remetente {} e usuário SMTP {}. Senha SMTP configurada: {}",
                 this.from == null || this.from.isBlank() ? "(vazio)" : this.from,
                 this.username == null || this.username.isBlank() ? "(vazio)" : this.username,
-                this.password != null && !this.password.isBlank() ? "sim" : "nao");
+                this.password != null && !this.password.isBlank() ? "sim" : "não");
     }
 
     public void enviarEmail(EmailDTO emailDTO) {
@@ -115,7 +115,7 @@ public class EmailService {
 
             mailSender.send(mensagem);
         } catch (Exception e) {
-            log.warn("Nao foi possivel enviar codigo de recuperacao de senha para {}. Motivo: {}",
+            log.warn("Nao foi possivel enviar código de recuperacao de senha para {}. Motivo: {}",
                     destinatario,
                     detalheErro(e),
                     e);
@@ -144,7 +144,7 @@ public class EmailService {
 
             mailSender.send(mensagem);
         } catch (Exception e) {
-            log.warn("Nao foi possivel enviar email de confirmacao para {}. Motivo: {}",
+            log.warn("Nao foi possivel enviar email de confirmação para {}. Motivo: {}",
                     destinatario,
                     detalheErro(e),
                     e);
@@ -211,7 +211,7 @@ public class EmailService {
 
     private void validarConfiguracaoSmtp() {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new MailSendException("SMTP nao configurado. Verifique MAIL_USER e MAIL_PASSWORD no arquivo .env ou nas variaveis de ambiente.");
+            throw new MailSendException("SMTP não configurado. Verifique MAIL_USER e MAIL_PASSWORD no arquivo .env ou nas variaveis de ambiente.");
         }
     }
 

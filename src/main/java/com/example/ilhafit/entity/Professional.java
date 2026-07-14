@@ -35,27 +35,27 @@ public class Professional {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome e obrigatorio")
+    @NotBlank(message = "Nome é obrigatório")
     @Column(nullable = false)
     private String nome;
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha e obrigatoria")
+    @NotBlank(message = "Senha é obrigatória")
     @Column(nullable = false)
     private String senha;
 
     @Column(name = "email_confirmado")
     private Boolean emailConfirmado = false;
 
-    @NotBlank(message = "Telefone e obrigatorio")
+    @NotBlank(message = "Telefone é obrigatório")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CPF e obrigatorio")
+    @NotBlank(message = "CPF é obrigatório")
     @Column(name = "cpf", nullable = false, unique = true)
     private String cpf;
 
@@ -97,9 +97,9 @@ public class Professional {
     }
 
     private void normalizeFields() {
-        this.nome = StringNormalizer.normalize(nome);
+        this.nome = StringNormalizer.normalizeName(nome);
         this.email = StringNormalizer.normalizeEmail(email);
-        this.regiao = StringNormalizer.normalize(regiao);
+        this.regiao = StringNormalizer.normalizeName(regiao);
     }
 
     public LocalDateTime getDataCadastro() {
