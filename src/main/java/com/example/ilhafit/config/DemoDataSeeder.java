@@ -42,11 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Popula a base com dados de demonstracao (usuarios, profissionais, estabelecimentos,
- * avaliacoes e denuncias) para apresentacao. So roda quando app.seed.demo=true e e
- * idempotente: se o estabelecimento "Academia VP" ja existir, nao faz nada.
- */
+
 @Slf4j
 @Component
 @Order(20)
@@ -58,10 +54,10 @@ public class DemoDataSeeder implements ApplicationRunner {
     private static final String VP_EMAIL = "vinicius.souzaprado7@gmail.com";
 
     private static final List<String> CATEGORIAS = List.of(
-            "Academia", "Musculacao", "Funcional", "Crossfit", "Boxe", "Muay Thai",
-            "Jiu Jitsu", "Judo", "Karate", "Natacao", "Pilates", "Yoga", "Danca",
-            "Spinning", "Circo", "Futebol", "Volei", "Basquete", "Corrida",
-            "Ciclismo", "Ginastica", "Escalada");
+            "Academia", "Musculação", "Funcional", "Crossfit", "Boxe", "Muay Thai",
+            "Jiu Jitsu", "Judô", "Karatê", "Natação", "Pilates", "Yoga", "Dança",
+            "Spinning", "Circo", "Futebol", "Vôlei", "Basquete", "Corrida",
+            "Ciclismo", "Ginástica", "Escalada");
 
     private static final String[] COMENT_POS = {
             "Excelente estrutura e profissionais super atenciosos!",
@@ -210,40 +206,40 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     private void criarProfissionais() {
         // SP
-        prof("Carlos Mendes", "MASCULINO", "Pinheiros - Sao Paulo/SP", false, List.of("Musculacao", "Funcional"));
-        prof("Fernanda Ribeiro", "FEMININO", "Moema - Sao Paulo/SP", true, List.of("Pilates", "Yoga"));
-        prof("Rafael Oliveira", "MASCULINO", "Tatuape - Sao Paulo/SP", false, List.of("Boxe", "Muay Thai"));
-        prof("Juliana Castro", "FEMININO", "Santana - Sao Paulo/SP", false, List.of("Danca", "Ginastica"));
+        prof("Carlos Mendes", "MASCULINO", "Pinheiros - São Paulo/SP", false, List.of("Musculação", "Funcional"));
+        prof("Fernanda Ribeiro", "FEMININO", "Moema - São Paulo/SP", true, List.of("Pilates", "Yoga"));
+        prof("Rafael Oliveira", "MASCULINO", "Tatuapé - São Paulo/SP", false, List.of("Boxe", "Muay Thai"));
+        prof("Juliana Castro", "FEMININO", "Santana - São Paulo/SP", false, List.of("Dança", "Ginástica"));
 
         // RJ
         prof("Marcelo Pereira", "MASCULINO", "Copacabana - Rio de Janeiro/RJ", false, List.of("Crossfit", "Funcional"));
         prof("Patricia Gomes", "FEMININO", "Tijuca - Rio de Janeiro/RJ", true, List.of("Yoga", "Pilates"));
-        prof("Thiago Barbosa", "MASCULINO", "Barra da Tijuca - Rio de Janeiro/RJ", false, List.of("Jiu Jitsu", "Judo"));
-        prof("Larissa Cardoso", "FEMININO", "Botafogo - Rio de Janeiro/RJ", false, List.of("Natacao", "Funcional"));
+        prof("Thiago Barbosa", "MASCULINO", "Barra da Tijuca - Rio de Janeiro/RJ", false, List.of("Jiu Jitsu", "Judô"));
+        prof("Larissa Cardoso", "FEMININO", "Botafogo - Rio de Janeiro/RJ", false, List.of("Natação", "Funcional"));
 
         // RS
-        prof("Gustavo Schmidt", "MASCULINO", "Moinhos de Vento - Porto Alegre/RS", false, List.of("Musculacao", "Crossfit"));
-        prof("Manuela Vargas", "FEMININO", "Cidade Baixa - Porto Alegre/RS", false, List.of("Danca", "Spinning"));
-        prof("Leonardo Fischer", "MASCULINO", "Centro - Caxias do Sul/RS", false, List.of("Boxe", "Karate"));
-        prof("Bianca Moraes", "FEMININO", "Zona Sul - Porto Alegre/RS", true, List.of("Pilates", "Ginastica"));
+        prof("Gustavo Schmidt", "MASCULINO", "Moinhos de Vento - Porto Alegre/RS", false, List.of("Musculação", "Crossfit"));
+        prof("Manuela Vargas", "FEMININO", "Cidade Baixa - Porto Alegre/RS", false, List.of("Dança", "Spinning"));
+        prof("Leonardo Fischer", "MASCULINO", "Centro - Caxias do Sul/RS", false, List.of("Boxe", "Karatê"));
+        prof("Bianca Moraes", "FEMININO", "Zona Sul - Porto Alegre/RS", true, List.of("Pilates", "Ginástica"));
 
         // PR
-        prof("Andre Kowalski", "MASCULINO", "Batel - Curitiba/PR", false, List.of("Musculacao", "Funcional"));
-        prof("Carolina Bianchi", "FEMININO", "Agua Verde - Curitiba/PR", false, List.of("Natacao", "Yoga"));
+        prof("Andre Kowalski", "MASCULINO", "Batel - Curitiba/PR", false, List.of("Musculação", "Funcional"));
+        prof("Carolina Bianchi", "FEMININO", "Água Verde - Curitiba/PR", false, List.of("Natação", "Yoga"));
         prof("Vinicius Ramos", "MASCULINO", "Centro - Londrina/PR", false, List.of("Crossfit", "Corrida"));
-        prof("Amanda Reis", "FEMININO", "Centro - Maringa/PR", true, List.of("Danca", "Pilates"));
+        prof("Amanda Reis", "FEMININO", "Centro - Maringá/PR", true, List.of("Dança", "Pilates"));
 
         // SC (10)
-        prof("Rodrigo Espindola", "MASCULINO", "Centro - Florianópolis/SC", false, List.of("Musculacao", "Funcional"));
+        prof("Rodrigo Espindola", "MASCULINO", "Centro - Florianópolis/SC", false, List.of("Musculação", "Funcional"));
         prof("Mariana Cunha", "FEMININO", "Trindade - Florianópolis/SC", true, List.of("Yoga", "Pilates"));
-        prof("Lucas Bittencourt", "MASCULINO", "Lagoa da Conceicao - Florianópolis/SC", false, List.of("Natacao", "Crossfit"));
-        prof("Beatriz Amaral", "FEMININO", "Ingleses - Florianópolis/SC", false, List.of("Danca", "Ginastica"));
+        prof("Lucas Bittencourt", "MASCULINO", "Lagoa da Conceição - Florianópolis/SC", false, List.of("Natação", "Crossfit"));
+        prof("Beatriz Amaral", "FEMININO", "Ingleses - Florianópolis/SC", false, List.of("Dança", "Ginástica"));
         prof("Matheus Goulart", "MASCULINO", "Canasvieiras - Florianópolis/SC", false, List.of("Boxe", "Muay Thai"));
         prof("Natalia Duarte", "FEMININO", "Kobrasol - São José/SC", true, List.of("Pilates", "Funcional"));
-        prof("Guilherme Souza", "MASCULINO", "Campinas - São José/SC", false, List.of("Jiu Jitsu", "Judo"));
-        prof("Priscila Fontes", "FEMININO", "Barreiros - São José/SC", false, List.of("Natacao", "Spinning"));
+        prof("Guilherme Souza", "MASCULINO", "Campinas - São José/SC", false, List.of("Jiu Jitsu", "Judô"));
+        prof("Priscila Fontes", "FEMININO", "Barreiros - São José/SC", false, List.of("Natação", "Spinning"));
         prof("Otavio Machado", "MASCULINO", "Centro - Joinville/SC", false, List.of("Crossfit", "Corrida"));
-        prof("Renata Steil", "FEMININO", "Centro - Balneario Camboriu/SC", false, List.of("Danca", "Yoga"));
+        prof("Renata Steil", "FEMININO", "Centro - Balneário Camboriú/SC", false, List.of("Dança", "Yoga"));
 
         // Algumas avaliacoes/denuncias em profissionais de SC (para tela de moderacao).
         List<Professional> todos = profissionalRepository.findAll();
@@ -284,17 +280,17 @@ public class DemoDataSeeder implements ApplicationRunner {
     private List<Establishment> criarEstabelecimentos() {
         // SP (4)
         estab("IronFit Pinheiros", "IronFit Academia LTDA", "iron.pinheiros@demo.ilhafit.com",
-                addr("Rua dos Pinheiros", "1200", "Pinheiros", "Sao Paulo", "SP", "05422012", -23.5629, -46.6944),
-                List.of("Academia", "Musculacao", "Funcional"), 1, "gym,fitness");
+                addr("Rua dos Pinheiros", "1200", "Pinheiros", "São Paulo", "SP", "05422012", -23.5629, -46.6944),
+                List.of("Academia", "Musculação", "Funcional"), 1, "gym,fitness");
         estab("Studio Moema Fit", "Moema Fitness LTDA", "moema.fit@demo.ilhafit.com",
-                addr("Avenida Ibirapuera", "2100", "Moema", "Sao Paulo", "SP", "04029200", -23.6011, -46.6553),
+                addr("Avenida Ibirapuera", "2100", "Moema", "São Paulo", "SP", "04029200", -23.6011, -46.6553),
                 List.of("Pilates", "Yoga", "Funcional"), 1, "yoga,pilates");
-        estab("Tatuape Boxe Club", "Tatuape Fight LTDA", "tatuape.boxe@demo.ilhafit.com",
-                addr("Rua Tuiuti", "890", "Tatuape", "Sao Paulo", "SP", "03081000", -23.5405, -46.5760),
+        estab("Tatuapé Boxe Club", "Tatuapé Fight LTDA", "tatuape.boxe@demo.ilhafit.com",
+                addr("Rua Tuiuti", "890", "Tatuapé", "São Paulo", "SP", "03081000", -23.5405, -46.5760),
                 List.of("Boxe", "Muay Thai"), 1, "boxing,gym");
         estab("Santana Aquatic", "Santana Aquatic Center LTDA", "santana.aqua@demo.ilhafit.com",
-                addr("Avenida Cruzeiro do Sul", "1500", "Santana", "Sao Paulo", "SP", "02031000", -23.5030, -46.6250),
-                List.of("Natacao"), 1, "swimming,pool");
+                addr("Avenida Cruzeiro do Sul", "1500", "Santana", "São Paulo", "SP", "02031000", -23.5030, -46.6250),
+                List.of("Natação"), 1, "swimming,pool");
 
         // RJ (4)
         estab("Copa Cross", "Copa Cross Treinamento LTDA", "copa.cross@demo.ilhafit.com",
@@ -302,24 +298,24 @@ public class DemoDataSeeder implements ApplicationRunner {
                 List.of("Crossfit", "Funcional"), 1, "crossfit,gym");
         estab("Tijuca Power Gym", "Tijuca Power LTDA", "tijuca.gym@demo.ilhafit.com",
                 addr("Rua Conde de Bonfim", "455", "Tijuca", "Rio de Janeiro", "RJ", "20520051", -22.9245, -43.2320),
-                List.of("Academia", "Musculacao"), 1, "gym,fitness");
+                List.of("Academia", "Musculação"), 1, "gym,fitness");
         estab("Barra Jiu Jitsu", "Barra JJ Academia LTDA", "barra.jj@demo.ilhafit.com",
-                addr("Avenida das Americas", "5000", "Barra da Tijuca", "Rio de Janeiro", "RJ", "22640102", -23.0000, -43.3650),
-                List.of("Jiu Jitsu", "Judo"), 1, "martialarts,training");
+                addr("Avenida das Américas", "5000", "Barra da Tijuca", "Rio de Janeiro", "RJ", "22640102", -23.0000, -43.3650),
+                List.of("Jiu Jitsu", "Judô"), 1, "martialarts,training");
         estab("Botafogo Dance Studio", "Botafogo Dance LTDA", "botafogo.dance@demo.ilhafit.com",
-                addr("Rua Voluntarios da Patria", "340", "Botafogo", "Rio de Janeiro", "RJ", "22270000", -22.9519, -43.1866),
-                List.of("Danca", "Ginastica"), 1, "dance,studio");
+                addr("Rua Voluntários da Pátria", "340", "Botafogo", "Rio de Janeiro", "RJ", "22270000", -22.9519, -43.1866),
+                List.of("Dança", "Ginástica"), 1, "dance,studio");
 
         // RS (4)
         estab("Moinhos Strength", "Moinhos Strength LTDA", "moinhos.str@demo.ilhafit.com",
                 addr("Rua Padre Chagas", "220", "Moinhos de Vento", "Porto Alegre", "RS", "90570080", -30.0248, -51.2050),
-                List.of("Musculacao", "Crossfit"), 1, "gym,fitness");
+                List.of("Musculação", "Crossfit"), 1, "gym,fitness");
         estab("Cidade Baixa Yoga", "Cidade Baixa Bem Estar LTDA", "cb.yoga@demo.ilhafit.com",
-                addr("Avenida Joao Pessoa", "780", "Cidade Baixa", "Porto Alegre", "RS", "90040000", -30.0430, -51.2180),
+                addr("Avenida João Pessoa", "780", "Cidade Baixa", "Porto Alegre", "RS", "90040000", -30.0430, -51.2180),
                 List.of("Yoga", "Pilates"), 1, "yoga,pilates");
         estab("Caxias Fight House", "Caxias Fight LTDA", "caxias.fight@demo.ilhafit.com",
                 addr("Rua Sinimbu", "1500", "Centro", "Caxias do Sul", "RS", "95020000", -29.1680, -51.1790),
-                List.of("Boxe", "Karate"), 1, "boxing,gym");
+                List.of("Boxe", "Karatê"), 1, "boxing,gym");
         estab("Zona Sul Runners", "Zona Sul Runners LTDA", "zs.runners@demo.ilhafit.com",
                 addr("Avenida Wenceslau Escobar", "2100", "Tristeza", "Porto Alegre", "RS", "91900000", -30.1080, -51.2440),
                 List.of("Corrida", "Funcional"), 1, "running,track");
@@ -328,55 +324,55 @@ public class DemoDataSeeder implements ApplicationRunner {
         estab("Batel Prime Fitness", "Batel Prime LTDA", "batel.prime@demo.ilhafit.com",
                 addr("Avenida do Batel", "1750", "Batel", "Curitiba", "PR", "80420090", -25.4410, -49.2900),
                 List.of("Academia", "Funcional"), 1, "gym,fitness");
-        estab("Agua Verde Aqua", "Agua Verde Aqua LTDA", "av.aqua@demo.ilhafit.com",
-                addr("Avenida Republica Argentina", "900", "Agua Verde", "Curitiba", "PR", "80620010", -25.4560, -49.2870),
-                List.of("Natacao", "Yoga"), 1, "swimming,pool");
+        estab("Água Verde Aqua", "Água Verde Aqua LTDA", "av.aqua@demo.ilhafit.com",
+                addr("Avenida República Argentina", "900", "Água Verde", "Curitiba", "PR", "80620010", -25.4560, -49.2870),
+                List.of("Natação", "Yoga"), 1, "swimming,pool");
         estab("Londrina Crossbox", "Londrina Crossbox LTDA", "ldn.cross@demo.ilhafit.com",
-                addr("Avenida Higienopolis", "1200", "Centro", "Londrina", "PR", "86020080", -23.3100, -51.1620),
+                addr("Avenida Higienópolis", "1200", "Centro", "Londrina", "PR", "86020080", -23.3100, -51.1620),
                 List.of("Crossfit", "Corrida"), 1, "crossfit,gym");
-        estab("Maringa Dance", "Maringa Dance LTDA", "mga.dance@demo.ilhafit.com",
-                addr("Avenida Brasil", "3200", "Centro", "Maringa", "PR", "87013000", -23.4250, -51.9380),
-                List.of("Danca", "Pilates"), 1, "dance,studio");
+        estab("Maringá Dance", "Maringá Dance LTDA", "mga.dance@demo.ilhafit.com",
+                addr("Avenida Brasil", "3200", "Centro", "Maringá", "PR", "87013000", -23.4250, -51.9380),
+                List.of("Dança", "Pilates"), 1, "dance,studio");
 
         // SC (10) — 8 na Grande Florianópolis (Floripa + São José), 2 no restante do estado.
         List<Establishment> sc = new ArrayList<>();
         sc.add(estab("Floripa Center Fit", "Floripa Center Fit LTDA", "floripa.center@demo.ilhafit.com",
                 addr("Rua Felipe Schmidt", "300", "Centro", "Florianópolis", "SC", "88010001", -27.5954, -48.5480),
-                List.of("Academia", "Musculacao", "Funcional", "Crossfit"), 6, "gym,fitness"));
+                List.of("Academia", "Musculação", "Funcional", "Crossfit"), 6, "gym,fitness"));
         sc.add(estab("Trindade Yoga Space", "Trindade Bem Estar LTDA", "trindade.yoga@demo.ilhafit.com",
                 addr("Rua Lauro Linhares", "1100", "Trindade", "Florianópolis", "SC", "88036001", -27.5860, -48.5230),
                 List.of("Yoga", "Pilates"), 1, "yoga,pilates"));
         sc.add(estab("Lagoa Surf & Fit", "Lagoa Surf Fit LTDA", "lagoa.fit@demo.ilhafit.com",
-                addr("Avenida das Rendeiras", "500", "Lagoa da Conceicao", "Florianópolis", "SC", "88062000", -27.6040, -48.4670),
-                List.of("Natacao", "Funcional", "Crossfit"), 2, "swimming,pool"));
+                addr("Avenida das Rendeiras", "500", "Lagoa da Conceição", "Florianópolis", "SC", "88062000", -27.6040, -48.4670),
+                List.of("Natação", "Funcional", "Crossfit"), 2, "swimming,pool"));
         sc.add(estab("Ingleses Beach Gym", "Ingleses Beach LTDA", "ingleses.gym@demo.ilhafit.com",
                 addr("Rua das Gaivotas", "820", "Ingleses", "Florianópolis", "SC", "88058000", -27.4360, -48.3960),
-                List.of("Academia", "Musculacao"), 1, "gym,fitness"));
+                List.of("Academia", "Musculação"), 1, "gym,fitness"));
         sc.add(estab("Canasvieiras Combat", "Canasvieiras Combat LTDA", "cana.combat@demo.ilhafit.com",
-                addr("Avenida das Nacoes", "410", "Canasvieiras", "Florianópolis", "SC", "88054000", -27.4280, -48.4590),
+                addr("Avenida das Nações", "410", "Canasvieiras", "Florianópolis", "SC", "88054000", -27.4280, -48.4590),
                 List.of("Boxe", "Muay Thai", "Jiu Jitsu"), 1, "boxing,gym"));
         sc.add(estab("Kobrasol Prime", "Kobrasol Prime LTDA", "kobrasol.prime@demo.ilhafit.com",
                 addr("Avenida Central", "760", "Kobrasol", "São José", "SC", "88102000", -27.5960, -48.6180),
-                List.of("Academia", "Musculacao", "Funcional"), 2, "gym,fitness"));
+                List.of("Academia", "Musculação", "Funcional"), 2, "gym,fitness"));
         sc.add(estab("Campinas Aqua Center", "Campinas Aqua LTDA", "campinas.aqua@demo.ilhafit.com",
-                addr("Avenida Josue Di Bernardi", "1200", "Campinas", "São José", "SC", "88101000", -27.5920, -48.6120),
-                List.of("Natacao", "Pilates"), 1, "swimming,pool"));
+                addr("Avenida Josué Di Bernardi", "1200", "Campinas", "São José", "SC", "88101000", -27.5920, -48.6120),
+                List.of("Natação", "Pilates"), 1, "swimming,pool"));
         sc.add(estab("Barreiros Fight Team", "Barreiros Fight LTDA", "barreiros.fight@demo.ilhafit.com",
                 addr("Rua Koesa", "150", "Barreiros", "São José", "SC", "88117000", -27.5820, -48.6350),
-                List.of("Jiu Jitsu", "Judo", "Karate"), 1, "martialarts,training"));
+                List.of("Jiu Jitsu", "Judô", "Karatê"), 1, "martialarts,training"));
         sc.add(estab("Joinville Iron House", "Joinville Iron LTDA", "jve.iron@demo.ilhafit.com",
                 addr("Rua das Palmeiras", "700", "Centro", "Joinville", "SC", "89201000", -26.3040, -48.8460),
                 List.of("Academia", "Crossfit"), 1, "crossfit,gym"));
         sc.add(estab("BC Beach Sports", "Balneario Beach Sports LTDA", "bc.beach@demo.ilhafit.com",
-                addr("Avenida Brasil", "2500", "Centro", "Balneario Camboriu", "SC", "88330000", -26.9900, -48.6350),
-                List.of("Funcional", "Volei", "Corrida"), 1, "beach,volleyball"));
+                addr("Avenida Brasil", "2500", "Centro", "Balneário Camboriú", "SC", "88330000", -26.9900, -48.6350),
+                List.of("Funcional", "Vôlei", "Corrida"), 1, "beach,volleyball"));
         return sc;
     }
 
     private Establishment criarEstabelecimentoVP() {
         return estab("Academia VP", "Academia VP", VP_EMAIL,
                 addr("Rua Manoel Loureiro", "1500", "Forquilhinhas", "São José", "SC", "88111120", -27.5595, -48.6390),
-                List.of("Academia", "Boxe", "Jiu Jitsu", "Muay Thai", "Natacao", "Funcional"), 6, "gym,fitness");
+                List.of("Academia", "Boxe", "Jiu Jitsu", "Muay Thai", "Natação", "Funcional"), 6, "gym,fitness");
     }
 
     private Address addr(String rua, String numero, String bairro, String cidade,
