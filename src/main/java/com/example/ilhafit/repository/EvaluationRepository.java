@@ -19,6 +19,15 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
     @Query("SELECT a FROM Evaluation a WHERE a.profissional.id = :id AND a.deletedAt IS NULL ORDER BY a.dataAvaliacao DESC")
     List<Evaluation> findByProfissionalIdOrderByDataAvaliacaoDesc(@Param("id") Long profissionalId);
 
+    // Uma unica query agregada para toda a listagem, no lugar de 1 select de avaliacoes por item.
+    @Query("SELECT a.estabelecimento.id, AVG(a.nota), COUNT(a) FROM Evaluation a " +
+            "WHERE a.estabelecimento.id IN :ids AND a.deletedAt IS NULL GROUP BY a.estabelecimento.id")
+    List<Object[]> mediaPorEstabelecimentoIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT a.profissional.id, AVG(a.nota), COUNT(a) FROM Evaluation a " +
+            "WHERE a.profissional.id IN :ids AND a.deletedAt IS NULL GROUP BY a.profissional.id")
+    List<Object[]> mediaPorProfissionalIds(@Param("ids") List<Long> ids);
+
     @Query("SELECT a FROM Evaluation a WHERE a.autorTipo = :autorTipo AND a.autorId = :autorId AND a.deletedAt IS NULL")
     List<Evaluation> findByAutorTipoAndAutorId(@Param("autorTipo") String autorTipo, @Param("autorId") Long autorId);
 

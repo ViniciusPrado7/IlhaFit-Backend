@@ -89,7 +89,7 @@ class ProfessionalControllerTest {
 
     @Test
     void listarTodos_retorna200() throws Exception {
-        when(profissionalService.listarTodos()).thenReturn(List.of());
+        when(profissionalService.listarTodos(any(), any())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/profissionais/profissionais"))
                 .andExpect(status().isOk());

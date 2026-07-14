@@ -7,6 +7,8 @@ import com.example.ilhafit.entity.ActivitySchedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class EstablishmentMapper {
@@ -55,6 +57,14 @@ public class EstablishmentMapper {
                     .map(this::gradeToDTO)
                     .toList());
         }
+        return dto;
+    }
+
+    // Listagem so exibe 1 foto de capa; detalhe (buscado a parte) traz a lista completa.
+    public EstablishmentDTO.Resposta toResumoDTO(Establishment est) {
+        EstablishmentDTO.Resposta dto = toDTO(est);
+        List<String> fotos = dto.getFotosUrl();
+        dto.setFotosUrl(fotos != null && !fotos.isEmpty() ? List.of(fotos.get(0)) : List.of());
         return dto;
     }
 

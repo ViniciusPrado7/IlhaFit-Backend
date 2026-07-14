@@ -15,18 +15,26 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EstablishmentService {
+
+
+    private static final int TAMANHO_PADRAO = 200;
+    private static final int TAMANHO_MAXIMO = 500;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -67,9 +75,24 @@ public class EstablishmentService {
         return mappedWithRating(estabelecimentoRepository.findById(estabelecimentoId).orElseThrow());
     }
 
-    public List<EstablishmentDTO.Resposta> listarTodos() {
-        return estabelecimentoRepository.findAll().stream()
-                .map(this::mappedWithRating)
+    public List<EstablishmentDTO.Resposta> listarTodos(Integer page, Integer size) {
+        int paginaSolicitada = page != null && page >= 0 ? page : 0;
+        int tamanhoSolicitado = size != null && size > 0 ? Math.min(size, TAMANHO_MAXIMO) : TAMANHO_PADRAO;
+
+        Page<Establishment> pagina = estabelecimentoRepository.findAll(PageRequest.of(paginaSolicitada, tamanhoSolicitado));
+        List<Long> ids = pagina.getContent().stream().map(Establishment::getId).toList();
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Establishment> comGradePorId = estabelecimentoRepository.findComGradeAtividadesByIdIn(ids).stream()
+                .collect(Collectors.toMap(Establishment::getId, e -> e));
+        Map<Long, RatingSummary> ratings = buscarRatings(ids);
+
+        return ids.stream()
+                .map(comGradePorId::get)
+                .filter(Objects::nonNull)
+                .map(e -> aplicarRating(estabelecimentoMapper.toResumoDTO(e), ratings.get(e.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -148,6 +171,25 @@ public class EstablishmentService {
             dto.setAvaliacao(Math.round(media * 10.0) / 10.0);
             dto.setTotalAvaliacoes(avaliacoes.size());
         }
+        return dto;
+    }
+
+    // Uma unica query agregada para todos os ids da listagem, no lugar de 1 query por item.
+    private Map<Long, RatingSummary> buscarRatings(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return avaliacaoRepository.mediaPorEstabelecimentoIds(ids).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> new RatingSummary(
+                                Math.round(((Number) row[1]).doubleValue() * 10.0) / 10.0,
+                                ((Number) row[2]).intValue())));
+    }
+
+    private EstablishmentDTO.Resposta aplicarRating(EstablishmentDTO.Resposta dto, RatingSummary rating) {
+        dto.setAvaliacao(rating != null ? rating.media() : 0.0);
+        dto.setTotalAvaliacoes(rating != null ? rating.total() : 0);
         return dto;
     }
 

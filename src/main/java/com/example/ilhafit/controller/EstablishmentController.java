@@ -36,8 +36,10 @@ public class EstablishmentController {
     }
 
     @GetMapping("/estabelecimentos")
-    public ResponseEntity<List<EstablishmentDTO.Resposta>> listarTodos() {
-        return ResponseEntity.ok(estabelecimentoService.listarTodos());
+    public ResponseEntity<List<EstablishmentDTO.Resposta>> listarTodos(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        return ResponseEntity.ok(estabelecimentoService.listarTodos(page, size));
     }
 
     @GetMapping("/estabelecimentos/{id}")

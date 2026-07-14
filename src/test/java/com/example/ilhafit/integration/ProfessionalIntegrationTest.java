@@ -69,7 +69,7 @@ class ProfessionalIntegrationTest extends AbstractIntegrationTest {
     void listarTodos_aposRegistro_contemProfissionalCriado() {
         professionalService.cadastrar(TestFixtures.profissionalDto("listar@test.com", "66666666666"));
 
-        List<ProfessionalDTO.Resposta> lista = professionalService.listarTodos();
+        List<ProfessionalDTO.Resposta> lista = professionalService.listarTodos(null, null);
 
         assertThat(lista).extracting(ProfessionalDTO.Resposta::getEmail).contains("listar@test.com");
     }

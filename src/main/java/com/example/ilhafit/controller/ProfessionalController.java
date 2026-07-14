@@ -39,8 +39,10 @@ public class ProfessionalController {
     }
 
     @GetMapping("/profissionais")
-    public ResponseEntity<List<ProfessionalDTO.Resposta>> listarTodos() {
-        List<ProfessionalDTO.Resposta> profissionais = profissionalService.listarTodos();
+    public ResponseEntity<List<ProfessionalDTO.Resposta>> listarTodos(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        List<ProfessionalDTO.Resposta> profissionais = profissionalService.listarTodos(page, size);
         return ResponseEntity.ok(profissionais);
     }
 

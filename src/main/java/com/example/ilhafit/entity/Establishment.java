@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,6 +81,7 @@ public class Establishment {
     @ElementCollection
     @CollectionTable(name = "estabelecimento_fotos", joinColumns = @JoinColumn(name = "estabelecimento_id"))
     @Column(name = "foto_url", columnDefinition = "TEXT")
+    @BatchSize(size = 25)
     private List<String> fotosUrl;
 
     @Column(name = "data_cadastro", nullable = false, updatable = false)

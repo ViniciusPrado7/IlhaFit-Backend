@@ -70,7 +70,7 @@ class EstablishmentIntegrationTest extends AbstractIntegrationTest {
     void listarTodos_aposRegistro_contemEstabelecimentoCriado() {
         establishmentService.cadastrar(TestFixtures.estabelecimentoDto("listar@test.com", "66777888000136"));
 
-        List<EstablishmentDTO.Resposta> lista = establishmentService.listarTodos();
+        List<EstablishmentDTO.Resposta> lista = establishmentService.listarTodos(null, null);
 
         assertThat(lista).extracting(EstablishmentDTO.Resposta::getEmail).contains("listar@test.com");
     }

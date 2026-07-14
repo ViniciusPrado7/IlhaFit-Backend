@@ -16,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -95,12 +98,13 @@ class EstablishmentServiceTest {
 
     @Test
     void listarTodos_retornaListaMapeada() {
-        when(estabelecimentoRepository.findAll()).thenReturn(List.of(estab));
-        when(avaliacaoRepository.findByEstabelecimentoIdOrderByDataAvaliacaoDesc(ESTAB_ID))
-                .thenReturn(java.util.Collections.emptyList());
-        when(estabelecimentoMapper.toDTO(estab)).thenReturn(respostaDto);
+        Page<Establishment> pagina = new PageImpl<>(List.of(estab));
+        when(estabelecimentoRepository.findAll(any(Pageable.class))).thenReturn(pagina);
+        when(estabelecimentoRepository.findComGradeAtividadesByIdIn(List.of(ESTAB_ID))).thenReturn(List.of(estab));
+        when(avaliacaoRepository.mediaPorEstabelecimentoIds(List.of(ESTAB_ID))).thenReturn(List.of());
+        when(estabelecimentoMapper.toResumoDTO(estab)).thenReturn(respostaDto);
 
-        List<EstablishmentDTO.Resposta> lista = establishmentService.listarTodos();
+        List<EstablishmentDTO.Resposta> lista = establishmentService.listarTodos(null, null);
 
         assertThat(lista).hasSize(1);
         assertThat(lista.get(0).getNomeFantasia()).isEqualTo("Academia Teste");
