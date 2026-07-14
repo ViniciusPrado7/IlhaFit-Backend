@@ -38,31 +38,31 @@ public class Establishment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome fantasia e obrigatorio")
+    @NotBlank(message = "Nome fantasia é obrigatório")
     @Column(name = "nome_fantasia", nullable = false)
     private String nomeFantasia;
 
-    @NotBlank(message = "Razao social e obrigatoria")
+    @NotBlank(message = "Razão social é obrigatória")
     @Column(name = "razao_social", nullable = false)
     private String razaoSocial;
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha e obrigatoria")
+    @NotBlank(message = "Senha é obrigatória")
     @Column(nullable = false)
     private String senha;
 
     @Column(name = "email_confirmado")
     private Boolean emailConfirmado = false;
 
-    @NotBlank(message = "Telefone e obrigatorio")
+    @NotBlank(message = "Telefone é obrigatório")
     @Column(nullable = false)
     private String telefone;
 
-    @NotBlank(message = "CNPJ e obrigatorio")
+    @NotBlank(message = "CNPJ é obrigatório")
     @Column(nullable = false, unique = true)
     private String cnpj;
 
@@ -97,13 +97,13 @@ public class Establishment {
     }
 
     private void normalizeFields() {
-        this.nomeFantasia = StringNormalizer.normalize(nomeFantasia);
-        this.razaoSocial = StringNormalizer.normalize(razaoSocial);
+        this.nomeFantasia = StringNormalizer.normalizeName(nomeFantasia);
+        this.razaoSocial = StringNormalizer.normalizeName(razaoSocial);
         this.email = StringNormalizer.normalizeEmail(email);
         if (this.endereco != null) {
-            this.endereco.setRua(StringNormalizer.normalize(this.endereco.getRua()));
-            this.endereco.setBairro(StringNormalizer.normalize(this.endereco.getBairro()));
-            this.endereco.setCidade(StringNormalizer.normalize(this.endereco.getCidade()));
+            this.endereco.setRua(StringNormalizer.normalizeName(this.endereco.getRua()));
+            this.endereco.setBairro(StringNormalizer.normalizeName(this.endereco.getBairro()));
+            this.endereco.setCidade(StringNormalizer.normalizeName(this.endereco.getCidade()));
         }
     }
 

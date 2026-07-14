@@ -27,7 +27,7 @@ class CategoryIntegrationTest extends AbstractIntegrationTest {
         CategoryDTO.Resposta resposta = categoryService.criar(registroDto("Yoga"));
 
         assertThat(resposta.getId()).isNotNull();
-        assertThat(resposta.getNome()).isEqualTo("yoga");
+        assertThat(resposta.getNome()).isEqualTo("Yoga");
         assertThat(resposta.isAtivo()).isTrue();
     }
 
@@ -89,7 +89,7 @@ class CategoryIntegrationTest extends AbstractIntegrationTest {
         Optional<CategoryDTO.Resposta> resultado = categoryService.buscarPorId(id);
 
         assertThat(resultado).isPresent();
-        assertThat(resultado.get().getNome()).isEqualTo("spinning");
+        assertThat(resultado.get().getNome()).isEqualTo("Spinning");
     }
 
     @Test
@@ -108,9 +108,9 @@ class CategoryIntegrationTest extends AbstractIntegrationTest {
 
         CategoryDTO.Resposta atualizado = categoryService.atualizar(id, registroDto("Karate Shotokan"));
 
-        assertThat(atualizado.getNome()).isEqualTo("karate shotokan");
+        assertThat(atualizado.getNome()).isEqualTo("Karate Shotokan");
         assertThat(categoryService.buscarPorId(id))
-                .hasValueSatisfying(c -> assertThat(c.getNome()).isEqualTo("karate shotokan"));
+                .hasValueSatisfying(c -> assertThat(c.getNome()).isEqualTo("Karate Shotokan"));
     }
 
     @Test
@@ -164,7 +164,7 @@ class CategoryIntegrationTest extends AbstractIntegrationTest {
     void criar_comEspacosInternosExtras_normalizaColapsandoEspacos() {
         CategoryDTO.Resposta resposta = categoryService.criar(registroDto("Futebol  de  Praia"));
 
-        assertThat(resposta.getNome()).isEqualTo("futebol de praia");
+        assertThat(resposta.getNome()).isEqualTo("Futebol de Praia");
     }
 
     @Test

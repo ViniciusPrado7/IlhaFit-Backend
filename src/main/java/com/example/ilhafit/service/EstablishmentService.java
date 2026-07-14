@@ -61,7 +61,7 @@ public class EstablishmentService {
         try {
             entityManager.flush();
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.", ex);
+            throw new IllegalStateException("Esta categoria já esta cadastrada na grade de atividades deste estabelecimento.", ex);
         }
         entityManager.clear();
         return mappedWithRating(estabelecimentoRepository.findById(estabelecimentoId).orElseThrow());
@@ -121,7 +121,7 @@ public class EstablishmentService {
             estabelecimentoRepository.save(estabelecimento);
             entityManager.flush();
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.", ex);
+            throw new IllegalStateException("Esta categoria já esta cadastrada na grade de atividades deste estabelecimento.", ex);
         }
         entityManager.clear();
         return mappedWithRating(estabelecimentoRepository.findById(id).orElseThrow());

@@ -27,7 +27,7 @@ public class DataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (administradorRepository.count() > 0) {
-            log.info("[DataInitializer] Admin ja existe. Nenhuma acao necessaria.");
+            log.info("[DataInitializer] Admin já existe. Nenhuma acao necessaria.");
         } else {
             Administrator admin = new Administrator();
             admin.setNome(adminProperties.getNome());
@@ -40,7 +40,7 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         if (categoriaRepository.existsByNomeIgnoreCaseAndDeletedAtIsNull(CATEGORIA_PADRAO)) {
-            log.info("[DataInitializer] Categoria padrao ja existe. Nenhuma acao necessaria.");
+            log.info("[DataInitializer] Categoria padrao já existe. Nenhuma acao necessaria.");
         } else {
             Category categoria = new Category();
             categoria.setNome(CATEGORIA_PADRAO);

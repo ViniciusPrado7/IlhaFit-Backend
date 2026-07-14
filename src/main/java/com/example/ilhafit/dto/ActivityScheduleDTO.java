@@ -17,7 +17,7 @@ public class ActivityScheduleDTO {
         @NotEmpty(message = "Informe pelo menos um dia da semana")
         private List<String> diasSemana;
 
-        @NotEmpty(message = "Informe pelo menos um periodo")
+        @NotEmpty(message = "Informe pelo menos um período")
         private List<String> periodos;
     }
 

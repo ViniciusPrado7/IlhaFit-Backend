@@ -60,7 +60,7 @@ public class ProfessionalService {
         try {
             entityManager.flush();
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste profissional.", ex);
+            throw new IllegalStateException("Esta categoria já esta cadastrada na grade de atividades deste profissional.", ex);
         }
         entityManager.clear();
         return mappedWithRating(profissionalRepository.findById(profissionalId).orElseThrow());
@@ -131,7 +131,7 @@ public class ProfessionalService {
             profissionalRepository.save(profissional);
             entityManager.flush();
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Esta categoria ja esta cadastrada na grade de atividades deste profissional.", ex);
+            throw new IllegalStateException("Esta categoria já esta cadastrada na grade de atividades deste profissional.", ex);
         }
         entityManager.clear();
         return mappedWithRating(profissionalRepository.findById(id).orElseThrow());

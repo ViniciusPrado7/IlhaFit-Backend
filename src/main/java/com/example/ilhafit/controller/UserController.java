@@ -86,7 +86,7 @@ public class UserController {
                 && usuarioId.equals(userDetails.getId());
 
         if (!isAdmin && !isProprioUser) {
-            throw new SecurityException("Sem permissao para alterar este usuario.");
+            throw new SecurityException("Sem permissao para alterar este usuário.");
         }
     }
 }

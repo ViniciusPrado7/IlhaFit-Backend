@@ -92,7 +92,7 @@ public class EstablishmentController {
             return erro;
         }
 
-        if (mensagem.contains("Razao social")) {
+        if (mensagem.contains("Razão social")) {
             erro.put("razaoSocial", mensagem);
             return erro;
         }

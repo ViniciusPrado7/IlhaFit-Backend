@@ -11,7 +11,7 @@ public class CategoryDTO {
 
     @Data
     public static class Registro {
-        @NotBlank(message = "Nome Ã© obrigatÃ³rio")
+        @NotBlank(message = "Nome é obrigatório")
         private String nome;
     }
 

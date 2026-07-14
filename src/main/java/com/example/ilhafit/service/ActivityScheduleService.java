@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 public class ActivityScheduleService {
 
     private static final String MENSAGEM_DUPLICIDADE_ESTABELECIMENTO =
-            "Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.";
+            "Esta categoria já esta cadastrada na grade de atividades deste estabelecimento.";
     private static final String MENSAGEM_DUPLICIDADE_PROFISSIONAL =
-            "Esta categoria ja esta cadastrada na grade de atividades deste profissional.";
+            "Esta categoria já esta cadastrada na grade de atividades deste profissional.";
 
     private final ActivityScheduleRepository gradeAtividadeRepository;
     private final ProfessionalRepository profissionalRepository;
@@ -36,7 +36,7 @@ public class ActivityScheduleService {
     @Transactional
     public ActivityScheduleDTO.Resposta adicionarAoProfessional(Long profissionalId, ActivityScheduleDTO.Registro dto) {
         Professional profissional = profissionalRepository.findById(profissionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Professional não encontrado"));
 
         ActivitySchedule atividade = toEntity(dto);
         gradeAtividadeDuplicidadeValidator.validarProfessional(profissional, dto.getCategoriaId(), null);
@@ -51,7 +51,7 @@ public class ActivityScheduleService {
 
     public List<ActivityScheduleDTO.Resposta> listarPorProfessional(Long profissionalId) {
         Professional profissional = profissionalRepository.findById(profissionalId)
-                .orElseThrow(() -> new IllegalArgumentException("Professional nao encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Professional não encontrado"));
         return profissional.getGradeAtividades().stream()
                 .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
@@ -61,7 +61,7 @@ public class ActivityScheduleService {
     @Transactional
     public ActivityScheduleDTO.Resposta adicionarAoEstablishment(Long estabelecimentoId, ActivityScheduleDTO.Registro dto) {
         Establishment estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Establishment não encontrado"));
 
         ActivitySchedule atividade = toEntity(dto);
         gradeAtividadeDuplicidadeValidator.validarEstablishment(estabelecimento, dto.getCategoriaId(), null);
@@ -76,7 +76,7 @@ public class ActivityScheduleService {
 
     public List<ActivityScheduleDTO.Resposta> listarPorEstablishment(Long estabelecimentoId) {
         Establishment estabelecimento = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new IllegalArgumentException("Establishment nao encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Establishment não encontrado"));
         return estabelecimento.getGradeAtividades().stream()
                 .filter(ga -> ga.getCategoria() != null && ga.getCategoria().isAtiva())
                 .map(this::toDTO)
@@ -86,7 +86,7 @@ public class ActivityScheduleService {
     @Transactional
     public ActivityScheduleDTO.Resposta atualizar(Long id, ActivityScheduleDTO.Registro dto) {
         ActivitySchedule atividade = gradeAtividadeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Atividade nao encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Atividade não encontrada"));
 
         Professional profissional = profissionalRepository.findByGradeAtividadesId(id).orElse(null);
         Establishment estabelecimento = estabelecimentoRepository.findByGradeAtividadesId(id).orElse(null);
@@ -113,7 +113,7 @@ public class ActivityScheduleService {
     @Transactional
     public void deletar(Long id) {
         if (!gradeAtividadeRepository.existsById(id)) {
-            throw new IllegalArgumentException("Atividade nao encontrada");
+            throw new IllegalArgumentException("Atividade não encontrada");
         }
         gradeAtividadeRepository.deleteById(id);
     }
@@ -143,12 +143,12 @@ public class ActivityScheduleService {
 
     private Category validarCategoriaAtiva(Long categoriaId) {
         if (categoriaId == null) {
-            throw new IllegalArgumentException("Categoria invalida");
+            throw new IllegalArgumentException("Categoria inválida");
         }
         return categoriaRepository.findById(categoriaId)
                 .filter(Category::isAtiva)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Categoria nao encontrada ou inativa. Verifique as categorias disponíveis em /api/categorias"
+                        "Categoria não encontrada ou inativa. Verifique as categorias disponíveis em /api/categorias"
                 ));
     }
 

@@ -31,7 +31,7 @@ public class PendingCategoryDTO {
 
     @Data
     public static class Solicitacao {
-        @NotBlank(message = "Nome da categoria e obrigatorio")
+        @NotBlank(message = "Nome da categoria é obrigatório")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "Nome da categoria deve conter apenas letras")
         private String nome;
     }

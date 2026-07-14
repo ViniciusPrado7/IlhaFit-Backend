@@ -12,11 +12,11 @@ public class AddressMapper {
         if (dto == null)
             return null;
         Address endereco = new Address();
-        endereco.setRua(StringNormalizer.normalize(dto.getRua()));
+        endereco.setRua(StringNormalizer.normalizeName(dto.getRua()));
         endereco.setNumero(StringNormalizer.normalize(dto.getNumero()));
         endereco.setComplemento(StringNormalizer.normalize(dto.getComplemento()));
-        endereco.setBairro(StringNormalizer.normalize(dto.getBairro()));
-        endereco.setCidade(StringNormalizer.normalize(dto.getCidade()));
+        endereco.setBairro(StringNormalizer.normalizeName(dto.getBairro()));
+        endereco.setCidade(StringNormalizer.normalizeName(dto.getCidade()));
         endereco.setEstado(dto.getEstado());
         endereco.setCep(dto.getCep());
         endereco.setLatitude(dto.getLatitude());

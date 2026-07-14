@@ -28,7 +28,7 @@ class ProfessionalIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(resposta.getId()).isNotNull();
         assertThat(resposta.getEmail()).isEqualTo("prof1@test.com");
-        assertThat(resposta.getNome()).isEqualTo("profissional teste");
+        assertThat(resposta.getNome()).isEqualTo("Profissional Teste");
         assertThat(professionalService.buscarPorId(resposta.getId())).isPresent();
     }
 
@@ -42,7 +42,7 @@ class ProfessionalIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(resposta.getGradeAtividades()).hasSize(1);
         assertThat(resposta.getGradeAtividades().get(0).getCategoriaId()).isEqualTo(catId);
-        assertThat(resposta.getGradeAtividades().get(0).getCategoriaNome()).isEqualTo("yoga");
+        assertThat(resposta.getGradeAtividades().get(0).getCategoriaNome()).isEqualTo("Yoga");
     }
 
     @Test
@@ -107,7 +107,7 @@ class ProfessionalIntegrationTest extends AbstractIntegrationTest {
         update.setNome("Nome Atualizado");
         ProfessionalDTO.Resposta atualizado = professionalService.atualizar(id, update);
 
-        assertThat(atualizado.getNome()).isEqualTo("nome atualizado");
+        assertThat(atualizado.getNome()).isEqualTo("Nome Atualizado");
         assertThat(atualizado.getEmail()).isEqualTo("atualizado@test.com");
         assertThat(professionalService.buscarPorId(id))
                 .hasValueSatisfying(p -> assertThat(p.getEmail()).isEqualTo("atualizado@test.com"));

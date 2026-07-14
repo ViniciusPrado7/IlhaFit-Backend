@@ -6,16 +6,16 @@ import jakarta.validation.constraints.Size;
 
 public class EmailDTO {
 
-    @NotBlank(message = "Destinatario e obrigatorio")
-    @Email(message = "Destinatario deve ser um email valido")
+    @NotBlank(message = "Destinatário é obrigatório")
+    @Email(message = "Destinatário deve ser um email válido")
     private String to;
 
-    @NotBlank(message = "Assunto e obrigatorio")
-    @Size(max = 120, message = "Assunto deve ter no maximo 120 caracteres")
+    @NotBlank(message = "Assunto é obrigatório")
+    @Size(max = 120, message = "Assunto deve ter no máximo 120 caracteres")
     private String subject;
 
-    @NotBlank(message = "Mensagem e obrigatoria")
-    @Size(max = 5000, message = "Mensagem deve ter no maximo 5000 caracteres")
+    @NotBlank(message = "Mensagem é obrigatória")
+    @Size(max = 5000, message = "Mensagem deve ter no máximo 5000 caracteres")
     private String message;
 
     public EmailDTO() {

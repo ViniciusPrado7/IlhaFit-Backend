@@ -27,7 +27,7 @@ public class Evaluation {
     @Column(nullable = false)
     private Integer nota;
 
-    @NotBlank(message = "ComentÃ¡rio nÃ£o pode ser vazio")
+    @NotBlank(message = "Comentário não pode ser vazio")
     @Column(columnDefinition = "TEXT")
     private String comentario;
 
@@ -75,7 +75,7 @@ public class Evaluation {
     private void normalizeFields() {
         this.comentario = StringNormalizer.normalize(comentario);
         this.autorEmail = StringNormalizer.normalizeEmail(autorEmail);
-        this.autorNome = StringNormalizer.normalize(autorNome);
+        this.autorNome = StringNormalizer.normalizeName(autorNome);
     }
 }
 

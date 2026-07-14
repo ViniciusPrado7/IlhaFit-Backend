@@ -65,7 +65,7 @@ public class RegistrationIdentityValidator {
     }
 
     public void validarRazaoSocialDisponivel(String razaoSocial, String estado, Long estabelecimentoIdAtual) {
-        String razaoNormalizada = StringNormalizer.normalize(razaoSocial);
+        String razaoNormalizada = StringNormalizer.normalizeName(razaoSocial);
         if (razaoNormalizada == null || estado == null || estado.isBlank()) {
             return;
         }
@@ -77,7 +77,7 @@ public class RegistrationIdentityValidator {
                 : estabelecimentoRepository.countByRazaoSocialAndEnderecoEstadoIgnoreCaseAndIdNot(razaoNormalizada, estado, estabelecimentoIdAtual);
 
         if (quantidade > 0) {
-            throw new IllegalArgumentException("Razao social ja esta cadastrada para outro estabelecimento neste estado.");
+            throw new IllegalArgumentException("Razão social já esta cadastrada para outro estabelecimento neste estado.");
         }
     }
 

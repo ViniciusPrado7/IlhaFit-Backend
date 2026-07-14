@@ -31,16 +31,16 @@ public class Administrator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome e obrigatorio")
+    @NotBlank(message = "Nome é obrigatório")
     @Column(nullable = false)
     private String nome;
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Senha e obrigatoria")
+    @NotBlank(message = "Senha é obrigatória")
     @Column(nullable = false)
     private String senha;
 
@@ -70,7 +70,7 @@ public class Administrator {
     }
 
     private void normalizeFields() {
-        this.nome = StringNormalizer.normalize(nome);
+        this.nome = StringNormalizer.normalizeName(nome);
         this.email = StringNormalizer.normalizeEmail(email);
     }
 

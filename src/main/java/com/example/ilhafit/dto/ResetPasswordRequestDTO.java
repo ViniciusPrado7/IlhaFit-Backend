@@ -8,19 +8,19 @@ import jakarta.validation.constraints.Pattern;
 
 public class ResetPasswordRequestDTO {
 
-    @NotBlank(message = "Email e obrigatorio")
-    @Email(message = "Email deve ser valido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
     private String email;
 
-    @NotBlank(message = "Codigo e obrigatorio")
-    @Pattern(regexp = "\\d{6}", message = "Codigo deve conter 6 digitos")
+    @NotBlank(message = "Código é obrigatório")
+    @Pattern(regexp = "\\d{6}", message = "Código deve conter 6 dígitos")
     private String codigo;
 
-    @NotBlank(message = "Nova senha e obrigatoria")
+    @NotBlank(message = "Nova senha é obrigatória")
     @StrongPassword
     private String novaSenha;
 
-    @NotBlank(message = "Confirmacao de senha e obrigatoria")
+    @NotBlank(message = "Confirmação de senha é obrigatória")
     private String confirmacaoSenha;
 
     public String getEmail() {
@@ -55,7 +55,7 @@ public class ResetPasswordRequestDTO {
         this.confirmacaoSenha = confirmacaoSenha;
     }
 
-    @AssertTrue(message = "As senhas nao coincidem")
+    @AssertTrue(message = "As senhas não coincidem")
     public boolean isSenhaConfirmada() {
         if (novaSenha == null || confirmacaoSenha == null) {
             return true;

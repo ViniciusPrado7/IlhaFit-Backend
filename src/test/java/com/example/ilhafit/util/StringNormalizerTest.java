@@ -17,13 +17,13 @@ class StringNormalizerTest {
     }
 
     @Test
-    void normalize_trimsAndLowercases() {
-        assertThat(StringNormalizer.normalize("  Yoga  ")).isEqualTo("yoga");
+    void normalize_trimsButPreservesCase() {
+        assertThat(StringNormalizer.normalize("  Yoga  ")).isEqualTo("Yoga");
     }
 
     @Test
     void normalize_collapsesInternalSpaces() {
-        assertThat(StringNormalizer.normalize("Futebol  de  Praia")).isEqualTo("futebol de praia");
+        assertThat(StringNormalizer.normalize("Futebol  de  Praia")).isEqualTo("Futebol de Praia");
     }
 
     @Test
@@ -32,8 +32,33 @@ class StringNormalizerTest {
     }
 
     @Test
-    void normalize_unicodeLetters() {
-        assertThat(StringNormalizer.normalize("  João Silva  ")).isEqualTo("joão silva");
+    void normalize_unicodeLetters_preservesCase() {
+        assertThat(StringNormalizer.normalize("  João Silva  ")).isEqualTo("João Silva");
+    }
+
+    @Test
+    void normalizeName_null_returnsNull() {
+        assertThat(StringNormalizer.normalizeName(null)).isNull();
+    }
+
+    @Test
+    void normalizeName_capitalizesEachWord() {
+        assertThat(StringNormalizer.normalizeName("  joão silva  ")).isEqualTo("João Silva");
+    }
+
+    @Test
+    void normalizeName_accentedCityLowercase_becomesTitleCase() {
+        assertThat(StringNormalizer.normalizeName("florianópolis")).isEqualTo("Florianópolis");
+    }
+
+    @Test
+    void normalizeName_keepsConnectorsLowercase() {
+        assertThat(StringNormalizer.normalizeName("RUA DAS FLORES")).isEqualTo("Rua das Flores");
+    }
+
+    @Test
+    void normalizeName_capitalizesAfterHyphen() {
+        assertThat(StringNormalizer.normalizeName("santo-antônio")).isEqualTo("Santo-Antônio");
     }
 
     @Test

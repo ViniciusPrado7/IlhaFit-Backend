@@ -78,7 +78,7 @@ class PendingCategoryServiceTest {
                 "Pole Dance", RegistrationType.PROFISSIONAL, PROF_ID);
 
         assertThat(resposta).isNotNull();
-        assertThat(resposta.getNome()).isEqualTo("pole dance");
+        assertThat(resposta.getNome()).isEqualTo("Pole Dance");
         assertThat(resposta.getStatus()).isEqualTo(PendingCategoryStatus.PENDENTE);
     }
 

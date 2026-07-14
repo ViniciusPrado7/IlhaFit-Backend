@@ -17,9 +17,9 @@ class EntityNormalizationTest {
         p.setTelefone("48999887766");
         p.onCreate();
 
-        assertThat(p.getNome()).isEqualTo("joão silva");
+        assertThat(p.getNome()).isEqualTo("João Silva");
         assertThat(p.getEmail()).isEqualTo("joao@email.com");
-        assertThat(p.getRegiao()).isEqualTo("norte da ilha");
+        assertThat(p.getRegiao()).isEqualTo("Norte da Ilha");
         assertThat(p.getSenha()).isEqualTo("Teste@123");
         assertThat(p.getCpf()).isEqualTo("12345678900");
     }
@@ -35,8 +35,8 @@ class EntityNormalizationTest {
         e.setTelefone("48999887766");
         e.onCreate();
 
-        assertThat(e.getNomeFantasia()).isEqualTo("academia ilha fit");
-        assertThat(e.getRazaoSocial()).isEqualTo("academia ltda");
+        assertThat(e.getNomeFantasia()).isEqualTo("Academia Ilha Fit");
+        assertThat(e.getRazaoSocial()).isEqualTo("Academia Ltda");
         assertThat(e.getEmail()).isEqualTo("academia@ilha.com");
         assertThat(e.getSenha()).isEqualTo("Senha@123");
         assertThat(e.getCnpj()).isEqualTo("12345678000195");
@@ -48,7 +48,7 @@ class EntityNormalizationTest {
         c.setNome("  YOGA  ");
         c.normalizeFields();
 
-        assertThat(c.getNome()).isEqualTo("yoga");
+        assertThat(c.getNome()).isEqualTo("Yoga");
     }
 
     @Test
@@ -57,7 +57,7 @@ class EntityNormalizationTest {
         c.setNome("Futebol  de  Praia");
         c.normalizeFields();
 
-        assertThat(c.getNome()).isEqualTo("futebol de praia");
+        assertThat(c.getNome()).isEqualTo("Futebol de Praia");
     }
 
     @Test
@@ -68,7 +68,7 @@ class EntityNormalizationTest {
         u.setSenha("Senha@123");
         u.onCreate();
 
-        assertThat(u.getNome()).isEqualTo("maria souza");
+        assertThat(u.getNome()).isEqualTo("Maria Souza");
         assertThat(u.getEmail()).isEqualTo("maria@email.com");
         assertThat(u.getSenha()).isEqualTo("Senha@123");
     }
@@ -80,7 +80,7 @@ class EntityNormalizationTest {
         cp.setObservacaoAdmin("  Categoria Aprovada  ");
         cp.onCreate();
 
-        assertThat(cp.getNome()).isEqualTo("crossfit");
-        assertThat(cp.getObservacaoAdmin()).isEqualTo("categoria aprovada");
+        assertThat(cp.getNome()).isEqualTo("Crossfit");
+        assertThat(cp.getObservacaoAdmin()).isEqualTo("Categoria Aprovada");
     }
 }

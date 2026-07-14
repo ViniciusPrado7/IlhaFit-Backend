@@ -39,7 +39,7 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(resposta.getId()).isNotNull();
         assertThat(resposta.getEmail()).isEqualTo("joao@test.com");
-        assertThat(resposta.getNome()).isEqualTo("joão teste");
+        assertThat(resposta.getNome()).isEqualTo("João Teste");
     }
 
     @Test
@@ -55,7 +55,7 @@ class UserIntegrationTest extends AbstractIntegrationTest {
     void cadastrar_nomeComEspacos_normalizadoNoBanco() {
         UserResponseDTO resposta = authService.registerUser(registroDto("normalizado@test.com", TestFixtures.SENHA_PADRAO));
 
-        assertThat(resposta.getNome()).isEqualTo("joão teste");
+        assertThat(resposta.getNome()).isEqualTo("João Teste");
     }
 
     @Test
@@ -67,7 +67,7 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 
         UserResponseDTO atualizado = authService.atualizarUser(id, updateDto);
 
-        assertThat(atualizado.getNome()).isEqualTo("maria atualizada");
+        assertThat(atualizado.getNome()).isEqualTo("Maria Atualizada");
     }
 
     @Test

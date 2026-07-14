@@ -9,11 +9,11 @@ import lombok.Setter;
 @Setter
 public class UserLoginDTO {
 
-    @NotBlank(message = "Email Ã© obrigatÃ³rio")
-    @Email(message = "Email invÃ¡lido")
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email inválido")
     private String email;
 
-    @NotBlank(message = "Senha Ã© obrigatÃ³ria")
+    @NotBlank(message = "Senha é obrigatória")
     private String senha;
 }
 

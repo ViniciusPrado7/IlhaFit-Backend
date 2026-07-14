@@ -14,9 +14,9 @@ import java.util.Set;
 public class ActivityScheduleDuplicateValidator {
 
     private static final String MENSAGEM_ESTABELECIMENTO =
-            "Esta categoria ja esta cadastrada na grade de atividades deste estabelecimento.";
+            "Esta categoria já esta cadastrada na grade de atividades deste estabelecimento.";
     private static final String MENSAGEM_PROFISSIONAL =
-            "Esta categoria ja esta cadastrada na grade de atividades deste profissional.";
+            "Esta categoria já esta cadastrada na grade de atividades deste profissional.";
 
     public void validarListaEstabelecimento(List<ActivitySchedule> atividades) {
         validarLista(atividades, MENSAGEM_ESTABELECIMENTO);

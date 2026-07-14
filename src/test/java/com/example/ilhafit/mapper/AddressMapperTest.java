@@ -32,9 +32,9 @@ class AddressMapperTest {
         Address entity = mapper.toEntity(dto);
 
         assertThat(entity).isNotNull();
-        assertThat(entity.getRua()).isEqualTo("rua das flores");       // normalize() lowercases
-        assertThat(entity.getBairro()).isEqualTo("centro");
-        assertThat(entity.getCidade()).isEqualTo("florianópolis");
+        assertThat(entity.getRua()).isEqualTo("Rua das Flores");     // normalizeName() aplica Title Case
+        assertThat(entity.getBairro()).isEqualTo("Centro");
+        assertThat(entity.getCidade()).isEqualTo("Florianópolis");
         assertThat(entity.getEstado()).isEqualTo("SC");
         assertThat(entity.getCep()).isEqualTo("88000-000");
         assertThat(entity.getLatitude()).isEqualTo(-27.59);

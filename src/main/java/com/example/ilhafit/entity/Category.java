@@ -27,7 +27,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Nome Ã© obrigatÃ³rio")
+    @NotBlank(message = "Nome é obrigatório")
     @Column(nullable = false, unique = true)
     private String nome;
 
@@ -42,7 +42,7 @@ public class Category {
     @PrePersist
     @PreUpdate
     protected void normalizeFields() {
-        this.nome = StringNormalizer.normalize(nome);
+        this.nome = StringNormalizer.normalizeName(nome);
     }
 }
 

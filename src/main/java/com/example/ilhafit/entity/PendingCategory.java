@@ -68,7 +68,7 @@ public class PendingCategory {
     }
 
     private void normalizeFields() {
-        this.nome = StringNormalizer.normalize(nome);
+        this.nome = StringNormalizer.normalizeName(nome);
         this.observacaoAdmin = StringNormalizer.normalize(observacaoAdmin);
     }
 }
